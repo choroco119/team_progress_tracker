@@ -1269,7 +1269,7 @@ function addNewProject(data) {
 // Render Table Header
 function renderHeader() {
     const headerRow = document.getElementById('table-header-row');
-    const staticStartCount = 7; // 製番, リンク, 客先, 件名, 向先, 品名, 納期
+    const staticStartCount = 8; // 製番, 担当者, リンク, 客先, 件名, 向先, 品名, 納期
     const staticEndCount = 0;
 
     // Remove all dynamic columns
