@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Progress Tracker | チーム進捗管理</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <!-- Lucide Icons (CDN) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <header>
+        <h1><i data-lucide="layout-dashboard"></i> Team Progress Tracker</h1>
+        <div class="header-actions">
+            <button class="btn" id="load-file-btn" title="データを読み込む">
+                <i data-lucide="folder-open"></i> 読込
+            </button>
+            <button class="btn" id="save-file-btn" title="データを保存する">
+                <i data-lucide="save"></i> 保存
+            </button>
+            <button class="btn btn-icon" id="settings-btn" title="設定">
+                <i data-lucide="settings"></i>
+            </button>
+            <button class="btn btn-primary" id="add-project-btn">
+                <i data-lucide="plus-circle"></i> 新規製番登録
+            </button>
+        </div>
+    </header>
+
+    <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="progress-tab">製番別進捗一覧</button>
+        <button class="tab-btn" data-tab="other-tab" disabled title="将来の拡張用">その他（準備中）</button>
+    </nav>
+
+    <main>
+        <div id="progress-tab" class="tab-content active">
+            <div class="content-card animate-fade-in" style="animation-delay: 0.1s;">
+                <div class="card-header" style="flex-direction: column; align-items: stretch; gap: 1rem;">
+                    <div class="card-title">製番別進捗一覧</div>
+                <div class="filter-controls">
+                    <div class="filter-row">
+                        <div class="filter-item">
+                            <label>製番</label>
+                            <input type="text" id="filter-id" placeholder="検索...">
+                        </div>
+                        <div class="filter-item">
+                            <label>客先</label>
+                            <input type="text" id="filter-customer" placeholder="検索...">
+                        </div>
+                        <div class="filter-item">
+                            <label>件名</label>
+                            <input type="text" id="filter-subject" placeholder="検索...">
+                        </div>
+                        <div class="filter-item">
+                            <label>向先</label>
+                            <input type="text" id="filter-destination" placeholder="検索...">
+                        </div>
+                        <div class="filter-item">
+                            <label>品名</label>
+                            <input type="text" id="filter-name" placeholder="検索...">
+                        </div>
+                        <div class="filter-item">
+                            <label>担当者</label>
+                            <select id="filter-staff">
+                                <option value="">全員</option>
+                                <!-- JSで動的に追加 -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-row" style="margin-top: 1rem; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                        <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted);">工程未完フィルタ:</span>
+                        <div class="btn-group" id="process-filter-group">
+                            <button type="button" class="btn btn-sm btn-outline" data-filter="specDoc">仕様書</button>
+                            <button type="button" class="btn btn-sm btn-outline" data-filter="sheetMetal">板金</button>
+                            <button type="button" class="btn btn-sm btn-outline" data-filter="partsProcurement">部品</button>
+                            <button type="button" class="btn btn-sm btn-outline" data-filter="nameplateProcurement">銘板</button>
+                            <button type="button" class="btn btn-sm btn-outline" data-filter="internalDrawings">社内図</button>
+                            <button type="button" class="btn btn-sm btn-outline" data-filter="software">ソフト</button>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline" id="filter-exclude-completed" style="margin-left: 1rem;">完了を除外</button>
+                        <button class="btn btn-sm" id="clear-filters" style="margin-left: auto;">
+                            <i data-lucide="rotate-ccw"></i> 全て解除
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="progress-table">
+                    <thead>
+                        <tr id="table-header-row">
+                            <th id="sort-id" style="cursor:pointer;">製番 <span class="icon-wrapper"><i data-lucide="chevrons-up-down" class="sort-icon"></i></span></th>
+                            <th>担当者</th>
+                            <th>リンク</th>
+                            <th>客先</th>
+                            <th>件名</th>
+                            <th>向先</th>
+                            <th>品名</th>
+                            <th id="sort-deadline" style="cursor:pointer;">納期 <span class="icon-wrapper"><i data-lucide="chevrons-up-down" class="sort-icon"></i></span></th>
+                            <!-- 工程カラムはJSで動的に生成 -->
+                        </tr>
+                    </thead>
+                    <tbody id="progress-body">
+                        <!-- データはJSで挿入 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 将来用の空タブ -->
+        <div id="other-tab" class="tab-content">
+            <div class="content-card">
+                <p>今後、ガントチャートやリソース管理などの機能を追加予定です。</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for New Project -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-content animate-fade-in">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">新規製番登録</h2>
+                <button class="btn-icon" id="close-modal"><i data-lucide="x"></i></button>
+            </div>
+            <form id="add-project-form">
+                <div class="modal-body">
+                    <div class="modal-flex-layout">
+                        <!-- 左カラム: 基本情報 -->
+                        <div class="modal-column-main">
+                            <div class="modal-grid">
+                                <div class="form-group">
+                                    <label for="project-id">製番</label>
+                                    <input type="text" id="project-id" placeholder="例: PB-2024-001" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="project-deadline">納期</label>
+                                    <input type="date" id="project-deadline" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="project-staff">担当者</label>
+                                    <select id="project-staff">
+                                        <option value="">選択してください</option>
+                                        <!-- JSで動的に追加 -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="project-customer">客先</label>
+                                    <select id="project-customer">
+                                        <option value="">選択してください</option>
+                                        <!-- JSで動的に追加 -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="project-subject">件名</label>
+                                    <input type="text" id="project-subject" placeholder="例: 設備更新">
+                                </div>
+                                <div class="form-group">
+                                    <label for="project-destination">向先</label>
+                                    <input type="text" id="project-destination" placeholder="例: A工場">
+                                </div>
+                                <div class="form-group">
+                                    <label for="project-name">品名</label>
+                                    <input type="text" id="project-name" placeholder="例: 制御盤">
+                                </div>
+                                <div class="form-group">
+                                    <label for="project-quantity">数量</label>
+                                    <input type="number" id="project-quantity" value="1" min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="project-spec">規格</label>
+                                    <select id="project-spec">
+                                        <option value="">選択してください</option>
+                                        <!-- JSで動的に追加 -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="project-inspection">検査</label>
+                                    <select id="project-inspection">
+                                        <option value="無">無</option>
+                                        <option value="有">有</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="project-budget">板金予算</label>
+                                    <input type="text" id="project-budget" placeholder="例: 500,000">
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label for="project-link">フォルダリンク (URLまたはパス)</label>
+                                    <input type="text" id="project-link" placeholder="例: file://Z:/Projects/... または SharePointのURL">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右カラム: 要否設定とメモ -->
+                        <div class="modal-column-side">
+                            <div class="form-group">
+                                <label style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">工程要否設定</label>
+                                <div class="necessity-list">
+                                    <div class="necessity-row">
+                                        <span>納入仕様書</span>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-spec-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-spec-no">否</button>
+                                        </div>
+                                    </div>
+                                    <div class="necessity-row">
+                                        <span>板金手配</span>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-sm-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-sm-no">否</button>
+                                        </div>
+                                    </div>
+                                    <div class="necessity-row">
+                                        <span>部品手配(主)</span>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-main-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-main-no">否</button>
+                                        </div>
+                                    </div>
+                                    <div class="necessity-row">
+                                        <span>部品手配(予)</span>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-spare-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-spare-no">否</button>
+                                        </div>
+                                    </div>
+                                    <div class="necessity-row">
+                                        <span>部品手配(支)</span>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-prov-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-prov-no">否</button>
+                                        </div>
+                                    </div>
+                                    <div class="necessity-row">
+                                        <span>銘板手配</span>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-np-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-np-no">否</button>
+                                        </div>
+                                    </div>
+                                    <div class="necessity-row">
+                                        <span>社内工事図</span>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-id-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-id-no">否</button>
+                                        </div>
+                                    </div>
+                                    <div class="necessity-row">
+                                        <span>ソフト</span>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-sw-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline" id="nec-sw-no">否</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-top: 2rem;">
+                                <label for="project-remarks">メモ</label>
+                                <textarea id="project-remarks" rows="4" placeholder="自由入力..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="display: flex; justify-content: space-between;">
+                    <button type="button" class="btn btn-danger" id="delete-project-btn"
+                        style="display: none;">削除</button>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="button" class="btn" id="cancel-btn">キャンセル</button>
+                        <button type="submit" class="btn btn-primary">登録</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Process: Spec Document (納入仕様書) -->
+    <div id="process-spec-modal" class="modal-overlay">
+        <div class="modal-content animate-fade-in" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title">工程詳細：納入仕様書</h2>
+                <button class="btn-icon" id="close-spec-modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row-align">
+                    <label>出図</label>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <button type="button" class="btn btn-toggle" id="spec-issue-btn">済</button>
+                        <input type="date" id="spec-issue-date"
+                            style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    </div>
+                </div>
+                <div class="form-group row-align">
+                    <label for="spec-due-date">返却期日</label>
+                    <input type="date" id="spec-due-date" style="max-width: 150px;">
+                </div>
+                <div class="form-group row-align">
+                    <label>返却</label>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <button type="button" class="btn btn-toggle" id="spec-return-btn">済</button>
+                        <input type="date" id="spec-return-date"
+                            style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    </div>
+                </div>
+                <div class="form-group row-align">
+                    <label>修正要否</label>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline" id="spec-fix-yes-btn">要</button>
+                        <button type="button" class="btn btn-outline" id="spec-fix-no-btn">否</button>
+                    </div>
+                </div>
+                <div class="form-group row-align">
+                    <label>承認</label>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <button type="button" class="btn btn-toggle" id="spec-approval-btn">済</button>
+                        <input type="date" id="spec-approval-date"
+                            style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="spec-memo">メモ</label>
+                    <textarea id="spec-memo" rows="2" placeholder="工程に関するメモ..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" id="cancel-spec-modal">キャンセル</button>
+                <button type="button" class="btn btn-primary" id="save-spec-modal">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Process: Sheet Metal (板金手配) -->
+    <div id="process-sheetMetal-modal" class="modal-overlay">
+        <div class="modal-content animate-fade-in" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2 class="modal-title">工程詳細：板金手配</h2>
+                <button class="btn-icon" id="close-sheetMetal-modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row-align">
+                    <label>見積依頼送付</label>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <button type="button" class="btn btn-toggle" id="sm-quote-btn">済</button>
+                        <input type="date" id="sm-quote-date"
+                            style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    </div>
+                </div>
+                <div class="form-group row-align">
+                    <label for="sm-vendor">手配先</label>
+                    <select id="sm-vendor">
+                        <option value="">選択してください</option>
+                        <!-- JSで動的に追加 -->
+                    </select>
+                </div>
+                <div class="form-group row-align">
+                    <label>注文書送付</label>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <button type="button" class="btn btn-toggle" id="sm-po-sent-btn">済</button>
+                        <input type="date" id="sm-po-sent-date"
+                            style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    </div>
+                </div>
+                <div class="form-group row-align">
+                    <label for="sm-po-due-date">納期(注文書)</label>
+                    <input type="date" id="sm-po-due-date" style="max-width: 150px;">
+                </div>
+                <div class="form-group row-align">
+                    <label for="sm-drawing-due-date">詳細図期日</label>
+                    <input type="date" id="sm-drawing-due-date" style="max-width: 150px;">
+                </div>
+                <div class="form-group row-align">
+                    <label>注文書受領</label>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <button type="button" class="btn btn-toggle" id="sm-po-recv-btn">済</button>
+                        <input type="date" id="sm-po-recv-date"
+                            style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    </div>
+                </div>
+                <div class="form-group row-align">
+                    <label>詳細図送付</label>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <button type="button" class="btn btn-toggle" id="sm-drawing-sent-btn">済</button>
+                        <input type="date" id="sm-drawing-sent-date"
+                            style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    </div>
+                </div>
+                <div class="form-group row-align">
+                    <label for="sm-drawing-limit-date">納期(詳細図)</label>
+                    <input type="date" id="sm-drawing-limit-date" style="max-width: 150px;">
+                </div>
+                <div class="form-group row-align">
+                    <label>納期確定</label>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <button type="button" class="btn btn-toggle" id="sm-confirmed-btn">済</button>
+                        <input type="date" id="sm-confirmed-date"
+                            style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="sm-memo">メモ</label>
+                    <textarea id="sm-memo" rows="2" placeholder="工程に関するメモ..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" id="cancel-sheetMetal-modal">キャンセル</button>
+                <button type="button" class="btn btn-primary" id="save-sheetMetal-modal">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Process: Parts Procurement (部品手配) -->
+    <div id="process-parts-modal" class="modal-overlay">
+        <div class="modal-content animate-fade-in" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2 class="modal-title">工程詳細：部品手配</h2>
+                <button class="btn-icon" id="close-parts-modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-grid" style="grid-template-columns: 1fr;">
+                    <!-- 主部品手配 -->
+                    <div id="pp-main-section">
+                        <div style="margin-top: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border-color);">
+                            <strong>主部品手配</strong>
+                        </div>
+                        <div class="form-group row-align">
+                            <label>手配依頼</label>
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <button type="button" class="btn btn-toggle" id="pp-main-req-btn">済</button>
+                                <input type="date" id="pp-main-req-date"
+                                    style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                            </div>
+                        </div>
+                        <div class="form-group row-align">
+                            <label for="pp-main-due-date">納期</label>
+                            <input type="date" id="pp-main-due-date" style="max-width: 150px;">
+                        </div>
+                    </div>
+
+                    <!-- 予備品手配 -->
+                    <div id="pp-spare-section">
+                        <div style="margin-top: 1rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border-color);">
+                            <strong>予備品手配</strong>
+                        </div>
+                        <div class="form-group row-align">
+                            <label>手配依頼</label>
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <button type="button" class="btn btn-toggle" id="pp-spare-req-btn">済</button>
+                                <input type="date" id="pp-spare-req-date"
+                                    style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                            </div>
+                        </div>
+                        <div class="form-group row-align">
+                            <label for="pp-spare-due-date">納期</label>
+                            <input type="date" id="pp-spare-due-date" style="max-width: 150px;">
+                        </div>
+                        <div class="form-group row-align">
+                            <label>コピー</label>
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <button type="button" class="btn btn-toggle" id="pp-spare-copy-btn">済</button>
+                                <input type="date" id="pp-spare-copy-date"
+                                    style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 支給品手配 -->
+                    <div id="pp-provided-section">
+                        <div style="margin-top: 1rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border-color);">
+                            <strong>支給品手配</strong>
+                        </div>
+                        <div class="form-group row-align">
+                            <label>手配依頼</label>
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <button type="button" class="btn btn-toggle" id="pp-prov-req-btn">済</button>
+                                <input type="date" id="pp-prov-req-date"
+                                    style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                            </div>
+                        </div>
+                        <div class="form-group row-align">
+                            <label for="pp-prov-due-date">納期</label>
+                            <input type="date" id="pp-prov-due-date" style="max-width: 150px;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pp-memo">メモ</label>
+                        <textarea id="pp-memo" rows="2" placeholder="工程に関するメモ..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="margin-top: 1rem;">
+                <button type="button" class="btn" id="cancel-parts-modal">キャンセル</button>
+                <button type="button" class="btn btn-primary" id="save-parts-modal">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Process: Nameplate Procurement (銘板手配) -->
+    <div id="process-nameplate-modal" class="modal-overlay">
+        <div class="modal-content animate-fade-in" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title">工程詳細：銘板手配</h2>
+                <button class="btn-icon" id="close-nameplate-modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-grid" style="grid-template-columns: 1fr;">
+                    <div class="form-group row-align">
+                        <label>注文書送付</label>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <button type="button" class="btn btn-toggle" id="np-po-sent-btn">済</button>
+                            <input type="date" id="np-po-sent-date"
+                                style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                        </div>
+                    </div>
+                    <div class="form-group row-align">
+                        <label for="np-due-date">納期</label>
+                        <input type="date" id="np-due-date" style="max-width: 150px;">
+                    </div>
+                    <div class="form-group">
+                        <label for="np-memo">メモ</label>
+                        <textarea id="np-memo" rows="2" placeholder="工程に関するメモ..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="margin-top: 1rem;">
+                <button type="button" class="btn" id="cancel-nameplate-modal">キャンセル</button>
+                <button type="button" class="btn btn-primary" id="save-nameplate-modal">保存</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal for Process: Internal Drawings (社内工事図) -->
+    <div id="process-internal-drawings-modal" class="modal-overlay">
+        <div class="modal-content animate-fade-in" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title">工程詳細：社内工事図</h2>
+                <button class="btn-icon" id="close-internal-drawings-modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-grid" style="grid-template-columns: 1fr;">
+                    <div class="form-group row-align">
+                        <label>出図</label>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <button type="button" class="btn btn-toggle" id="id-issue-btn">済</button>
+                            <input type="date" id="id-issue-date"
+                                style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id-memo">メモ</label>
+                        <textarea id="id-memo" rows="2" placeholder="工程に関するメモ..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="margin-top: 1rem;">
+                <button type="button" class="btn" id="cancel-internal-drawings-modal">キャンセル</button>
+                <button type="button" class="btn btn-primary" id="save-internal-drawings-modal">保存</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal for Process: Software (ソフト) -->
+    <div id="process-software-modal" class="modal-overlay">
+        <div class="modal-content animate-fade-in" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title">工程詳細：ソフト</h2>
+                <button class="btn-icon" id="close-software-modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-grid" style="grid-template-columns: 1fr;">
+                    <div class="form-group row-align">
+                        <label>作成</label>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <button type="button" class="btn btn-toggle" id="sw-creation-btn">済</button>
+                            <input type="date" id="sw-creation-date"
+                                style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                        </div>
+                    </div>
+                    <div class="form-group row-align">
+                        <label>デバッグ</label>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <button type="button" class="btn btn-toggle" id="sw-debugging-btn">済</button>
+                            <input type="date" id="sw-debugging-date"
+                                style="max-width: 140px; padding: 0.25rem; font-size: 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="sw-memo">メモ</label>
+                        <textarea id="sw-memo" rows="2" placeholder="工程に関するメモ..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="margin-top: 1rem;">
+                <button type="button" class="btn" id="cancel-software-modal">キャンセル</button>
+                <button type="button" class="btn btn-primary" id="save-software-modal">保存</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal for Settings -->
+    <div id="settings-overlay" class="modal-overlay">
+        <div class="modal-content animate-fade-in settings-modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">マスターデータ設定</h2>
+                <button class="btn-icon" id="close-settings"><i data-lucide="x"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tab-customer">客先<br>リスト</button>
+                    <button class="tab-btn" data-tab="tab-staff">担当者<br>リスト</button>
+                    <button class="tab-btn" data-tab="tab-spec">規格<br>リスト</button>
+                    <button class="tab-btn" data-tab="tab-vendor">板金業者<br>リスト</button>
+                </div>
+
+                <!-- 客先タブ -->
+                <div id="tab-customer" class="tab-content active">
+                    <div class="input-group">
+                        <input type="text" id="new-customer-name-input" placeholder="客先名 (漢字など)" style="flex: 1;">
+                        <input type="text" id="new-customer-kana-input" placeholder="フリガナ (半角/全角カナ)" style="flex: 1;">
+                        <button type="button" class="btn btn-primary" id="add-customer-btn"
+                            style="flex: 0 0 auto;">追加</button>
+                    </div>
+                    <ul class="list-group" id="customer-list-container">
+                        <!-- JSで動的に追加 -->
+                    </ul>
+                </div>
+
+                <!-- 担当者タブ -->
+                <div id="tab-staff" class="tab-content">
+                    <div class="input-group">
+                        <input type="text" id="new-staff-input" placeholder="担当者名を入力..." style="flex: 1;">
+                        <button type="button" class="btn btn-primary" id="add-staff-btn"
+                            style="flex: 0 0 auto;">追加</button>
+                    </div>
+                    <ul class="list-group" id="staff-list-container">
+                        <!-- JSで動的に追加 -->
+                    </ul>
+                </div>
+
+                <!-- 規格タブ -->
+                <div id="tab-spec" class="tab-content">
+                    <div class="input-group">
+                        <input type="text" id="new-spec-input" placeholder="新しい規格を入力...">
+                        <button type="button" class="btn btn-primary" id="add-spec-btn">追加</button>
+                    </div>
+                    <ul class="list-group" id="spec-list-container">
+                        <!-- JSで動的に追加 -->
+                    </ul>
+                </div>
+
+                <!-- 板金業者タブ -->
+                <div id="tab-vendor" class="tab-content">
+                    <div class="input-group">
+                        <input type="text" id="new-vendor-input" placeholder="新しい板金業者を入力...">
+                        <button type="button" class="btn btn-primary" id="add-vendor-btn">追加</button>
+                    </div>
+                    <ul class="list-group" id="vendor-list-container">
+                        <!-- JSで動的に追加 -->
+                    </ul>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn" id="cancel-settings">キャンセル</button>
+                <button type="button" class="btn btn-primary" id="save-settings-btn">設定を保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Lucideアイコンの初期化
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
