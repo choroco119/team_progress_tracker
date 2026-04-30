@@ -1601,7 +1601,13 @@ function renderTable() {
                 // aタグ（リンク）クリック時は編集画面を開かない
                 if (e.target.closest('a')) return;
                 await refreshIfRemoteUpdated();
-                openEditModal(project);
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openEditModal(latestProject);
             };
 
             if (field.special === 'link') {
@@ -1692,7 +1698,13 @@ function renderTable() {
             }
             tdSpec.onclick = async () => {
                 await refreshIfRemoteUpdated();
-                openSpecDocModal(project);
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openSpecDocModal(latestProject);
             };
         }
 
@@ -1738,7 +1750,13 @@ function renderTable() {
             }
             tdSheetMetal.onclick = async () => {
                 await refreshIfRemoteUpdated();
-                openSheetMetalModal(project);
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openSheetMetalModal(latestProject);
             };
         }
 
@@ -1814,7 +1832,13 @@ function renderTable() {
             }
             tdParts.onclick = async () => {
                 await refreshIfRemoteUpdated();
-                openPartsModal(project);
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openPartsModal(latestProject);
             };
         }
 
@@ -1854,7 +1878,13 @@ function renderTable() {
             }
             tdNameplate.onclick = async () => {
                 await refreshIfRemoteUpdated();
-                openNameplateModal(project);
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openNameplateModal(latestProject);
             };
         }
 
@@ -1887,7 +1917,13 @@ function renderTable() {
             }
             tdInternalDrawings.onclick = async () => {
                 await refreshIfRemoteUpdated();
-                openInternalDrawingsModal(project);
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openInternalDrawingsModal(latestProject);
             };
         }
 
@@ -1921,7 +1957,13 @@ function renderTable() {
             }
             tdSoftware.onclick = async () => {
                 await refreshIfRemoteUpdated();
-                openSoftwareModal(project);
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openSoftwareModal(latestProject);
             };
         }
 
@@ -1949,7 +1991,13 @@ function renderTable() {
         completedBtn.onclick = async (e) => {
             e.stopPropagation();
             await refreshIfRemoteUpdated();
-            project.isCompleted = !project.isCompleted;
+            const latestProject = state.projects.find(p => p.id === project.id);
+            if (!latestProject) {
+                alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                renderTable();
+                return;
+            }
+            latestProject.isCompleted = !latestProject.isCompleted;
             renderTable();
         };
 
