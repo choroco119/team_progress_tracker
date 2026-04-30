@@ -259,6 +259,7 @@ let currentNecessityData = {
 
 let dirHandle = null;
 let lastLoadedData = null; // 競合検知用
+let lastFsModified = 0; // ファイルシステム上の最終更新時刻
 let syncInterval = null;
 let isSaving = false; // 二重保存防止
 let editingProcessProjectId = null;
@@ -1120,8 +1121,8 @@ async function refreshIfRemoteUpdated() {
     try {
         const fileHandle = await dirHandle.getFileHandle('team_data.json');
         const file = await fileHandle.getFile();
-        // 更新日時を秒単位で比較
-        if (state.lastUpdated && Math.floor(file.lastModified/1000) > Math.floor(new Date(state.lastUpdated).getTime()/1000)) {
+        // ファイルシステムの時刻が異なれば中身を確認
+        if (file.lastModified !== lastFsModified) {
             const content = await file.text();
             const remoteData = JSON.parse(content);
             if (remoteData.lastUpdated !== state.lastUpdated) {
@@ -1172,6 +1173,7 @@ async function loadFromFolder() {
         if (data.projects && data.config) {
             state = data;
             lastLoadedData = JSON.parse(JSON.stringify(data)); // クローンを保存
+            lastFsModified = file.lastModified; // FS時刻を保存
             renderHeader();
             renderTable();
             populateSelectOptions();
@@ -1249,6 +1251,10 @@ async function saveWithSync(isAutoSave = false) {
         state.lastUpdated = new Date().toISOString();
         await saveToFolder(state);
         lastLoadedData = JSON.parse(JSON.stringify(state));
+        
+        // 保存後のファイルシステム時刻を再取得
+        const updatedFile = await (await dirHandle.getFileHandle('team_data.json')).getFile();
+        lastFsModified = updatedFile.lastModified;
 
         // 4. ロック解除
         await dirHandle.removeEntry('lock.json');
@@ -1353,8 +1359,8 @@ function startAutoSync() {
         try {
             const fileHandle = await dirHandle.getFileHandle('team_data.json');
             const file = await fileHandle.getFile();
-            // 更新日時を秒単位で比較
-            if (state.lastUpdated && Math.floor(file.lastModified/1000) > Math.floor(new Date(state.lastUpdated).getTime()/1000)) {
+            // ファイルシステムの時刻が異なれば中身を確認
+            if (file.lastModified !== lastFsModified) {
                 // 内容を軽くチェック
                 const content = await file.text();
                 const remoteData = JSON.parse(content);
