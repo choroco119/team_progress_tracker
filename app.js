@@ -197,7 +197,7 @@ const addStaffBtn = document.getElementById('add-staff-btn');
 const staffListContainer = document.getElementById('staff-list-container');
 
 const syncFolderBtn = document.getElementById('sync-folder-btn');
-const saveSyncBtn = document.getElementById('save-sync-btn');
+const refreshDataBtn = document.getElementById('save-sync-btn');
 const syncStatusEl = document.getElementById('sync-status');
 
 const projectCustomerSelect = document.getElementById('project-customer');
@@ -401,10 +401,14 @@ function setupEventListeners() {
     closeModalBtn.onclick = () => modalOverlay.classList.remove('active');
     cancelBtn.onclick = () => modalOverlay.classList.remove('active');
 
-    deleteProjectBtn.onclick = () => {
+    deleteProjectBtn.onclick = async () => {
         if (editingProjectId) {
-            deleteProject(editingProjectId);
-            modalOverlay.classList.remove('active');
+            const projectId = editingProjectId;
+            if (deleteProject(projectId)) {
+                modalOverlay.classList.remove('active');
+                // 自動保存を実行
+                await saveWithSync(true);
+            }
         }
     };
 
@@ -415,7 +419,7 @@ function setupEventListeners() {
     // Process Sheet Metal Modal
     closeSheetMetalModalBtn.onclick = () => processSheetMetalModal.classList.remove('active');
     cancelSheetMetalModalBtn.onclick = () => processSheetMetalModal.classList.remove('active');
-    saveSheetMetalModalBtn.onclick = () => {
+    saveSheetMetalModalBtn.onclick = async () => {
         if (!editingProcessProjectId) return;
 
         const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
@@ -428,7 +432,8 @@ function setupEventListeners() {
 
             state.projects[index].processes.sheetMetal = { ...currentSheetMetalData };
             renderTable();
-
+            // 自動保存を実行
+            await saveWithSync(true);
         }
         processSheetMetalModal.classList.remove('active');
     };
@@ -436,7 +441,7 @@ function setupEventListeners() {
     // Process Parts Procurement Modal
     closePartsModalBtn.onclick = () => processPartsModal.classList.remove('active');
     cancelPartsModalBtn.onclick = () => processPartsModal.classList.remove('active');
-    savePartsModalBtn.onclick = () => {
+    savePartsModalBtn.onclick = async () => {
         if (!editingProcessProjectId) return;
 
         const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
@@ -449,7 +454,8 @@ function setupEventListeners() {
             // deep copy to avoid reference issues
             state.projects[index].processes.partsProcurement = JSON.parse(JSON.stringify(currentPartsData));
             renderTable();
-
+            // 自動保存を実行
+            await saveWithSync(true);
         }
         processPartsModal.classList.remove('active');
     };
@@ -457,7 +463,7 @@ function setupEventListeners() {
     // Process Nameplate Procurement Modal
     closeNameplateModalBtn.onclick = () => processNameplateModal.classList.remove('active');
     cancelNameplateModalBtn.onclick = () => processNameplateModal.classList.remove('active');
-    saveNameplateModalBtn.onclick = () => {
+    saveNameplateModalBtn.onclick = async () => {
         if (!editingProcessProjectId) return;
 
         const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
@@ -467,7 +473,8 @@ function setupEventListeners() {
 
             state.projects[index].processes.nameplateProcurement = { ...currentNameplateData };
             renderTable();
-
+            // 自動保存を実行
+            await saveWithSync(true);
         }
         processNameplateModal.classList.remove('active');
     };
@@ -475,7 +482,7 @@ function setupEventListeners() {
     // Process Internal Drawings Modal
     closeInternalDrawingsModalBtn.onclick = () => processInternalDrawingsModal.classList.remove('active');
     cancelInternalDrawingsModalBtn.onclick = () => processInternalDrawingsModal.classList.remove('active');
-    saveInternalDrawingsModalBtn.onclick = () => {
+    saveInternalDrawingsModalBtn.onclick = async () => {
         if (!editingProcessProjectId) return;
 
         const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
@@ -483,7 +490,8 @@ function setupEventListeners() {
             currentInternalDrawingsData.memo = idMemoInput.value;
             state.projects[index].processes.internalDrawings = { ...currentInternalDrawingsData };
             renderTable();
-
+            // 自動保存を実行
+            await saveWithSync(true);
         }
         processInternalDrawingsModal.classList.remove('active');
     };
@@ -491,7 +499,7 @@ function setupEventListeners() {
     // Process Software Modal
     closeSoftwareModalBtn.onclick = () => processSoftwareModal.classList.remove('active');
     cancelSoftwareModalBtn.onclick = () => processSoftwareModal.classList.remove('active');
-    saveSoftwareModalBtn.onclick = () => {
+    saveSoftwareModalBtn.onclick = async () => {
         if (!editingProcessProjectId) return;
 
         const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
@@ -499,11 +507,12 @@ function setupEventListeners() {
             currentSoftwareData.memo = swMemoInput.value;
             state.projects[index].processes.software = { ...currentSoftwareData };
             renderTable();
-
+            // 自動保存を実行
+            await saveWithSync(true);
         }
         processSoftwareModal.classList.remove('active');
     };
-    saveSpecModalBtn.onclick = () => {
+    saveSpecModalBtn.onclick = async () => {
         if (!editingProcessProjectId) return;
         const project = state.projects.find(p => p.id === editingProcessProjectId);
         if (project) {
@@ -513,7 +522,8 @@ function setupEventListeners() {
                 memo: specMemoInput.value
             };
             renderTable();
-
+            // 自動保存を実行
+            await saveWithSync(true);
         }
         processSpecModal.classList.remove('active');
     };
@@ -817,7 +827,7 @@ function setupEventListeners() {
         }
     };
 
-    saveSettingsBtn.onclick = () => {
+    saveSettingsBtn.onclick = async () => {
         state.config.customerList = tempCustomerList;
         state.config.specList = tempSpecList;
         state.config.sheetMetalVendors = tempVendorList;
@@ -828,11 +838,20 @@ function setupEventListeners() {
         renderTable();
         settingsOverlay.classList.remove('active');
         resetEditStates();
+        // 自動保存を実行
+        await saveWithSync(true);
     };
 
     // File Sync
     syncFolderBtn.onclick = connectToFolder;
-    saveSyncBtn.onclick = saveWithSync;
+    refreshDataBtn.onclick = async () => {
+        if (!dirHandle) {
+            alert('同期フォルダが設定されていません。「同期設定」からフォルダを選択してください。');
+            return;
+        }
+        await loadFromFolder();
+        showToast('最新データを読み込みました');
+    };
 
     modalOverlay.onclick = (e) => {
         if (e.target === modalOverlay) modalOverlay.classList.remove('active');
@@ -841,7 +860,7 @@ function setupEventListeners() {
         if (e.target === settingsOverlay) settingsOverlay.classList.remove('active');
     };
 
-    addProjectForm.onsubmit = (e) => {
+    addProjectForm.onsubmit = async (e) => {
         e.preventDefault();
         const data = {
             id: document.getElementById('project-id').value,
@@ -868,6 +887,9 @@ function setupEventListeners() {
 
         addProjectForm.reset();
         modalOverlay.classList.remove('active');
+        
+        // 自動保存を実行
+        await saveWithSync(true);
     };
 
     // Filter Events
@@ -963,8 +985,9 @@ function deleteProject(projectId) {
     if (confirm(`製番 ${projectId} を削除してもよろしいですか？\nこの操作は取り消せません。`)) {
         state.projects = state.projects.filter(p => p.id !== projectId);
         renderTable();
-
+        return true;
     }
+    return false;
 }
 
 // Logic: File Operations
@@ -1163,9 +1186,11 @@ async function loadFromFolder() {
     }
 }
 
-async function saveWithSync() {
+async function saveWithSync(isAutoSave = false) {
     if (!dirHandle) {
-        alert('同期フォルダが設定されていません。「同期設定」からフォルダを選択してください。');
+        if (!isAutoSave) {
+            alert('同期フォルダが設定されていません。「同期設定」からフォルダを選択してください。');
+        }
         return;
     }
 
@@ -1999,6 +2024,8 @@ function renderTable() {
             }
             latestProject.isCompleted = !latestProject.isCompleted;
             renderTable();
+            // 自動保存を実行
+            await saveWithSync(true);
         };
 
         tdCompleted.appendChild(completedBtn);
