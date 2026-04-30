@@ -1,6 +1,12 @@
-.DS_Store
-Thumbs.db
-*.log
+# Data files
+team_data.json
+lock.json
+backups/
+
+# IDE files
 .vscode/
 .idea/
-.gemini/
+
+# OS files
+Thumbs.db
+.DS_Store
