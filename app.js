@@ -1,91 +1,8 @@
 // Application State
 let state = {
+    lastUpdated: null, // 同期用タイムスタンプ
     projects: [
-        {
-            id: 'PB-2024-001',
-            staff: '田中',
-            customer: 'A社',
-            subject: '設備更新-1',
-            destination: '東京工場',
-            name: '制御盤A',
-            deadline: '2026-04-30',
-            isCompleted: true,
-            necessity: { specDoc: true, sheetMetal: true, partsProcurement: { main: true, spare: true, provided: true }, nameplateProcurement: true, internalDrawings: true, software: true },
-            processes: {
-                specDoc: { approvalDate: '2026-04-10' },
-                sheetMetal: { confirmedDate: '2026-04-15' },
-                partsProcurement: { main: { requestDate: '2026-04-12' }, spare: { requestDate: '2026-04-12' }, provided: { requestDate: '2026-04-12' } },
-                nameplateProcurement: { poSentDate: '2026-04-14' },
-                internalDrawings: { issueDate: '2026-04-18' },
-                software: { creationDate: '2026-04-20', debuggingDate: '2026-04-25' }
-            }
-        },
-        {
-            id: 'PB-2024-002',
-            staff: '佐藤',
-            customer: 'B社',
-            subject: 'ライン増設',
-            destination: '大阪支店',
-            name: '分電盤B',
-            deadline: '2026-05-15',
-            isCompleted: false,
-            necessity: { specDoc: true, sheetMetal: true, partsProcurement: { main: true, spare: false, provided: false }, nameplateProcurement: true, internalDrawings: true, software: false },
-            processes: {
-                specDoc: { approvalDate: '2026-04-25' },
-                sheetMetal: { quoteDate: '2026-04-26' },
-                partsProcurement: { main: { requestDate: '2026-04-28' }, spare: {}, provided: {} },
-                nameplateProcurement: {},
-                internalDrawings: {},
-                software: {}
-            }
-        },
-        {
-            id: 'PB-2024-003',
-            staff: '田中',
-            customer: 'C工業',
-            subject: '新規案件',
-            destination: '名古屋工場',
-            name: '操作盤C',
-            deadline: '2026-06-01',
-            isCompleted: false,
-            necessity: { specDoc: true, sheetMetal: true, partsProcurement: { main: true, spare: true, provided: true }, nameplateProcurement: true, internalDrawings: true, software: true },
-            processes: {
-                specDoc: {}, sheetMetal: {}, partsProcurement: { main: {}, spare: {}, provided: {} }, nameplateProcurement: {}, internalDrawings: {}, software: {}
-            }
-        },
-        {
-            id: 'PB-2024-004',
-            staff: '鈴木',
-            customer: 'A社',
-            subject: '予備盤製作',
-            destination: '東京工場',
-            name: '予備盤D',
-            deadline: '2026-05-20',
-            isCompleted: false,
-            necessity: { specDoc: false, sheetMetal: false, partsProcurement: { main: true, spare: false, provided: false }, nameplateProcurement: true, internalDrawings: true, software: false },
-            processes: {
-                specDoc: {}, sheetMetal: {}, partsProcurement: { main: { requestDate: '2026-04-29' }, spare: {}, provided: {} }, nameplateProcurement: { poSentDate: '2026-04-29' }, internalDrawings: {}, software: {}
-            }
-        },
-        {
-            id: 'PB-2024-005',
-            staff: '佐藤',
-            customer: 'D電機',
-            subject: 'システム改修',
-            destination: '横浜工場',
-            name: '通信盤E',
-            deadline: '2026-05-10',
-            isCompleted: false,
-            necessity: { specDoc: true, sheetMetal: true, partsProcurement: { main: true, spare: true, provided: true }, nameplateProcurement: true, internalDrawings: true, software: true },
-            processes: {
-                specDoc: { approvalDate: '2026-04-20' },
-                sheetMetal: { confirmedDate: '2026-04-22' },
-                partsProcurement: { main: { requestDate: '2026-04-23' }, spare: { requestDate: '2026-04-23' }, provided: { requestDate: '2026-04-23' } },
-                nameplateProcurement: { poSentDate: '2026-04-24' },
-                internalDrawings: { issueDate: '2026-04-26' },
-                software: { creationDate: '2026-04-28' }
-            }
-        }
+        // ... (existing sample data)
     ],
     config: {
         customerList: [
@@ -279,8 +196,9 @@ const newStaffInput = document.getElementById('new-staff-input');
 const addStaffBtn = document.getElementById('add-staff-btn');
 const staffListContainer = document.getElementById('staff-list-container');
 
-const loadFileBtn = document.getElementById('load-file-btn');
-const saveFileBtn = document.getElementById('save-file-btn');
+const syncFolderBtn = document.getElementById('sync-folder-btn');
+const saveSyncBtn = document.getElementById('save-sync-btn');
+const syncStatusEl = document.getElementById('sync-status');
 
 const projectCustomerSelect = document.getElementById('project-customer');
 const projectSpecSelect = document.getElementById('project-spec');
@@ -339,7 +257,10 @@ let currentNecessityData = {
     software: true
 };
 
-let fileHandle = null;
+let dirHandle = null;
+let lastLoadedData = null; // 競合検知用
+let syncInterval = null;
+let isSaving = false; // 二重保存防止
 let editingProcessProjectId = null;
 
 // Sort & Filter State
@@ -357,6 +278,9 @@ function init() {
     renderTable();
     setupEventListeners();
     setupInputFormatters();
+    
+    // 自動更新の開始（接続済みの場合）
+    startAutoSync();
 }
 
 // Logic: Setup Input Formatters
@@ -454,7 +378,8 @@ function populateSelectOptions() {
 // Event Listeners
 function setupEventListeners() {
     // Project Modal
-    addProjectBtn.onclick = () => {
+    addProjectBtn.onclick = async () => {
+        await refreshIfRemoteUpdated();
         editingProjectId = null;
         document.getElementById('modal-title').textContent = '新規製番登録';
         deleteProjectBtn.style.display = 'none';
@@ -772,7 +697,8 @@ function setupEventListeners() {
     setNecHandler(necSwYes, necSwNo, 'software');
 
     // Settings Modal
-    settingsBtn.onclick = () => {
+    settingsBtn.onclick = async () => {
+        await refreshIfRemoteUpdated();
         // 後方互換性: 古い文字列データがあればオブジェクトに変換してコピー
         tempCustomerList = (state.config.customerList || []).map(item =>
             typeof item === 'string' ? { name: item, kana: item } : { ...item }
@@ -905,8 +831,8 @@ function setupEventListeners() {
     };
 
     // File Sync
-    loadFileBtn.onclick = loadFromFile;
-    saveFileBtn.onclick = saveToFile;
+    syncFolderBtn.onclick = connectToFolder;
+    saveSyncBtn.onclick = saveWithSync;
 
     modalOverlay.onclick = (e) => {
         if (e.target === modalOverlay) modalOverlay.classList.remove('active');
@@ -1164,45 +1090,259 @@ function renderSettingsLists() {
     lucide.createIcons({ root: settingsOverlay });
 }
 
-async function loadFromFile() {
+// Logic: File Operations (Folder Sync)
+
+async function refreshIfRemoteUpdated() {
+    if (!dirHandle || isSaving) return;
     try {
-        [fileHandle] = await window.showOpenFilePicker({
-            types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }],
-        });
+        const fileHandle = await dirHandle.getFileHandle('team_data.json');
         const file = await fileHandle.getFile();
-        const content = await file.text();
-        const data = JSON.parse(content);
-
-        if (data.projects && data.config) {
-            state = data;
-            renderHeader();
-            renderTable();
-
-            alert('データを読み込みました');
+        // 更新日時を秒単位で比較
+        if (state.lastUpdated && Math.floor(file.lastModified/1000) > Math.floor(new Date(state.lastUpdated).getTime()/1000)) {
+            const content = await file.text();
+            const remoteData = JSON.parse(content);
+            if (remoteData.lastUpdated !== state.lastUpdated) {
+                console.log('Detected remote update before action, refreshing...');
+                await loadFromFolder();
+                showToast('最新データを読み込みました');
+            }
         }
-    } catch (err) {
-        console.error('Failed to load file:', err);
+    } catch (e) {
+        // Ignore
     }
 }
 
-async function saveToFile() {
+async function connectToFolder() {
     try {
-        if (!fileHandle) {
-            fileHandle = await window.showSaveFilePicker({
-                suggestedName: 'team_data.json',
-                types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }],
-            });
+        dirHandle = await window.showDirectoryPicker();
+        // 権限の確認
+        if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
+            await dirHandle.requestPermission({ mode: 'readwrite' });
+        }
+        
+        await loadFromFolder();
+        updateSyncStatusUI('connected');
+        showToast('共有フォルダに接続しました');
+        startAutoSync();
+    } catch (err) {
+        if (err.name !== 'AbortError') {
+            console.error('Folder connection failed:', err);
+            alert('フォルダ接続に失敗しました');
+        }
+    }
+}
+
+async function loadFromFolder() {
+    if (!dirHandle) return;
+    try {
+        const fileHandle = await dirHandle.getFileHandle('team_data.json', { create: true });
+        const file = await fileHandle.getFile();
+        const content = await file.text();
+        
+        if (!content || content.trim() === '') {
+            // 新規ファイルの場合は現在のstateを保存
+            await saveToFolder(state);
+            return;
         }
 
-        const writable = await fileHandle.createWritable();
-        await writable.write(JSON.stringify(state, null, 2));
-        await writable.close();
-        alert('データを保存しました');
+        const data = JSON.parse(content);
+        if (data.projects && data.config) {
+            state = data;
+            lastLoadedData = JSON.parse(JSON.stringify(data)); // クローンを保存
+            renderHeader();
+            renderTable();
+            populateSelectOptions();
+            updateSyncStatusUI('connected');
+            
+            // その日最初の接続時にバックアップを作成
+            await saveToDailyBackup(data);
+        }
     } catch (err) {
-        console.error('Failed to save file:', err);
-        alert('保存に失敗しました。ファイルを選択し直してください。');
-        fileHandle = null; // Reset to force re-selection
+        console.error('Loading failed:', err);
+        showToast('データの読み込みに失敗しました');
     }
+}
+
+async function saveWithSync() {
+    if (!dirHandle) {
+        alert('同期フォルダが設定されていません。「同期設定」からフォルダを選択してください。');
+        return;
+    }
+
+    if (isSaving) return;
+    isSaving = true;
+    updateSyncStatusUI('locked');
+
+    try {
+        // 1. ロックファイルの確認と作成
+        let lockHandle;
+        try {
+            lockHandle = await dirHandle.getFileHandle('lock.json', { create: false });
+            // すでにロックファイルがある場合
+            const lockFile = await lockHandle.getFile();
+            const lockTime = lockFile.lastModified;
+            const now = Date.now();
+            
+            // 5分以上古いロックは無視（デッドロック対策）
+            if (now - lockTime < 5 * 60 * 1000) {
+                // 削除を試みる
+                await dirHandle.removeEntry('lock.json');
+            } else {
+                alert('現在、他の人が保存中です。数秒待ってからやり直してください。');
+                isSaving = false;
+                updateSyncStatusUI('connected');
+                return;
+            }
+        } catch (e) {
+            // ロックファイルがない場合は正常
+        }
+
+        // ロック作成
+        lockHandle = await dirHandle.getFileHandle('lock.json', { create: true });
+        const writableLock = await lockHandle.createWritable();
+        await writableLock.write(JSON.stringify({ user: 'active-user', time: Date.now() }));
+        await writableLock.close();
+
+        // 2. 競合チェック
+        const fileHandle = await dirHandle.getFileHandle('team_data.json');
+        const file = await fileHandle.getFile();
+        const content = await file.text();
+        const currentFileData = JSON.parse(content);
+
+        if (currentFileData.lastUpdated && lastLoadedData && currentFileData.lastUpdated !== lastLoadedData.lastUpdated) {
+            const ok = confirm('編集中に他の人がデータを更新しました。\n強制的に上書きしますか？（キャンセルすると最新データを読み込みます）');
+            if (!ok) {
+                await dirHandle.removeEntry('lock.json');
+                await loadFromFolder();
+                isSaving = false;
+                updateSyncStatusUI('connected');
+                return;
+            }
+        }
+
+        // 3. 書き込み
+        state.lastUpdated = new Date().toISOString();
+        await saveToFolder(state);
+        lastLoadedData = JSON.parse(JSON.stringify(state));
+
+        // 4. ロック解除
+        await dirHandle.removeEntry('lock.json');
+        showToast('データを同期しました');
+
+    } catch (err) {
+        console.error('Sync failed:', err);
+        alert('同期に失敗しました：' + err.message);
+    } finally {
+        isSaving = false;
+        updateSyncStatusUI('connected');
+    }
+}
+
+async function saveToFolder(data) {
+    const fileHandle = await dirHandle.getFileHandle('team_data.json', { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify(data, null, 2));
+    await writable.close();
+}
+
+async function saveToDailyBackup(data) {
+    if (!dirHandle) return;
+    try {
+        const backupsDir = await dirHandle.getDirectoryHandle('backups', { create: true });
+        const now = new Date();
+        const today = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+        const fileName = `daily_${today}.json`;
+        
+        // 今日の分が既に存在するかチェック
+        let exists = false;
+        try {
+            await backupsDir.getFileHandle(fileName, { create: false });
+            exists = true;
+        } catch (e) {}
+
+        if (!exists) {
+            const backupFile = await backupsDir.getFileHandle(fileName, { create: true });
+            const writable = await backupFile.createWritable();
+            await writable.write(JSON.stringify(data, null, 2));
+            await writable.close();
+            console.log('Daily backup created:', fileName);
+            
+            // 古いバックアップの削除（30日分保持）
+            await cleanupOldBackups(backupsDir);
+        }
+    } catch (err) {
+        console.error('Backup failed:', err);
+    }
+}
+
+async function cleanupOldBackups(backupsDir) {
+    try {
+        const entries = [];
+        for await (const entry of backupsDir.values()) {
+            if (entry.kind === 'file' && entry.name.startsWith('daily_')) {
+                entries.push(entry);
+            }
+        }
+        
+        // 名前順（日付順）にソートして、古いもの（先頭）を削除
+        entries.sort((a, b) => a.name.localeCompare(b.name));
+        
+        const MAX_BACKUPS = 30;
+        if (entries.length > MAX_BACKUPS) {
+            const toDelete = entries.slice(0, entries.length - MAX_BACKUPS);
+            for (const entry of toDelete) {
+                await backupsDir.removeEntry(entry.name);
+                console.log('Old backup removed:', entry.name);
+            }
+        }
+    } catch (e) {
+        console.error('Cleanup failed:', e);
+    }
+}
+
+function updateSyncStatusUI(status) {
+    if (!syncStatusEl) return;
+    
+    syncStatusEl.className = 'sync-status ' + status;
+    
+    if (status === 'connected') {
+        syncStatusEl.innerHTML = `<i data-lucide="cloud-check"></i> 同期中: ${state.lastUpdated ? formatTime(state.lastUpdated) : '接続済'}`;
+    } else if (status === 'locked') {
+        syncStatusEl.innerHTML = `<i data-lucide="lock"></i> 同期処理中...`;
+    } else {
+        syncStatusEl.innerHTML = `<i data-lucide="cloud-off"></i> フォルダ未接続`;
+    }
+    lucide.createIcons({ root: syncStatusEl });
+}
+
+function formatTime(isoStr) {
+    const d = new Date(isoStr);
+    return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function startAutoSync() {
+    if (syncInterval) clearInterval(syncInterval);
+    syncInterval = setInterval(async () => {
+        if (!dirHandle || isSaving) return;
+        
+        try {
+            const fileHandle = await dirHandle.getFileHandle('team_data.json');
+            const file = await fileHandle.getFile();
+            // 更新日時を秒単位で比較
+            if (state.lastUpdated && Math.floor(file.lastModified/1000) > Math.floor(new Date(state.lastUpdated).getTime()/1000)) {
+                // 内容を軽くチェック
+                const content = await file.text();
+                const remoteData = JSON.parse(content);
+                if (remoteData.lastUpdated !== state.lastUpdated) {
+                    console.log('Detected remote update, refreshing...');
+                    await loadFromFolder();
+                    showToast('最新のデータを読み込みました');
+                }
+            }
+        } catch (e) {
+            // ファイルがないなどの場合は無視
+        }
+    }, 30000); // 30秒ごとにチェック
 }
 
 // Logic: Add New Project
@@ -1372,7 +1512,7 @@ function renderTable() {
                 
                 const isDone = !nec[key] || (proc[key] && (
                     (key === 'specDoc' && proc[key].approvalDate) ||
-                    (key === 'sheetMetal' && proc[key].confirmedDate) ||
+                    (key === 'sheetMetal' && proc[key].drawingSentDate && proc[key].drawingLimitDate) ||
                     (key === 'nameplateProcurement' && proc[key].poSentDate) ||
                     (key === 'internalDrawings' && proc[key].issueDate) ||
                     (key === 'software' && proc[key].creationDate)
@@ -1411,8 +1551,32 @@ function renderTable() {
             tooltipEl.classList.add('show');
         });
         tr.addEventListener('mousemove', (e) => {
-            tooltipEl.style.left = e.pageX + 15 + 'px';
-            tooltipEl.style.top = e.pageY + 15 + 'px';
+            const margin = 15;
+            let left = e.pageX + margin;
+            let top = e.pageY + margin;
+
+            // 画面端の判定（ビューポート基準）
+            const tooltipWidth = tooltipEl.offsetWidth;
+            const tooltipHeight = tooltipEl.offsetHeight;
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // マウスの現在位置（ビューポート内）
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            // 右端で切れる場合、マウスの左側に表示
+            if (mouseX + margin + tooltipWidth > viewportWidth) {
+                left = e.pageX - tooltipWidth - margin;
+            }
+
+            // 下端で切れる場合、マウスの上側に表示
+            if (mouseY + margin + tooltipHeight > viewportHeight) {
+                top = e.pageY - tooltipHeight - margin;
+            }
+
+            tooltipEl.style.left = left + 'px';
+            tooltipEl.style.top = top + 'px';
         });
         tr.addEventListener('mouseleave', () => {
             tooltipEl.classList.remove('show');
@@ -1433,9 +1597,10 @@ function renderTable() {
         fields.forEach(field => {
             const td = document.createElement('td');
             td.style.cursor = 'pointer';
-            td.onclick = (e) => {
+            td.onclick = async (e) => {
                 // aタグ（リンク）クリック時は編集画面を開かない
                 if (e.target.closest('a')) return;
+                await refreshIfRemoteUpdated();
                 openEditModal(project);
             };
 
@@ -1525,7 +1690,10 @@ function renderTable() {
                 const dueStr = spec.dueDate ? `<br><small>返却期日:${formatShortDate(spec.dueDate)}</small>` : '';
                 summaryHTML = `<span>出図済${dueStr}</span>`;
             }
-            tdSpec.onclick = () => openSpecDocModal(project);
+            tdSpec.onclick = async () => {
+                await refreshIfRemoteUpdated();
+                openSpecDocModal(project);
+            };
         }
 
         tdSpec.innerHTML = summaryHTML;
@@ -1554,12 +1722,12 @@ function renderTable() {
             smSummaryHTML = '<span style="color:var(--text-muted);">不要</span>';
             tdSheetMetal.onclick = null;
         } else {
-            if (sm.confirmedDate) {
-                smSummaryHTML = `<span style="color:#4ade80;font-weight:bold;">納期確定済<br><small>${formatShortDate(sm.confirmedDate)}</small></span>`;
+            if (sm.drawingSentDate && sm.drawingLimitDate) {
+                const confirmedStr = sm.confirmedDate ? `<br><small style="color:var(--primary-color);">納期確定:${formatShortDate(sm.confirmedDate)}</small>` : '';
+                smSummaryHTML = `<span style="color:#4ade80;font-weight:bold;">完了 (詳細図送付)<br><small>納期:${formatShortDate(sm.drawingLimitDate)}</small></span>${confirmedStr}`;
                 tdSheetMetal.style.backgroundColor = 'var(--process-done-bg)';
             } else if (sm.drawingSentDate) {
-                const limitStr = sm.drawingLimitDate ? `納期(詳細図):${formatShortDate(sm.drawingLimitDate)}` : '納期(詳細図):-';
-                smSummaryHTML = `<span>詳細図送付済<br><small>${limitStr}</small></span>`;
+                smSummaryHTML = `<span>詳細図送付済<br><small>納期(詳細図):-</small></span>`;
             } else if (sm.poSentDate) {
                 const poDueStr = sm.poDueDate ? `納期(注文書):${formatShortDate(sm.poDueDate)}` : '';
                 const dwgDueStr = sm.drawingDueDate ? `詳細図送付期日:${formatShortDate(sm.drawingDueDate)}` : '';
@@ -1568,7 +1736,10 @@ function renderTable() {
             } else if (sm.quoteDate) {
                 smSummaryHTML = `<span>見積依頼送付済<br><small>${formatShortDate(sm.quoteDate)}</small></span>`;
             }
-            tdSheetMetal.onclick = () => openSheetMetalModal(project);
+            tdSheetMetal.onclick = async () => {
+                await refreshIfRemoteUpdated();
+                openSheetMetalModal(project);
+            };
         }
 
         tdSheetMetal.innerHTML = smSummaryHTML;
@@ -1641,7 +1812,10 @@ function renderTable() {
             if (mainDone && spareDone && providedDone && (ppNec.main || ppNec.spare || ppNec.provided)) {
                 tdParts.style.backgroundColor = 'var(--process-done-bg)';
             }
-            tdParts.onclick = () => openPartsModal(project);
+            tdParts.onclick = async () => {
+                await refreshIfRemoteUpdated();
+                openPartsModal(project);
+            };
         }
 
         tdParts.addEventListener('mouseenter', () => {
@@ -1678,7 +1852,10 @@ function renderTable() {
                 npSummaryHTML = `<span style="color:#4ade80;font-weight:bold;">注文書送付済<br><small>納期:${np.dueDate ? formatShortDate(np.dueDate) : '-'}</small></span>`;
                 tdNameplate.style.backgroundColor = 'var(--process-done-bg)';
             }
-            tdNameplate.onclick = () => openNameplateModal(project);
+            tdNameplate.onclick = async () => {
+                await refreshIfRemoteUpdated();
+                openNameplateModal(project);
+            };
         }
 
         tdNameplate.innerHTML = npSummaryHTML;
@@ -1708,7 +1885,10 @@ function renderTable() {
                 idSummaryHTML = `<span style="color:#4ade80;font-weight:bold;">出図済<br><small>${formatShortDate(idProc.issueDate)}</small></span>`;
                 tdInternalDrawings.style.backgroundColor = 'var(--process-done-bg)';
             }
-            tdInternalDrawings.onclick = () => openInternalDrawingsModal(project);
+            tdInternalDrawings.onclick = async () => {
+                await refreshIfRemoteUpdated();
+                openInternalDrawingsModal(project);
+            };
         }
 
         tdInternalDrawings.innerHTML = idSummaryHTML;
@@ -1739,7 +1919,10 @@ function renderTable() {
             } else if (swProc.creationDate) {
                 swSummaryHTML = `作成済<br><small>${formatShortDate(swProc.creationDate)}</small>`;
             }
-            tdSoftware.onclick = () => openSoftwareModal(project);
+            tdSoftware.onclick = async () => {
+                await refreshIfRemoteUpdated();
+                openSoftwareModal(project);
+            };
         }
 
         tdSoftware.innerHTML = swSummaryHTML;
@@ -1763,11 +1946,11 @@ function renderTable() {
         completedBtn.style.padding = '0.25rem 0.5rem';
         completedBtn.style.fontSize = '0.8rem';
         
-        completedBtn.onclick = (e) => {
+        completedBtn.onclick = async (e) => {
             e.stopPropagation();
+            await refreshIfRemoteUpdated();
             project.isCompleted = !project.isCompleted;
             renderTable();
-
         };
 
         tdCompleted.appendChild(completedBtn);

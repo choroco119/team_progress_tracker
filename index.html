@@ -15,13 +15,16 @@
     <header>
         <h1><i data-lucide="layout-dashboard"></i> Team Progress Tracker</h1>
         <div class="header-actions">
-            <button class="btn" id="load-file-btn" title="データを読み込む">
-                <i data-lucide="folder-open"></i> 読込
+            <div id="sync-status" class="sync-status">
+                <i data-lucide="cloud-off"></i> フォルダ未接続
+            </div>
+            <button class="btn btn-primary" id="save-sync-btn" title="共有フォルダへ保存同期">
+                <i data-lucide="save"></i> 保存同期
             </button>
-            <button class="btn" id="save-file-btn" title="データを保存する">
-                <i data-lucide="save"></i> 保存
+            <button class="btn" id="sync-folder-btn" title="共有フォルダを選択して同期">
+                <i data-lucide="refresh-cw"></i> 同期設定
             </button>
-            <button class="btn btn-icon" id="settings-btn" title="設定">
+            <button class="btn btn-icon" id="settings-btn" title="マスターデータ設定">
                 <i data-lucide="settings"></i>
             </button>
             <button class="btn btn-primary" id="add-project-btn">
@@ -40,81 +43,91 @@
             <div class="content-card animate-fade-in" style="animation-delay: 0.1s;">
                 <div class="card-header" style="flex-direction: column; align-items: stretch; gap: 1rem;">
                     <div class="card-title">製番別進捗一覧</div>
-                <div class="filter-controls">
-                    <div class="filter-row">
-                        <div class="filter-item">
-                            <label>製番</label>
-                            <input type="text" id="filter-id" placeholder="検索...">
+                    <div class="filter-controls">
+                        <div class="filter-row">
+                            <div class="filter-item">
+                                <label>製番</label>
+                                <input type="text" id="filter-id" placeholder="検索...">
+                            </div>
+                            <div class="filter-item">
+                                <label>客先</label>
+                                <input type="text" id="filter-customer" placeholder="検索...">
+                            </div>
+                            <div class="filter-item">
+                                <label>件名</label>
+                                <input type="text" id="filter-subject" placeholder="検索...">
+                            </div>
+                            <div class="filter-item">
+                                <label>向先</label>
+                                <input type="text" id="filter-destination" placeholder="検索...">
+                            </div>
+                            <div class="filter-item">
+                                <label>品名</label>
+                                <input type="text" id="filter-name" placeholder="検索...">
+                            </div>
+                            <div class="filter-item">
+                                <label>担当者</label>
+                                <select id="filter-staff">
+                                    <option value="">全員</option>
+                                    <!-- JSで動的に追加 -->
+                                </select>
+                            </div>
                         </div>
-                        <div class="filter-item">
-                            <label>客先</label>
-                            <input type="text" id="filter-customer" placeholder="検索...">
+                        <div class="filter-row"
+                            style="margin-top: 1rem; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                            <span
+                                style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted);">工程未完フィルタ:</span>
+                            <div class="btn-group" id="process-filter-group">
+                                <button type="button" class="btn btn-sm btn-outline"
+                                    data-filter="specDoc">納入仕様書</button>
+                                <button type="button" class="btn btn-sm btn-outline"
+                                    data-filter="sheetMetal">板金</button>
+                                <button type="button" class="btn btn-sm btn-outline"
+                                    data-filter="partsProcurement">部品</button>
+                                <button type="button" class="btn btn-sm btn-outline"
+                                    data-filter="nameplateProcurement">銘板</button>
+                                <button type="button" class="btn btn-sm btn-outline"
+                                    data-filter="internalDrawings">社内工事図</button>
+                                <button type="button" class="btn btn-sm btn-outline" data-filter="software">ソフト</button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline" id="filter-exclude-completed"
+                                style="margin-left: 1rem;">完了を除外</button>
+                            <button class="btn btn-sm" id="clear-filters" style="margin-left: auto;">
+                                <i data-lucide="rotate-ccw"></i> 全て解除
+                            </button>
                         </div>
-                        <div class="filter-item">
-                            <label>件名</label>
-                            <input type="text" id="filter-subject" placeholder="検索...">
-                        </div>
-                        <div class="filter-item">
-                            <label>向先</label>
-                            <input type="text" id="filter-destination" placeholder="検索...">
-                        </div>
-                        <div class="filter-item">
-                            <label>品名</label>
-                            <input type="text" id="filter-name" placeholder="検索...">
-                        </div>
-                        <div class="filter-item">
-                            <label>担当者</label>
-                            <select id="filter-staff">
-                                <option value="">全員</option>
-                                <!-- JSで動的に追加 -->
-                            </select>
-                        </div>
-                    </div>
-                    <div class="filter-row" style="margin-top: 1rem; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
-                        <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted);">工程未完フィルタ:</span>
-                        <div class="btn-group" id="process-filter-group">
-                            <button type="button" class="btn btn-sm btn-outline" data-filter="specDoc">仕様書</button>
-                            <button type="button" class="btn btn-sm btn-outline" data-filter="sheetMetal">板金</button>
-                            <button type="button" class="btn btn-sm btn-outline" data-filter="partsProcurement">部品</button>
-                            <button type="button" class="btn btn-sm btn-outline" data-filter="nameplateProcurement">銘板</button>
-                            <button type="button" class="btn btn-sm btn-outline" data-filter="internalDrawings">社内図</button>
-                            <button type="button" class="btn btn-sm btn-outline" data-filter="software">ソフト</button>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline" id="filter-exclude-completed" style="margin-left: 1rem;">完了を除外</button>
-                        <button class="btn btn-sm" id="clear-filters" style="margin-left: auto;">
-                            <i data-lucide="rotate-ccw"></i> 全て解除
-                        </button>
                     </div>
                 </div>
+                <div class="table-container">
+                    <table id="progress-table">
+                        <thead>
+                            <tr id="table-header-row">
+                                <th id="sort-id" style="cursor:pointer;">製番 <span class="icon-wrapper"><i
+                                            data-lucide="chevrons-up-down" class="sort-icon"></i></span></th>
+                                <th>担当者</th>
+                                <th>リンク</th>
+                                <th>客先</th>
+                                <th>件名</th>
+                                <th>向先</th>
+                                <th>品名</th>
+                                <th id="sort-deadline" style="cursor:pointer;">納期 <span class="icon-wrapper"><i
+                                            data-lucide="chevrons-up-down" class="sort-icon"></i></span></th>
+                                <!-- 工程カラムはJSで動的に生成 -->
+                            </tr>
+                        </thead>
+                        <tbody id="progress-body">
+                            <!-- データはJSで挿入 -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="table-container">
-                <table id="progress-table">
-                    <thead>
-                        <tr id="table-header-row">
-                            <th id="sort-id" style="cursor:pointer;">製番 <span class="icon-wrapper"><i data-lucide="chevrons-up-down" class="sort-icon"></i></span></th>
-                            <th>担当者</th>
-                            <th>リンク</th>
-                            <th>客先</th>
-                            <th>件名</th>
-                            <th>向先</th>
-                            <th>品名</th>
-                            <th id="sort-deadline" style="cursor:pointer;">納期 <span class="icon-wrapper"><i data-lucide="chevrons-up-down" class="sort-icon"></i></span></th>
-                            <!-- 工程カラムはJSで動的に生成 -->
-                        </tr>
-                    </thead>
-                    <tbody id="progress-body">
-                        <!-- データはJSで挿入 -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
-        <!-- 将来用の空タブ -->
-        <div id="other-tab" class="tab-content">
-            <div class="content-card">
-                <p>今後、ガントチャートやリソース管理などの機能を追加予定です。</p>
+            <!-- 将来用の空タブ -->
+            <div id="other-tab" class="tab-content">
+                <div class="content-card">
+                    <p>今後、ガントチャートやリソース管理などの機能を追加予定です。</p>
+                </div>
             </div>
-        </div>
     </main>
 
     <!-- Modal for New Project -->
@@ -188,7 +201,8 @@
                                 </div>
                                 <div class="form-group" style="grid-column: span 2;">
                                     <label for="project-link">フォルダリンク (URLまたはパス)</label>
-                                    <input type="text" id="project-link" placeholder="例: file://Z:/Projects/... または SharePointのURL">
+                                    <input type="text" id="project-link"
+                                        placeholder="例: file://Z:/Projects/... または SharePointのURL">
                                 </div>
                             </div>
                         </div>
@@ -196,62 +210,79 @@
                         <!-- 右カラム: 要否設定とメモ -->
                         <div class="modal-column-side">
                             <div class="form-group">
-                                <label style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">工程要否設定</label>
+                                <label
+                                    style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">工程要否設定</label>
                                 <div class="necessity-list">
                                     <div class="necessity-row">
                                         <span>納入仕様書</span>
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-spec-yes">要</button>
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-spec-no">否</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-spec-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-spec-no">否</button>
                                         </div>
                                     </div>
                                     <div class="necessity-row">
                                         <span>板金手配</span>
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-sm-yes">要</button>
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-sm-no">否</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-sm-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-sm-no">否</button>
                                         </div>
                                     </div>
                                     <div class="necessity-row">
                                         <span>部品手配(主)</span>
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-main-yes">要</button>
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-main-no">否</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-pp-main-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-pp-main-no">否</button>
                                         </div>
                                     </div>
                                     <div class="necessity-row">
                                         <span>部品手配(予)</span>
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-spare-yes">要</button>
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-spare-no">否</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-pp-spare-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-pp-spare-no">否</button>
                                         </div>
                                     </div>
                                     <div class="necessity-row">
                                         <span>部品手配(支)</span>
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-prov-yes">要</button>
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-pp-prov-no">否</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-pp-prov-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-pp-prov-no">否</button>
                                         </div>
                                     </div>
                                     <div class="necessity-row">
                                         <span>銘板手配</span>
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-np-yes">要</button>
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-np-no">否</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-np-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-np-no">否</button>
                                         </div>
                                     </div>
                                     <div class="necessity-row">
                                         <span>社内工事図</span>
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-id-yes">要</button>
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-id-no">否</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-id-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-id-no">否</button>
                                         </div>
                                     </div>
                                     <div class="necessity-row">
                                         <span>ソフト</span>
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-sw-yes">要</button>
-                                            <button type="button" class="btn btn-sm btn-outline" id="nec-sw-no">否</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-sw-yes">要</button>
+                                            <button type="button" class="btn btn-sm btn-outline"
+                                                id="nec-sw-no">否</button>
                                         </div>
                                     </div>
                                 </div>
@@ -420,7 +451,8 @@
                 <div class="modal-grid" style="grid-template-columns: 1fr;">
                     <!-- 主部品手配 -->
                     <div id="pp-main-section">
-                        <div style="margin-top: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border-color);">
+                        <div
+                            style="margin-top: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border-color);">
                             <strong>主部品手配</strong>
                         </div>
                         <div class="form-group row-align">
@@ -439,7 +471,8 @@
 
                     <!-- 予備品手配 -->
                     <div id="pp-spare-section">
-                        <div style="margin-top: 1rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border-color);">
+                        <div
+                            style="margin-top: 1rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border-color);">
                             <strong>予備品手配</strong>
                         </div>
                         <div class="form-group row-align">
@@ -466,7 +499,8 @@
 
                     <!-- 支給品手配 -->
                     <div id="pp-provided-section">
-                        <div style="margin-top: 1rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border-color);">
+                        <div
+                            style="margin-top: 1rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border-color);">
                             <strong>支給品手配</strong>
                         </div>
                         <div class="form-group row-align">
@@ -482,7 +516,7 @@
                             <input type="date" id="pp-prov-due-date" style="max-width: 150px;">
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="pp-memo">メモ</label>
                         <textarea id="pp-memo" rows="2" placeholder="工程に関するメモ..."></textarea>
