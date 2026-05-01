@@ -403,10 +403,10 @@ function setupEventListeners() {
         };
         renderNecessityButtons();
         
-        modalOverlay.classList.add('active');
+        toggleModal(modalOverlay, true);
     };
-    closeModalBtn.onclick = () => modalOverlay.classList.remove('active');
-    cancelBtn.onclick = () => modalOverlay.classList.remove('active');
+    if (closeModalBtn) closeModalBtn.onclick = () => toggleModal(modalOverlay, false);
+    if (cancelBtn) cancelBtn.onclick = () => toggleModal(modalOverlay, false);
 
     // 既存案件からのコピー検索ロジック
     copySearchInput.oninput = () => {
@@ -468,10 +468,13 @@ function setupEventListeners() {
         copySearchResults.style.display = 'block';
     };
 
+
     // 検索結果以外をクリックした時にリストを閉じる
     document.addEventListener('click', (e) => {
-        if (!copySearchInput.contains(e.target) && !copySearchResults.contains(e.target)) {
-            copySearchResults.style.display = 'none';
+        if (copySearchInput && copySearchResults) {
+            if (!copySearchInput.contains(e.target) && !copySearchResults.contains(e.target)) {
+                copySearchResults.style.display = 'none';
+            }
         }
     });
 
@@ -487,12 +490,12 @@ function setupEventListeners() {
     };
 
     // Process Spec Modal
-    closeSpecModalBtn.onclick = () => processSpecModal.classList.remove('active');
-    cancelSpecModalBtn.onclick = () => processSpecModal.classList.remove('active');
+    if (closeSpecModalBtn) closeSpecModalBtn.onclick = () => toggleModal(processSpecModal, false);
+    if (cancelSpecModalBtn) cancelSpecModalBtn.onclick = () => toggleModal(processSpecModal, false);
 
     // Process Sheet Metal Modal
-    closeSheetMetalModalBtn.onclick = () => processSheetMetalModal.classList.remove('active');
-    cancelSheetMetalModalBtn.onclick = () => processSheetMetalModal.classList.remove('active');
+    if (closeSheetMetalModalBtn) closeSheetMetalModalBtn.onclick = () => toggleModal(processSheetMetalModal, false);
+    if (cancelSheetMetalModalBtn) cancelSheetMetalModalBtn.onclick = () => toggleModal(processSheetMetalModal, false);
     saveSheetMetalModalBtn.onclick = async () => {
         if (!editingProcessProjectId) return;
 
@@ -513,9 +516,9 @@ function setupEventListeners() {
     };
 
     // Process Parts Procurement Modal
-    closePartsModalBtn.onclick = () => processPartsModal.classList.remove('active');
-    cancelPartsModalBtn.onclick = () => processPartsModal.classList.remove('active');
-    savePartsModalBtn.onclick = async () => {
+    if (closePartsModalBtn) closePartsModalBtn.onclick = () => toggleModal(processPartsModal, false);
+    if (cancelPartsModalBtn) cancelPartsModalBtn.onclick = () => toggleModal(processPartsModal, false);
+    if (savePartsModalBtn) savePartsModalBtn.onclick = async () => {
         if (!editingProcessProjectId) return;
 
         const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
@@ -535,9 +538,9 @@ function setupEventListeners() {
     };
 
     // Process Nameplate Procurement Modal
-    closeNameplateModalBtn.onclick = () => processNameplateModal.classList.remove('active');
-    cancelNameplateModalBtn.onclick = () => processNameplateModal.classList.remove('active');
-    saveNameplateModalBtn.onclick = async () => {
+    if (closeNameplateModalBtn) closeNameplateModalBtn.onclick = () => toggleModal(processNameplateModal, false);
+    if (cancelNameplateModalBtn) cancelNameplateModalBtn.onclick = () => toggleModal(processNameplateModal, false);
+    if (saveNameplateModalBtn) saveNameplateModalBtn.onclick = async () => {
         if (!editingProcessProjectId) return;
 
         const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
@@ -554,9 +557,9 @@ function setupEventListeners() {
     };
 
     // Process Internal Drawings Modal
-    closeInternalDrawingsModalBtn.onclick = () => processInternalDrawingsModal.classList.remove('active');
-    cancelInternalDrawingsModalBtn.onclick = () => processInternalDrawingsModal.classList.remove('active');
-    saveInternalDrawingsModalBtn.onclick = async () => {
+    if (closeInternalDrawingsModalBtn) closeInternalDrawingsModalBtn.onclick = () => toggleModal(processInternalDrawingsModal, false);
+    if (cancelInternalDrawingsModalBtn) cancelInternalDrawingsModalBtn.onclick = () => toggleModal(processInternalDrawingsModal, false);
+    if (saveInternalDrawingsModalBtn) saveInternalDrawingsModalBtn.onclick = async () => {
         if (!editingProcessProjectId) return;
 
         const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
@@ -571,9 +574,9 @@ function setupEventListeners() {
     };
 
     // Process Software Modal
-    closeSoftwareModalBtn.onclick = () => processSoftwareModal.classList.remove('active');
-    cancelSoftwareModalBtn.onclick = () => processSoftwareModal.classList.remove('active');
-    saveSoftwareModalBtn.onclick = async () => {
+    if (closeSoftwareModalBtn) closeSoftwareModalBtn.onclick = () => toggleModal(processSoftwareModal, false);
+    if (cancelSoftwareModalBtn) cancelSoftwareModalBtn.onclick = () => toggleModal(processSoftwareModal, false);
+    if (saveSoftwareModalBtn) saveSoftwareModalBtn.onclick = async () => {
         if (!editingProcessProjectId) return;
 
         const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
@@ -792,13 +795,15 @@ function setupEventListeners() {
         tempStaffList = [...(state.config.staffList || [])];
         resetEditStates();
         renderSettingsLists();
-        settingsOverlay.classList.add('active');
+        toggleModal(settingsOverlay, true);
     };
-    closeSettingsBtn.onclick = () => { settingsOverlay.classList.remove('active'); resetEditStates(); };
-    cancelSettingsBtn.onclick = () => { settingsOverlay.classList.remove('active'); resetEditStates(); };
-    settingsOverlay.onclick = (e) => {
-        if (e.target === settingsOverlay) settingsOverlay.classList.remove('active');
-    };
+    if (closeSettingsBtn) closeSettingsBtn.onclick = () => { toggleModal(settingsOverlay, false); resetEditStates(); };
+    if (cancelSettingsBtn) cancelSettingsBtn.onclick = () => { toggleModal(settingsOverlay, false); resetEditStates(); };
+    if (settingsOverlay) {
+        settingsOverlay.onclick = (e) => {
+            if (e.target === settingsOverlay) toggleModal(settingsOverlay, false);
+        };
+    }
 
     // Add/Update Customer
     addCustomerBtn.onclick = () => {
@@ -1583,7 +1588,7 @@ function renderTable() {
 
     updateHeaderIcon(sortIdHeader, 'id');
     updateHeaderIcon(sortDeadlineHeader, 'deadline');
-    lucide.createIcons({ root: document.getElementById('table-header-row') });
+    if (window.lucide) lucide.createIcons({ root: document.getElementById('table-header-row') });
 
     // Apply Filters
     const filteredProjects = sortedProjects.filter(project => {
@@ -1797,7 +1802,8 @@ function renderTable() {
                 const dueStr = spec.dueDate ? `<br><small>返却期日:${formatShortDate(spec.dueDate)}</small>` : '';
                 summaryHTML = `<span>出図済${dueStr}</span>`;
             }
-            tdSpec.onclick = async () => {
+            tdSpec.onclick = async (e) => {
+                e.stopPropagation();
                 await refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
@@ -1849,7 +1855,8 @@ function renderTable() {
             } else if (sm.quoteDate) {
                 smSummaryHTML = `<span>見積依頼送付済<br><small>${formatShortDate(sm.quoteDate)}</small></span>`;
             }
-            tdSheetMetal.onclick = async () => {
+            tdSheetMetal.onclick = async (e) => {
+                e.stopPropagation();
                 await refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
@@ -1931,7 +1938,8 @@ function renderTable() {
             if (mainDone && spareDone && providedDone && (ppNec.main || ppNec.spare || ppNec.provided)) {
                 tdParts.style.backgroundColor = 'var(--process-done-bg)';
             }
-            tdParts.onclick = async () => {
+            tdParts.onclick = async (e) => {
+                e.stopPropagation();
                 await refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
@@ -1977,7 +1985,8 @@ function renderTable() {
                 npSummaryHTML = `<span style="color:#4ade80;font-weight:bold;">注文書送付済<br><small>納期:${np.dueDate ? formatShortDate(np.dueDate) : '-'}</small></span>`;
                 tdNameplate.style.backgroundColor = 'var(--process-done-bg)';
             }
-            tdNameplate.onclick = async () => {
+            tdNameplate.onclick = async (e) => {
+                e.stopPropagation();
                 await refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
@@ -2016,7 +2025,8 @@ function renderTable() {
                 idSummaryHTML = `<span style="color:#4ade80;font-weight:bold;">出図済<br><small>${formatShortDate(idProc.issueDate)}</small></span>`;
                 tdInternalDrawings.style.backgroundColor = 'var(--process-done-bg)';
             }
-            tdInternalDrawings.onclick = async () => {
+            tdInternalDrawings.onclick = async (e) => {
+                e.stopPropagation();
                 await refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
@@ -2056,7 +2066,8 @@ function renderTable() {
             } else if (swProc.creationDate) {
                 swSummaryHTML = `作成済<br><small>${formatShortDate(swProc.creationDate)}</small>`;
             }
-            tdSoftware.onclick = async () => {
+            tdSoftware.onclick = async (e) => {
+                e.stopPropagation();
                 await refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
@@ -2116,7 +2127,15 @@ function renderTable() {
         progressBody.appendChild(tr);
     });
 
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
+}
+
+// 共通のモーダル表示/非表示ヘルパー
+function toggleModal(modal, show) {
+    if (modal) {
+        if (show) modal.classList.add('active');
+        else modal.classList.remove('active');
+    }
 }
 
 // Logic: Open Process Modal
@@ -2186,7 +2205,7 @@ function openSheetMetalModal(project) {
     smMemoInput.value = currentSheetMetalData.memo || '';
 
     renderSheetMetalModal();
-    processSheetMetalModal.classList.add('active');
+    toggleModal(processSheetMetalModal, true);
 }
 
 function renderSheetMetalModal() {
@@ -2237,7 +2256,7 @@ function openPartsModal(project) {
     ppMemoInput.value = currentPartsData.memo || '';
 
     renderPartsModal();
-    processPartsModal.classList.add('active');
+    toggleModal(processPartsModal, true);
 }
 
 function renderPartsModal() {
@@ -2271,7 +2290,7 @@ function openNameplateModal(project) {
     npMemoInput.value = currentNameplateData.memo || '';
 
     renderNameplateModal();
-    processNameplateModal.classList.add('active');
+    toggleModal(processNameplateModal, true);
 }
 
 function renderNameplateModal() {
@@ -2301,7 +2320,7 @@ function openInternalDrawingsModal(project) {
     idMemoInput.value = currentInternalDrawingsData.memo || '';
 
     renderInternalDrawingsModal();
-    processInternalDrawingsModal.classList.add('active');
+    toggleModal(processInternalDrawingsModal, true);
 }
 
 function renderInternalDrawingsModal() {
@@ -2331,7 +2350,7 @@ function openSoftwareModal(project) {
     swMemoInput.value = currentSoftwareData.memo || '';
 
     renderSoftwareModal();
-    processSoftwareModal.classList.add('active');
+    toggleModal(processSoftwareModal, true);
 }
 
 function renderSoftwareModal() {
