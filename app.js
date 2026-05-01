@@ -1438,7 +1438,7 @@ function addNewProject(data) {
 // Render Table Header
 function renderHeader() {
     const headerRow = document.getElementById('table-header-row');
-    const staticStartCount = 8; // 製番, 担当者, リンク, 客先, 件名, 向先, 品名, 納期
+    const staticStartCount = 9; // 製番, 担当者, リンク, 客先, 件名, 向先, 品名, 納期, 操作
     const staticEndCount = 0;
 
     // Remove all dynamic columns
@@ -1447,6 +1447,12 @@ function renderHeader() {
     }
 
     // Add specific process columns
+    const thAction = document.createElement('th');
+    thAction.textContent = '操作';
+    thAction.style.textAlign = 'center';
+    thAction.style.width = '50px';
+    headerRow.appendChild(thAction);
+
     const thSpec = document.createElement('th');
     thSpec.textContent = '納入仕様書';
     thSpec.style.textAlign = 'center';
@@ -1679,6 +1685,23 @@ function renderTable() {
             }
             tr.appendChild(td);
         });
+
+        // Action Column (Copy)
+        const tdAction = document.createElement('td');
+        tdAction.style.textAlign = 'center';
+        tdAction.style.verticalAlign = 'middle';
+        
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'btn-icon';
+        copyBtn.style.color = 'var(--primary-color)';
+        copyBtn.innerHTML = '<i data-lucide="copy" style="width:16px; height:16px;"></i>';
+        copyBtn.title = 'コピーして新規作成';
+        copyBtn.onclick = (e) => {
+            e.stopPropagation();
+            openCopyModal(project);
+        };
+        tdAction.appendChild(copyBtn);
+        tr.appendChild(tdAction);
 
         // Process: Spec Document (納入仕様書)
         const tdSpec = document.createElement('td');
@@ -2310,6 +2333,43 @@ function openEditModal(project) {
     renderNecessityButtons();
 
     modalOverlay.classList.add('active');
+}
+
+function openCopyModal(project) {
+    editingProjectId = null; // 新規扱い
+    document.getElementById('modal-title').textContent = '製番コピー登録';
+    deleteProjectBtn.style.display = 'none';
+
+    // フォームをリセットしてから値をセット
+    addProjectForm.reset();
+
+    document.getElementById('project-id').value = ''; // 製番は空にする
+    document.getElementById('project-deadline').value = project.deadline || '';
+    document.getElementById('project-customer').value = project.customer || '';
+    document.getElementById('project-subject').value = project.subject || '';
+    document.getElementById('project-destination').value = project.destination || '';
+    document.getElementById('project-name').value = project.name || '';
+    document.getElementById('project-quantity').value = project.quantity || 1;
+    document.getElementById('project-spec').value = project.spec || '';
+    document.getElementById('project-staff').value = project.staff || '';
+    document.getElementById('project-inspection').value = project.inspection || '';
+    document.getElementById('project-budget').value = project.budget || '';
+    document.getElementById('project-link').value = project.link || '';
+    document.getElementById('project-remarks').value = project.remarks || '';
+
+    // 要否設定をコピー
+    currentNecessityData = JSON.parse(JSON.stringify(project.necessity || {
+        specDoc: true,
+        sheetMetal: true,
+        partsProcurement: { main: true, spare: true, provided: true },
+        nameplateProcurement: true,
+        internalDrawings: true,
+        software: true
+    }));
+    renderNecessityButtons();
+
+    modalOverlay.classList.add('active');
+    document.getElementById('project-id').focus();
 }
 
 
