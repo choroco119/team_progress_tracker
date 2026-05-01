@@ -1237,14 +1237,12 @@ async function saveWithSync(isAutoSave = false) {
         const currentFileData = JSON.parse(content);
 
         if (currentFileData.lastUpdated && lastLoadedData && currentFileData.lastUpdated !== lastLoadedData.lastUpdated) {
-            const ok = confirm('編集中に他の人がデータを更新しました。\n強制的に上書きしますか？（キャンセルすると最新データを読み込みます）');
-            if (!ok) {
-                await dirHandle.removeEntry('lock.json');
-                await loadFromFolder();
-                isSaving = false;
-                updateSyncStatusUI('connected');
-                return;
-            }
+            alert('編集中に他の人がデータを更新しました。データ整合性を守るため、最新のデータを読み込みます。\n恐れ入りますが、もう一度編集をお願いいたします。');
+            await dirHandle.removeEntry('lock.json');
+            await loadFromFolder();
+            isSaving = false;
+            updateSyncStatusUI('connected');
+            return;
         }
 
         // 3. 書き込み
