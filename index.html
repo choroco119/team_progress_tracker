@@ -112,7 +112,6 @@
                                 <th>品名</th>
                                 <th id="sort-deadline" style="cursor:pointer;">納期 <span class="icon-wrapper"><i
                                             data-lucide="chevrons-up-down" class="sort-icon"></i></span></th>
-                                <th>操作</th>
                                 <!-- 工程カラムはJSで動的に生成 -->
                             </tr>
                         </thead>
@@ -139,7 +138,21 @@
                 <button class="btn-icon" id="close-modal"><i data-lucide="x"></i></button>
             </div>
             <form id="add-project-form">
-                <div class="modal-body">
+                <!-- Copy from existing (only for new registration) -->
+                <div id="copy-from-section" class="content-card" style="margin-bottom: 1.5rem; padding: 1rem; background-color: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: var(--primary-color);">
+                        <i data-lucide="copy" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"></i>
+                        既存案件から情報をコピー
+                    </label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select id="copy-from-project-select" style="flex: 1; padding: 0.4rem; font-size: 0.9rem;">
+                            <option value="">-- コピー元を選択 --</option>
+                        </select>
+                        <button type="button" class="btn btn-sm" id="apply-copy-btn">適用</button>
+                    </div>
+                </div>
+
+                <div class="form-grid">
                     <div class="modal-flex-layout">
                         <!-- 左カラム: 基本情報 -->
                         <div class="modal-column-main">
