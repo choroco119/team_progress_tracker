@@ -199,8 +199,8 @@ const staffListContainer = document.getElementById('staff-list-container');
 const syncFolderBtn = document.getElementById('sync-folder-btn');
 const refreshDataBtn = document.getElementById('save-sync-btn');
 const copyFromSection = document.getElementById('copy-from-section');
-const copyFromSelect = document.getElementById('copy-from-project-select');
-const applyCopyBtn = document.getElementById('apply-copy-btn');
+const copySearchInput = document.getElementById('copy-search-input');
+const copySearchResults = document.getElementById('copy-search-results');
 const syncStatusEl = document.getElementById('sync-status');
 
 const projectCustomerSelect = document.getElementById('project-customer');
@@ -388,7 +388,8 @@ function setupEventListeners() {
         document.getElementById('modal-title').textContent = '新規製番登録';
         deleteProjectBtn.style.display = 'none';
         copyFromSection.style.display = 'block'; // コピー機能を表示
-        updateCopyFromList();
+        copySearchInput.value = ''; // 検索窓をリセット
+        copySearchResults.style.display = 'none';
         addProjectForm.reset();
         
         // Reset necessity to default all required
@@ -407,38 +408,65 @@ function setupEventListeners() {
     closeModalBtn.onclick = () => modalOverlay.classList.remove('active');
     cancelBtn.onclick = () => modalOverlay.classList.remove('active');
 
-    applyCopyBtn.onclick = () => {
-        const sourceId = copyFromSelect.value;
-        if (!sourceId) return;
-        const project = state.projects.find(p => p.id === sourceId);
-        if (project) {
-            // 基本情報をセット (製番以外)
-            document.getElementById('project-deadline').value = project.deadline || '';
-            document.getElementById('project-customer').value = project.customer || '';
-            document.getElementById('project-subject').value = project.subject || '';
-            document.getElementById('project-destination').value = project.destination || '';
-            document.getElementById('project-name').value = project.name || '';
-            document.getElementById('project-quantity').value = project.quantity || 1;
-            document.getElementById('project-spec').value = project.spec || '';
-            document.getElementById('project-staff').value = project.staff || '';
-            document.getElementById('project-inspection').value = project.inspection || '';
-            document.getElementById('project-budget').value = project.budget || '';
-            document.getElementById('project-link').value = project.link || '';
-            document.getElementById('project-remarks').value = project.remarks || '';
-
-            // 要否設定をコピー
-            currentNecessityData = JSON.parse(JSON.stringify(project.necessity || {
-                specDoc: true,
-                sheetMetal: true,
-                partsProcurement: { main: true, spare: true, provided: true },
-                nameplateProcurement: true,
-                internalDrawings: true,
-                software: true
-            }));
-            renderNecessityButtons();
-            showToast('情報をコピーしました');
+    // 既存案件からのコピー検索ロジック
+    copySearchInput.oninput = () => {
+        const query = copySearchInput.value.trim().toLowerCase();
+        if (!query) {
+            copySearchResults.style.display = 'none';
+            return;
         }
+
+        const matches = state.projects.filter(p => 
+            p.id.toLowerCase().includes(query) ||
+            (p.customer || '').toLowerCase().includes(query) ||
+            (p.subject || '').toLowerCase().includes(query)
+        ).slice(0, 15); // 最大15件
+
+        copySearchResults.innerHTML = '';
+        if (matches.length > 0) {
+            matches.forEach(project => {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.style.padding = '0.75rem';
+                div.style.cursor = 'pointer';
+                div.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                
+                div.innerHTML = `
+                    <div style="font-weight: 600; color: var(--primary-color); font-size: 0.9rem;">${project.id}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${project.customer || '-'} | ${project.subject || '-'}
+                    </div>
+                `;
+                
+                div.onclick = () => {
+                    applyCopyFrom(project);
+                    copySearchResults.style.display = 'none';
+                    copySearchInput.value = '';
+                };
+                
+                // Hover effect
+                div.onmouseenter = () => div.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                div.onmouseleave = () => div.style.backgroundColor = 'transparent';
+                
+                copySearchResults.appendChild(div);
+            });
+        } else {
+            const div = document.createElement('div');
+            div.style.padding = '0.75rem';
+            div.style.color = 'var(--text-muted)';
+            div.style.fontSize = '0.8rem';
+            div.textContent = '一致する案件がありません';
+            copySearchResults.appendChild(div);
+        }
+        copySearchResults.style.display = 'block';
     };
+
+    // 検索結果以外をクリックした時にリストを閉じる
+    document.addEventListener('click', (e) => {
+        if (!copySearchInput.contains(e.target) && !copySearchResults.contains(e.target)) {
+            copySearchResults.style.display = 'none';
+        }
+    });
 
     deleteProjectBtn.onclick = async () => {
         if (editingProjectId) {
@@ -2350,20 +2378,32 @@ function openEditModal(project) {
     modalOverlay.classList.add('active');
 }
 
-function updateCopyFromList() {
-    const currentVal = copyFromSelect.value;
-    copyFromSelect.innerHTML = '<option value="">-- コピー元を選択 --</option>';
-    
-    // 製番順にソートして追加
-    const seibans = state.projects.map(p => p.id).sort();
-    seibans.forEach(id => {
-        const option = document.createElement('option');
-        option.value = id;
-        option.textContent = id;
-        copyFromSelect.appendChild(option);
-    });
-    
-    copyFromSelect.value = currentVal;
+function applyCopyFrom(project) {
+    // 基本情報をセット (製番以外)
+    document.getElementById('project-deadline').value = project.deadline || '';
+    document.getElementById('project-customer').value = project.customer || '';
+    document.getElementById('project-subject').value = project.subject || '';
+    document.getElementById('project-destination').value = project.destination || '';
+    document.getElementById('project-name').value = project.name || '';
+    document.getElementById('project-quantity').value = project.quantity || 1;
+    document.getElementById('project-spec').value = project.spec || '';
+    document.getElementById('project-staff').value = project.staff || '';
+    document.getElementById('project-inspection').value = project.inspection || '';
+    document.getElementById('project-budget').value = project.budget || '';
+    document.getElementById('project-link').value = project.link || '';
+    document.getElementById('project-remarks').value = project.remarks || '';
+
+    // 要否設定をコピー
+    currentNecessityData = JSON.parse(JSON.stringify(project.necessity || {
+        specDoc: true,
+        sheetMetal: true,
+        partsProcurement: { main: true, spare: true, provided: true },
+        nameplateProcurement: true,
+        internalDrawings: true,
+        software: true
+    }));
+    renderNecessityButtons();
+    showToast(`${project.id} の情報をコピーしました`);
 }
 
 
