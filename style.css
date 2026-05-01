@@ -483,7 +483,7 @@ tr:hover td {
     width: 95%;
     max-width: 950px;
     border-radius: var(--radius-xl);
-    overflow: hidden;
+    overflow: visible; /* 検索候補リストが表示されるように変更 */
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     border: 1px solid var(--border-color);
 }

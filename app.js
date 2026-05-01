@@ -432,8 +432,8 @@ function setupEventListeners() {
                 div.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
                 
                 div.innerHTML = `
-                    <div style="font-weight: 600; color: var(--primary-color); font-size: 0.9rem;">${project.id}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <div style="font-weight: 600; color: var(--primary-color); font-size: 0.95rem;">${project.id}</div>
+                    <div style="font-size: 0.8rem; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
                         ${project.customer || '-'} | ${project.subject || '-'}
                     </div>
                 `;
@@ -445,8 +445,15 @@ function setupEventListeners() {
                 };
                 
                 // Hover effect
-                div.onmouseenter = () => div.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                div.onmouseleave = () => div.style.backgroundColor = 'transparent';
+                div.onmouseenter = () => {
+                    div.style.backgroundColor = 'var(--primary-color)';
+                    div.querySelectorAll('div').forEach(el => el.style.color = 'white');
+                };
+                div.onmouseleave = () => {
+                    div.style.backgroundColor = 'transparent';
+                    div.querySelector('div:first-child').style.color = 'var(--primary-color)';
+                    div.querySelector('div:last-child').style.color = '#e2e8f0';
+                };
                 
                 copySearchResults.appendChild(div);
             });

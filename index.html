@@ -138,21 +138,22 @@
                 <button class="btn-icon" id="close-modal"><i data-lucide="x"></i></button>
             </div>
             <form id="add-project-form">
-                <!-- Copy from existing (only for new registration) -->
-                <div id="copy-from-section" class="content-card" style="margin-bottom: 1.5rem; padding: 1rem; background-color: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: var(--primary-color);">
-                        <i data-lucide="copy" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"></i>
-                        既存案件から情報をコピー
-                    </label>
-                    <div style="position: relative;">
-                        <input type="text" id="copy-search-input" placeholder="製番・客先・件名で検索..." autocomplete="off" style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
-                        <div id="copy-search-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; max-height: 250px; overflow-y: auto; background: #2d2d2d; border: 1px solid var(--primary-color); border-radius: 0 0 4px 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-                            <!-- 検索結果がここに動的に追加される -->
+                <div class="modal-body">
+                    <!-- Copy from existing (only for new registration) -->
+                    <div id="copy-from-section" class="content-card" style="margin-bottom: 1.5rem; padding: 1rem; background-color: rgba(255,255,255,0.03); border: 1px solid var(--border-color); overflow: visible;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: var(--primary-color);">
+                            <i data-lucide="copy" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"></i>
+                            既存案件から情報をコピー
+                        </label>
+                        <div style="position: relative;">
+                            <input type="text" id="copy-search-input" placeholder="製番・客先・件名で検索..." autocomplete="off" style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                            <div id="copy-search-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; max-height: 250px; overflow-y: auto; background: #2d2d2d; border: 1px solid var(--primary-color); border-radius: 0 0 4px 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                                <!-- 検索結果がここに動的に追加される -->
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="form-grid">
+                    <div class="form-grid">
                     <div class="modal-flex-layout">
                         <!-- 左カラム: 基本情報 -->
                         <div class="modal-column-main">
