@@ -1,4 +1,0 @@
-- [x] `renderTable` 関数内での納入仕様書承認状況（`isSpecApproved`）の判定追加
-- [x] 銘板手配（`nameplateProcurement`）の未着手アラート実装
-- [x] 板金手配（`sheetMetal`）の詳細図送付可アラート実装
-- [x] 動作確認（承認後の各工程でのアラート表示テスト）

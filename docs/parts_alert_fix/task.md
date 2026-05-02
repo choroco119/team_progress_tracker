@@ -1,4 +1,0 @@
-- [x] `renderTable` 関数内の部品手配（`partsProcurement`）ロジック修正
-    - [x] `hasUnstartedRequired` フラグの導入
-    - [x] アラート表示と既存メッセージの併記ロジック修正
-- [x] 動作確認（「一部不要」設定時の挙動テスト）

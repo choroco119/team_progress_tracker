@@ -13,7 +13,8 @@
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
-    --process-done-bg: rgba(16, 185, 129, 0.15); /* 完了した工程の背景色 */
+    --process-done-bg: rgba(16, 185, 129, 0.15);
+    /* 完了した工程の背景色 */
 }
 
 * {
@@ -22,7 +23,8 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     height: 100%;
     margin: 0;
     padding: 0;
@@ -215,7 +217,8 @@ th.sort-active .sort-icon {
     color: var(--primary-color);
 }
 
-#sort-id:hover, #sort-deadline:hover {
+#sort-id:hover,
+#sort-deadline:hover {
     background-color: #475569 !important;
     cursor: pointer;
 }
@@ -230,6 +233,37 @@ td {
 
 td:first-child {
     border-left: none;
+}
+
+/* 製番列の幅調整 (1番目の列) */
+th:nth-child(1),
+td:nth-child(1) {
+    min-width: 130px;
+    white-space: nowrap;
+}
+
+/* 担当者列の幅調整 (2番目の列) */
+th:nth-child(2),
+td:nth-child(2) {
+    min-width: 3em;
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* リンク列の幅調整 (3番目の列) */
+th:nth-child(3),
+td:nth-child(3) {
+    width: 80px;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* 納期列の幅調整 (8番目の列) */
+th:nth-child(8),
+td:nth-child(8) {
+    width: 120px;
+    min-width: 120px;
+    text-align: center;
 }
 
 /* Hover Styles */
@@ -508,7 +542,8 @@ tr:hover .info-cell {
     width: 95%;
     max-width: 950px;
     border-radius: var(--radius-xl);
-    overflow: visible; /* 検索候補リストが表示されるように変更 */
+    overflow: visible;
+    /* 検索候補リストが表示されるように変更 */
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     border: 1px solid var(--border-color);
 }
@@ -571,7 +606,7 @@ tr:hover .info-cell {
         flex-direction: column;
         gap: 1.5rem;
     }
-    
+
     .modal-column-side {
         border-left: none;
         padding-left: 0;

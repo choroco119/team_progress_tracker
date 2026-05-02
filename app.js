@@ -2090,6 +2090,8 @@ function renderTable() {
                 }
                 const dueStr = spec.dueDate ? `<br><small style="${dueColor}">返却期日:${formatShortDate(spec.dueDate)}</small>` : '';
                 summaryHTML = `<span>出図済${dueStr}</span>`;
+            } else {
+                summaryHTML = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">要着手</span>`;
             }
             tdSpec.onclick = async (e) => {
                 e.stopPropagation();
