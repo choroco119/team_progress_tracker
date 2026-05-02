@@ -237,6 +237,7 @@ const filterStaff = document.getElementById('filter-staff');
 const filterExcludeCompleted = document.getElementById('filter-exclude-completed');
 const clearFiltersBtn = document.getElementById('clear-filters');
 const processFilterBtns = document.querySelectorAll('#process-filter-group button');
+const filterSpecDoc = document.getElementById('filter-specDoc');
 const sortIdHeader = document.getElementById('sort-id');
 const sortDeadlineHeader = document.getElementById('sort-deadline');
 
@@ -274,6 +275,9 @@ let sortOrder = 'asc'; // 'asc' or 'desc'
 
 // Filter State
 let activeProcessFilters = new Set();
+let processFilterValues = {
+    specDoc: ''
+};
 let excludeCompletedFilter = false;
 
 // Initialize
@@ -649,20 +653,24 @@ function setupEventListeners() {
     };
 
     // Needs Fix Logic
-    specFixYesBtn.onclick = () => {
-        currentSpecData.needsFix = currentSpecData.needsFix === '要' ? '' : '要';
-        if (currentSpecData.needsFix === '要') {
-            currentSpecData.issueDate = '';
-            currentSpecData.dueDate = '';
-            specDueInput.value = '';
-        }
-        renderSpecDocModal();
-    };
+    if (specFixYesBtn) {
+        specFixYesBtn.onclick = () => {
+            currentSpecData.needsFix = (currentSpecData.needsFix === '要') ? '' : '要';
+            if (currentSpecData.needsFix === '要') {
+                currentSpecData.issueDate = '';
+                currentSpecData.dueDate = '';
+                specDueInput.value = '';
+            }
+            renderSpecDocModal();
+        };
+    }
 
-    specFixNoBtn.onclick = () => {
-        currentSpecData.needsFix = currentSpecData.needsFix === '否' ? '' : '否';
-        renderSpecDocModal();
-    };
+    if (specFixNoBtn) {
+        specFixNoBtn.onclick = () => {
+            currentSpecData.needsFix = (currentSpecData.needsFix === '否') ? '' : '否';
+            renderSpecDocModal();
+        };
+    }
 
     // Sheet Metal Toggle Logic
     const setupSmToggle = (btnEl, inputEl, key) => {
@@ -1004,6 +1012,15 @@ function setupEventListeners() {
         };
     });
 
+    if (filterSpecDoc) {
+        filterSpecDoc.onchange = () => {
+            processFilterValues.specDoc = filterSpecDoc.value;
+            // 全て以外が選ばれている場合は枠線を強調
+            filterSpecDoc.style.borderColor = filterSpecDoc.value ? 'var(--primary-color)' : '';
+            renderTable();
+        };
+    }
+
     filterExcludeCompleted.onclick = () => {
         excludeCompletedFilter = !excludeCompletedFilter;
         filterExcludeCompleted.classList.toggle('active', excludeCompletedFilter);
@@ -1016,6 +1033,13 @@ function setupEventListeners() {
         });
         activeProcessFilters.clear();
         processFilterBtns.forEach(btn => btn.classList.remove('active'));
+        
+        if (filterSpecDoc) {
+            filterSpecDoc.value = '';
+            filterSpecDoc.style.borderColor = '';
+            processFilterValues.specDoc = '';
+        }
+
         excludeCompletedFilter = false;
         filterExcludeCompleted.classList.remove('active');
         renderTable();
@@ -1682,30 +1706,55 @@ function renderTable() {
         
         const excludeCompleted = excludeCompletedFilter && project.isCompleted;
         
+        const nec = project.necessity || { specDoc: true, sheetMetal: true, partsProcurement: { main: true, spare: true, provided: true }, nameplateProcurement: true, internalDrawings: true, software: true };
+        const proc = project.processes || {};
+        
         let matchProcessFilters = true;
-        if (activeProcessFilters.size > 0) {
-            const nec = project.necessity || { specDoc: true, sheetMetal: true, partsProcurement: { main: true, spare: true, provided: true }, nameplateProcurement: true, internalDrawings: true, software: true };
-            const proc = project.processes || {};
+        // 1. ボタンによる「未完了」フィルタ (Setに残っている工程)
+        const matchIncompleteButtons = Array.from(activeProcessFilters).some(key => {
+            if (key === 'partsProcurement') {
+                const ppNec = nec.partsProcurement || { main: true, spare: true, provided: true };
+                const ppMainDone = !ppNec.main || (proc.partsProcurement && proc.partsProcurement.main.requestDate);
+                const ppSpareDone = !ppNec.spare || (proc.partsProcurement && proc.partsProcurement.spare.requestDate);
+                const ppProvDone = !ppNec.provided || (proc.partsProcurement && proc.partsProcurement.provided.requestDate);
+                return !(ppMainDone && ppSpareDone && ppProvDone);
+            }
             
-            // Check if ANY of the active filters' corresponding processes are uncompleted
-            matchProcessFilters = Array.from(activeProcessFilters).some(key => {
-                if (key === 'partsProcurement') {
-                    const ppNec = nec.partsProcurement || { main: true, spare: true, provided: true };
-                    const ppMainDone = !ppNec.main || (proc.partsProcurement && proc.partsProcurement.main.requestDate);
-                    const ppSpareDone = !ppNec.spare || (proc.partsProcurement && proc.partsProcurement.spare.requestDate);
-                    const ppProvDone = !ppNec.provided || (proc.partsProcurement && proc.partsProcurement.provided.requestDate);
-                    return !(ppMainDone && ppSpareDone && ppProvDone);
-                }
-                
-                const isDone = !nec[key] || (proc[key] && (
-                    (key === 'specDoc' && proc[key].approvalDate) ||
-                    (key === 'sheetMetal' && proc[key].drawingSentDate && proc[key].drawingLimitDate) ||
-                    (key === 'nameplateProcurement' && proc[key].poSentDate) ||
-                    (key === 'internalDrawings' && proc[key].issueDate) ||
-                    (key === 'software' && proc[key].creationDate)
-                ));
-                return !isDone;
-            });
+            const isDone = !nec[key] || (proc[key] && (
+                (key === 'sheetMetal' && proc[key].drawingSentDate && proc[key].drawingLimitDate) ||
+                (key === 'nameplateProcurement' && proc[key].poSentDate) ||
+                (key === 'internalDrawings' && proc[key].issueDate) ||
+                (key === 'software' && proc[key].creationDate)
+            ));
+            return !isDone;
+        });
+
+        // 2. 納入仕様書詳細フィルタ
+        let matchSpecDetail = true;
+        if (processFilterValues.specDoc) {
+            const s = proc.specDoc || {};
+            const val = processFilterValues.specDoc;
+            
+            if (val === 'unissued') {
+                matchSpecDetail = !s.issueDate;
+            } else if (val === 'unreturned') {
+                matchSpecDetail = s.issueDate && !s.returnDate;
+            } else if (val === 'fixing') {
+                matchSpecDetail = s.needsFix === '要';
+            } else if (val === 'unapproved') {
+                matchSpecDetail = (s.issueDate || s.returnDate) && !s.approvalDate;
+            }
+        } else {
+            // セレクトボックスが「全て」の場合は、ボタン側のフィルタがない限り通過させる
+            matchSpecDetail = activeProcessFilters.size === 0;
+        }
+
+        // フィルタ全体の論理: ボタンフィルタがある場合は「いずれかが未完」 OR 納入仕様書詳細に合致
+        // ボタンフィルタがない場合は、納入仕様書詳細フィルタのみで判定
+        if (activeProcessFilters.size > 0) {
+            matchProcessFilters = matchIncompleteButtons || (processFilterValues.specDoc && matchSpecDetail);
+        } else {
+            matchProcessFilters = matchSpecDetail;
         }
 
         return matchId && matchCustomer && matchSubject && matchDestination && matchName && matchStaff && !excludeCompleted && matchProcessFilters;
@@ -2235,8 +2284,11 @@ function openSpecDocModal(project) {
         project.processes.specDoc = { issueDate: '', dueDate: '', returnDate: '', needsFix: '', approvalDate: '', memo: '' };
     }
 
-    // Copy data to temporary state
-    currentSpecData = { ...project.processes.specDoc };
+    // Copy data to temporary state (Update properties instead of re-assigning object)
+    Object.keys(project.processes.specDoc).forEach(key => {
+        currentSpecData[key] = project.processes.specDoc[key];
+    });
+    
     specDueInput.value = currentSpecData.dueDate || '';
     specMemoInput.value = currentSpecData.memo || '';
 
