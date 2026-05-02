@@ -235,9 +235,15 @@ const filterDestination = document.getElementById('filter-destination');
 const filterName = document.getElementById('filter-name');
 const filterStaff = document.getElementById('filter-staff');
 const filterExcludeCompleted = document.getElementById('filter-exclude-completed');
+const filterSpecDoc = document.getElementById('filter-specDoc');
+const filterSheetMetal = document.getElementById('filter-sheetMetal');
+const filterParts = document.getElementById('filter-parts');
+const filterNameplate = document.getElementById('filter-nameplate');
+const filterInternalDrawings = document.getElementById('filter-internalDrawings');
+const filterSoftware = document.getElementById('filter-software');
+const processFilterGroup = document.getElementById('process-filter-group');
 const clearFiltersBtn = document.getElementById('clear-filters');
 const processFilterBtns = document.querySelectorAll('#process-filter-group button');
-const filterSpecDoc = document.getElementById('filter-specDoc');
 const sortIdHeader = document.getElementById('sort-id');
 const sortDeadlineHeader = document.getElementById('sort-deadline');
 
@@ -276,9 +282,14 @@ let sortOrder = 'asc'; // 'asc' or 'desc'
 // Filter State
 let activeProcessFilters = new Set();
 let processFilterValues = {
-    specDoc: ''
+    specDoc: '',
+    sheetMetal: '',
+    partsProcurement: '',
+    nameplateProcurement: '',
+    internalDrawings: '',
+    software: ''
 };
-let excludeCompletedFilter = false;
+let showCompletedFilter = false;
 
 // Initialize
 async function init() {
@@ -1019,9 +1030,44 @@ function setupEventListeners() {
         };
     }
 
+    if (filterSheetMetal) {
+        filterSheetMetal.onchange = () => {
+            processFilterValues.sheetMetal = filterSheetMetal.value;
+            renderTable();
+        };
+    }
+
+    if (filterParts) {
+        filterParts.onchange = () => {
+            processFilterValues.partsProcurement = filterParts.value;
+            renderTable();
+        };
+    }
+
+    if (filterNameplate) {
+        filterNameplate.onchange = () => {
+            processFilterValues.nameplateProcurement = filterNameplate.value;
+            renderTable();
+        };
+    }
+
+    if (filterInternalDrawings) {
+        filterInternalDrawings.onchange = () => {
+            processFilterValues.internalDrawings = filterInternalDrawings.value;
+            renderTable();
+        };
+    }
+
+    if (filterSoftware) {
+        filterSoftware.onchange = () => {
+            processFilterValues.software = filterSoftware.value;
+            renderTable();
+        };
+    }
+
     filterExcludeCompleted.onclick = () => {
-        excludeCompletedFilter = !excludeCompletedFilter;
-        filterExcludeCompleted.classList.toggle('active', excludeCompletedFilter);
+        showCompletedFilter = !showCompletedFilter;
+        filterExcludeCompleted.classList.toggle('active', showCompletedFilter);
         renderTable();
     };
 
@@ -1036,9 +1082,27 @@ function setupEventListeners() {
             filterSpecDoc.value = '';
             processFilterValues.specDoc = '';
         }
+        if (filterSheetMetal) {
+            filterSheetMetal.value = '';
+            processFilterValues.sheetMetal = '';
+        }
+        if (filterParts) {
+            filterParts.value = '';
+            processFilterValues.partsProcurement = '';
+        }
+        if (filterNameplate) {
+            filterNameplate.value = '';
+            processFilterValues.nameplateProcurement = '';
+        }
+        if (filterInternalDrawings) {
+            filterInternalDrawings.value = '';
+            processFilterValues.internalDrawings = '';
+        }
+        if (filterSoftware) {
+            filterSoftware.value = '';
+            processFilterValues.software = '';
+        }
 
-        excludeCompletedFilter = false;
-        filterExcludeCompleted.classList.remove('active');
         renderTable();
     };
 
@@ -1701,7 +1765,10 @@ function renderTable() {
         const matchName = !filterName.value || (project.name || '').toLowerCase().includes(filterName.value.toLowerCase());
         const matchStaff = !filterStaff.value || project.staff === filterStaff.value;
         
-        const excludeCompleted = excludeCompletedFilter && project.isCompleted;
+        // 工程フィルタがいずれか有効かチェック
+        const hasActiveProcessFilter = Object.values(processFilterValues).some(v => v !== '');
+        // デフォルトで完了案件は除外、ボタン有効時のみ表示。ただし工程フィルタ使用時は常に除外。
+        const isExcludedCompleted = (!showCompletedFilter || hasActiveProcessFilter) && project.isCompleted;
         
         const nec = project.necessity || { specDoc: true, sheetMetal: true, partsProcurement: { main: true, spare: true, provided: true }, nameplateProcurement: true, internalDrawings: true, software: true };
         const proc = project.processes || {};
@@ -1736,20 +1803,109 @@ function renderTable() {
             const s = proc.specDoc || {};
             const val = processFilterValues.specDoc;
             
-            if (val === 'unissued') {
-                matchSpecDetail = !s.issueDate;
-            } else if (val === 'unreturned') {
-                matchSpecDetail = s.issueDate && !s.returnDate;
-            } else if (val === 'fixing') {
-                matchSpecDetail = s.needsFix === '要';
-            } else if (val === 'unapproved') {
-                matchSpecDetail = (s.issueDate || s.returnDate) && !s.approvalDate;
+            // 工程が「要」の場合のみ判定（不要な場合は除外）
+            if (nec.specDoc) {
+                if (val === 'unissued') {
+                    matchSpecDetail = !s.issueDate;
+                } else if (val === 'unreturned') {
+                    matchSpecDetail = s.issueDate && !s.returnDate;
+                } else if (val === 'fixing') {
+                    matchSpecDetail = s.needsFix === '要';
+                } else if (val === 'unapproved') {
+                    matchSpecDetail = (s.issueDate || s.returnDate) && !s.approvalDate;
+                }
             }
             
             matchProcessFilters = matchProcessFilters && matchSpecDetail;
         }
 
-        return matchId && matchCustomer && matchSubject && matchDestination && matchName && matchStaff && !excludeCompleted && matchProcessFilters;
+        // 3. 板金手配詳細フィルタ (AND)
+        if (processFilterValues.sheetMetal) {
+            let matchSMDetail = false;
+            const sm = proc.sheetMetal || {};
+            const val = processFilterValues.sheetMetal;
+            
+            // 工程が「要」の場合のみ判定（不要な場合は除外）
+            if (nec.sheetMetal) {
+                if (val === 'unquoted') {
+                    matchSMDetail = !sm.quoteDate;
+                } else if (val === 'unpo') {
+                    matchSMDetail = sm.quoteDate && !sm.poSentDate;
+                } else if (val === 'undrawing') {
+                    matchSMDetail = sm.poSentDate && !sm.drawingSentDate;
+                }
+            }
+            
+            matchProcessFilters = matchProcessFilters && matchSMDetail;
+        }
+
+        // 4. 部品手配詳細フィルタ (AND)
+        if (processFilterValues.partsProcurement) {
+            let matchPartsDetail = false;
+            const pp = proc.partsProcurement || { main: {}, spare: {}, provided: {} };
+            const ppNec = nec.partsProcurement || { main: true, spare: true, provided: true };
+            const val = processFilterValues.partsProcurement;
+            
+            if (val === 'unordered') {
+                const mainDone = !ppNec.main || (pp.main && pp.main.requestDate);
+                const spareDone = !ppNec.spare || (pp.spare && pp.spare.requestDate);
+                const providedDone = !ppNec.provided || (pp.provided && pp.provided.requestDate);
+                
+                // 「要」に設定されているもの全てが済になっていない
+                matchPartsDetail = !(mainDone && spareDone && providedDone);
+            }
+            
+            matchProcessFilters = matchProcessFilters && matchPartsDetail;
+        }
+
+        // 5. 銘板手配詳細フィルタ (AND)
+        if (processFilterValues.nameplateProcurement) {
+            let matchNPDetail = false;
+            const np = proc.nameplateProcurement || {};
+            const val = processFilterValues.nameplateProcurement;
+            
+            if (nec.nameplateProcurement) {
+                if (val === 'unordered') {
+                    matchNPDetail = !np.poSentDate;
+                }
+            }
+            
+            matchProcessFilters = matchProcessFilters && matchNPDetail;
+        }
+
+        // 6. 社内工事図詳細フィルタ (AND)
+        if (processFilterValues.internalDrawings) {
+            let matchIDDetail = false;
+            const idProc = proc.internalDrawings || {};
+            const val = processFilterValues.internalDrawings;
+            
+            if (nec.internalDrawings) {
+                if (val === 'unissued') {
+                    matchIDDetail = !idProc.issueDate;
+                }
+            }
+            
+            matchProcessFilters = matchProcessFilters && matchIDDetail;
+        }
+
+        // 7. ソフト詳細フィルタ (AND)
+        if (processFilterValues.software) {
+            let matchSWDetail = false;
+            const swProc = proc.software || {};
+            const val = processFilterValues.software;
+            
+            if (nec.software) {
+                if (val === 'uncreated') {
+                    matchSWDetail = !swProc.creationDate;
+                } else if (val === 'undebugged') {
+                    matchSWDetail = swProc.creationDate && !swProc.debuggingDate;
+                }
+            }
+            
+            matchProcessFilters = matchProcessFilters && matchSWDetail;
+        }
+
+        return matchId && matchCustomer && matchSubject && matchDestination && matchName && matchStaff && !isExcludedCompleted && matchProcessFilters;
     });
 
     filteredProjects.forEach(project => {
@@ -1824,6 +1980,7 @@ function renderTable() {
 
         fields.forEach(field => {
             const td = document.createElement('td');
+            td.className = 'info-cell';
             td.style.cursor = 'pointer';
             td.onclick = async (e) => {
                 // aタグ（リンク）クリック時は編集画面を開かない
@@ -2220,6 +2377,7 @@ function renderTable() {
 
         // Process: Completed (完了)
         const tdCompleted = document.createElement('td');
+        tdCompleted.className = 'process-cell';
         tdCompleted.style.textAlign = 'center';
         tdCompleted.style.verticalAlign = 'middle';
         

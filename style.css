@@ -232,8 +232,13 @@ td:first-child {
     border-left: none;
 }
 
-tr:hover td {
+/* Hover Styles */
+tr:hover .info-cell {
     background-color: #334155;
+}
+
+.process-cell:hover {
+    background-color: #334155 !important;
 }
 
 /* Process Badge */

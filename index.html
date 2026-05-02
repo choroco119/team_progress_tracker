@@ -90,21 +90,49 @@
                                     <option value="unapproved">未承認</option>
                                 </select>
                             </div>
-                            <div class="btn-group" id="process-filter-group" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-left: 1rem;">
-                                <button type="button" class="btn btn-sm btn-outline"
-                                    data-filter="sheetMetal">板金</button>
-                                <button type="button" class="btn btn-sm btn-outline"
-                                    data-filter="partsProcurement">部品</button>
-                                <button type="button" class="btn btn-sm btn-outline"
-                                    data-filter="nameplateProcurement">銘板</button>
-                                <button type="button" class="btn btn-sm btn-outline"
-                                    data-filter="internalDrawings">社内工事図</button>
-                                <button type="button" class="btn btn-sm btn-outline" data-filter="software">ソフト</button>
+                            <div class="filter-item" style="flex: 0 0 180px;">
+                                <label>板金手配</label>
+                                <select id="filter-sheetMetal">
+                                    <option value="">すべて</option>
+                                    <option value="unquoted">見積依頼未送付</option>
+                                    <option value="unpo">注文書未送付</option>
+                                    <option value="undrawing">詳細図未送付</option>
+                                </select>
                             </div>
-                            <button type="button" class="btn btn-sm btn-outline" id="filter-exclude-completed"
-                                style="margin-left: 1rem;">完了を除外</button>
-                            <button class="btn btn-sm" id="clear-filters" style="margin-left: auto;">
-                                <i data-lucide="rotate-ccw"></i> 全て解除
+                            <div class="filter-item" style="flex: 0 0 180px;">
+                                <label>部品手配</label>
+                                <select id="filter-parts">
+                                    <option value="">すべて</option>
+                                    <option value="unordered">未手配</option>
+                                </select>
+                            </div>
+                            <div class="filter-item" style="flex: 0 0 180px;">
+                                <label>銘板手配</label>
+                                <select id="filter-nameplate">
+                                    <option value="">すべて</option>
+                                    <option value="unordered">未手配</option>
+                                </select>
+                            </div>
+                            <div class="filter-item" style="flex: 0 0 180px;">
+                                <label>社内工事図</label>
+                                <select id="filter-internalDrawings">
+                                    <option value="">すべて</option>
+                                    <option value="unissued">未出図</option>
+                                </select>
+                            </div>
+                            <div class="filter-item" style="flex: 0 0 180px;">
+                                <label>ソフト</label>
+                                <select id="filter-software">
+                                    <option value="">すべて</option>
+                                    <option value="uncreated">未作成</option>
+                                    <option value="undebugged">未デバッグ</option>
+                                </select>
+                            </div>
+                            <div class="btn-group" id="process-filter-group" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-left: 1rem;">
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline" id="filter-exclude-completed" style="margin-left: auto;">完了を表示</button>
+                            <button class="btn btn-sm" id="clear-filters" style="margin-left: 0.5rem;">
+                                <i data-lucide="rotate-ccw" style="width:14px; height:14px; margin-right:4px;"></i> 全て解除
                             </button>
                         </div>
                     </div>

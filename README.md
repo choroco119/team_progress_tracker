@@ -39,6 +39,14 @@
 - **File System Access API** (ディレクトリ操作・ファイル同期)
 - Lucide Icons (アイコンライブラリ)
 
+## 詳細ドキュメント
+
+システムの詳細については、以下のドキュメントを参照してください：
+
+- [機能仕様書](docs/system_spec/functional_spec.md): 工程管理、検索、フィルタ、コピー機能などの詳細
+- [技術仕様書](docs/system_spec/technical_spec.md): 同期システム、排他制御、バックアップの仕組み
+- [UI/UX ガイド](docs/system_spec/ui_ux_guide.md): デザイン原則と操作マニュアル
+
 ## ライセンス
 
 MIT License
