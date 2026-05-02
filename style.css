@@ -310,6 +310,26 @@ tr:hover td {
     background-color: #dc2626;
 }
 
+.btn-outline {
+    background-color: transparent;
+    border-color: var(--border-color);
+    color: var(--text-main);
+}
+
+.btn-outline:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+#quick-sync-btn {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+#quick-sync-btn:hover {
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
 /* Modal */
 .modal-overlay {
     position: fixed;

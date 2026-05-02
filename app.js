@@ -197,6 +197,7 @@ const addStaffBtn = document.getElementById('add-staff-btn');
 const staffListContainer = document.getElementById('staff-list-container');
 
 const syncFolderBtn = document.getElementById('sync-folder-btn');
+const quickSyncBtn = document.getElementById('quick-sync-btn');
 const refreshDataBtn = document.getElementById('save-sync-btn');
 const copyFromSection = document.getElementById('copy-from-section');
 const copySearchInput = document.getElementById('copy-search-input');
@@ -276,12 +277,15 @@ let activeProcessFilters = new Set();
 let excludeCompletedFilter = false;
 
 // Initialize
-function init() {
+async function init() {
     populateSelectOptions();
     renderHeader();
     renderTable();
     setupEventListeners();
     setupInputFormatters();
+    
+    // 保存された同期フォルダの確認
+    await checkStoredFolder();
     
     // 自動更新の開始（接続済みの場合）
     startAutoSync();
@@ -922,7 +926,13 @@ function setupEventListeners() {
     };
 
     // File Sync
-    syncFolderBtn.onclick = connectToFolder;
+    syncFolderBtn.onclick = () => connectToFolder();
+    quickSyncBtn.onclick = async () => {
+        const handle = await getStoredHandle();
+        if (handle) {
+            await connectToFolder(handle);
+        }
+    };
     refreshDataBtn.onclick = async () => {
         if (!dirHandle) {
             alert('同期フォルダが設定されていません。「同期設定」からフォルダを選択してください。');
@@ -1194,6 +1204,63 @@ function renderSettingsLists() {
 
 // Logic: File Operations (Folder Sync)
 
+// IndexedDB Helper for FileSystemHandle persistence
+const DB_NAME = 'TeamProgressTrackerDB';
+const STORE_NAME = 'handles';
+const KEY_NAME = 'sync-directory';
+
+async function openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+            }
+        };
+        request.onsuccess = (e) => resolve(e.target.result);
+        request.onerror = (e) => reject(e.target.error);
+    });
+}
+
+async function storeHandle(handle) {
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).put(handle, KEY_NAME);
+    return new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
+async function getStoredHandle() {
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const request = tx.objectStore(STORE_NAME).get(KEY_NAME);
+    return new Promise((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function checkStoredFolder() {
+    try {
+        const handle = await getStoredHandle();
+        if (handle) {
+            // 保存されたハンドルがある場合、クイック同期ボタンを表示
+            quickSyncBtn.style.display = 'inline-flex';
+            quickSyncBtn.title = `記憶されたフォルダ: ${handle.name}`;
+            
+            // 権限があるか確認（ブラウザによっては自動で付与されている場合もあるが稀）
+            if (await handle.queryPermission({ mode: 'readwrite' }) === 'granted') {
+                await connectToFolder(handle);
+            }
+        }
+    } catch (e) {
+        console.error('Failed to check stored folder:', e);
+    }
+}
+
 async function refreshIfRemoteUpdated() {
     if (!dirHandle || isSaving) return;
     try {
@@ -1214,17 +1281,31 @@ async function refreshIfRemoteUpdated() {
     }
 }
 
-async function connectToFolder() {
+async function connectToFolder(existingHandle = null) {
     try {
-        dirHandle = await window.showDirectoryPicker();
-        // 権限の確認
-        if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
-            await dirHandle.requestPermission({ mode: 'readwrite' });
+        if (existingHandle) {
+            dirHandle = existingHandle;
+            // 権限のリクエスト（ユーザーのアクションが必要）
+            if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
+                if (await dirHandle.requestPermission({ mode: 'readwrite' }) !== 'granted') {
+                    return;
+                }
+            }
+        } else {
+            dirHandle = await window.showDirectoryPicker();
+            // 権限の確認
+            if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
+                await dirHandle.requestPermission({ mode: 'readwrite' });
+            }
+            // ハンドルを保存
+            await storeHandle(dirHandle);
+            quickSyncBtn.style.display = 'inline-flex';
+            quickSyncBtn.title = `記憶されたフォルダ: ${dirHandle.name}`;
         }
         
         await loadFromFolder();
         updateSyncStatusUI('connected');
-        showToast('共有フォルダに接続しました');
+        showToast('同期フォルダに接続しました');
         startAutoSync();
     } catch (err) {
         if (err.name !== 'AbortError') {
@@ -1748,7 +1829,14 @@ function renderTable() {
                 if (field.bold) td.style.fontWeight = '600';
 
                 if (field.special === 'deadline') {
-                    if (isThisWeek(project.deadline)) {
+                    const nec = project.necessity || {};
+                    const proc = project.processes || {};
+                    
+                    const isIdDone = !nec.internalDrawings || (proc.internalDrawings && proc.internalDrawings.issueDate);
+                    const isSwDone = !nec.software || (proc.software && proc.software.debuggingDate);
+
+                    // 案件自体が未完了、かつ納期がアラーム期間内、かつ重要工程が未完了
+                    if (!project.isCompleted && isWithinTwoMonths(project.deadline) && (!isIdDone || !isSwDone)) {
                         td.style.color = 'var(--danger-color)';
                         td.style.fontWeight = 'bold';
                     }
@@ -2435,13 +2523,15 @@ function applyCopyFrom(project) {
 
 
 // Helpers
-function isThisWeek(dateStr) {
+function isWithinTwoMonths(dateStr) {
     if (!dateStr) return false;
     const target = new Date(dateStr);
-    const now = new Date();
-    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-    const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
-    return target >= startOfWeek && target <= endOfWeek;
+    const limit = new Date();
+    limit.setMonth(limit.getMonth() + 2);
+    limit.setHours(23, 59, 59, 999);
+    
+    // 2ヶ月後までのすべて（過去を含む）
+    return target <= limit;
 }
 
 function formatShortDate(dateStr) {
