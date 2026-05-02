@@ -1015,8 +1015,6 @@ function setupEventListeners() {
     if (filterSpecDoc) {
         filterSpecDoc.onchange = () => {
             processFilterValues.specDoc = filterSpecDoc.value;
-            // 全て以外が選ばれている場合は枠線を強調
-            filterSpecDoc.style.borderColor = filterSpecDoc.value ? 'var(--primary-color)' : '';
             renderTable();
         };
     }
@@ -1036,7 +1034,6 @@ function setupEventListeners() {
         
         if (filterSpecDoc) {
             filterSpecDoc.value = '';
-            filterSpecDoc.style.borderColor = '';
             processFilterValues.specDoc = '';
         }
 
@@ -1710,28 +1707,32 @@ function renderTable() {
         const proc = project.processes || {};
         
         let matchProcessFilters = true;
-        // 1. ボタンによる「未完了」フィルタ (Setに残っている工程)
-        const matchIncompleteButtons = Array.from(activeProcessFilters).some(key => {
-            if (key === 'partsProcurement') {
-                const ppNec = nec.partsProcurement || { main: true, spare: true, provided: true };
-                const ppMainDone = !ppNec.main || (proc.partsProcurement && proc.partsProcurement.main.requestDate);
-                const ppSpareDone = !ppNec.spare || (proc.partsProcurement && proc.partsProcurement.spare.requestDate);
-                const ppProvDone = !ppNec.provided || (proc.partsProcurement && proc.partsProcurement.provided.requestDate);
-                return !(ppMainDone && ppSpareDone && ppProvDone);
-            }
-            
-            const isDone = !nec[key] || (proc[key] && (
-                (key === 'sheetMetal' && proc[key].drawingSentDate && proc[key].drawingLimitDate) ||
-                (key === 'nameplateProcurement' && proc[key].poSentDate) ||
-                (key === 'internalDrawings' && proc[key].issueDate) ||
-                (key === 'software' && proc[key].creationDate)
-            ));
-            return !isDone;
-        });
 
-        // 2. 納入仕様書詳細フィルタ
-        let matchSpecDetail = true;
+        // 1. ボタンによるフィルタ (複数選択時は OR)
+        if (activeProcessFilters.size > 0) {
+            const matchIncompleteButtons = Array.from(activeProcessFilters).some(key => {
+                if (key === 'partsProcurement') {
+                    const ppNec = nec.partsProcurement || { main: true, spare: true, provided: true };
+                    const ppMainDone = !ppNec.main || (proc.partsProcurement && proc.partsProcurement.main.requestDate);
+                    const ppSpareDone = !ppNec.spare || (proc.partsProcurement && proc.partsProcurement.spare.requestDate);
+                    const ppProvDone = !ppNec.provided || (proc.partsProcurement && proc.partsProcurement.provided.requestDate);
+                    return !(ppMainDone && ppSpareDone && ppProvDone);
+                }
+                
+                const isDone = !nec[key] || (proc[key] && (
+                    (key === 'sheetMetal' && proc[key].drawingSentDate && proc[key].drawingLimitDate) ||
+                    (key === 'nameplateProcurement' && proc[key].poSentDate) ||
+                    (key === 'internalDrawings' && proc[key].issueDate) ||
+                    (key === 'software' && proc[key].creationDate)
+                ));
+                return !isDone;
+            });
+            matchProcessFilters = matchProcessFilters && matchIncompleteButtons;
+        }
+
+        // 2. 納入仕様書詳細フィルタ (AND)
         if (processFilterValues.specDoc) {
+            let matchSpecDetail = false;
             const s = proc.specDoc || {};
             const val = processFilterValues.specDoc;
             
@@ -1744,17 +1745,8 @@ function renderTable() {
             } else if (val === 'unapproved') {
                 matchSpecDetail = (s.issueDate || s.returnDate) && !s.approvalDate;
             }
-        } else {
-            // セレクトボックスが「全て」の場合は、ボタン側のフィルタがない限り通過させる
-            matchSpecDetail = activeProcessFilters.size === 0;
-        }
-
-        // フィルタ全体の論理: ボタンフィルタがある場合は「いずれかが未完」 OR 納入仕様書詳細に合致
-        // ボタンフィルタがない場合は、納入仕様書詳細フィルタのみで判定
-        if (activeProcessFilters.size > 0) {
-            matchProcessFilters = matchIncompleteButtons || (processFilterValues.specDoc && matchSpecDetail);
-        } else {
-            matchProcessFilters = matchSpecDetail;
+            
+            matchProcessFilters = matchProcessFilters && matchSpecDetail;
         }
 
         return matchId && matchCustomer && matchSubject && matchDestination && matchName && matchStaff && !excludeCompleted && matchProcessFilters;
@@ -2302,9 +2294,11 @@ function renderSpecDocModal() {
     const setBtnState = (btn, inputEl, dateVal) => {
         if (dateVal) {
             btn.classList.add('btn-primary');
+            btn.classList.remove('btn-outline', 'btn-toggle');
             inputEl.value = dateVal;
         } else {
             btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline'); // btn-toggle よりも btn-outline を優先して復元
             inputEl.value = '';
         }
     };
@@ -2314,13 +2308,21 @@ function renderSpecDocModal() {
     setBtnState(specApprovalBtn, specApprovalDateInput, currentSpecData.approvalDate);
 
     // Needs Fix State
-    specFixYesBtn.classList.remove('btn-primary');
-    specFixNoBtn.classList.remove('btn-primary');
-    if (currentSpecData.needsFix === '要') {
-        specFixYesBtn.classList.add('btn-primary');
-    } else if (currentSpecData.needsFix === '否') {
-        specFixNoBtn.classList.add('btn-primary');
-    }
+    const updateFixBtns = () => {
+        specFixYesBtn.classList.remove('btn-primary');
+        specFixYesBtn.classList.add('btn-outline');
+        specFixNoBtn.classList.remove('btn-primary');
+        specFixNoBtn.classList.add('btn-outline');
+
+        if (currentSpecData.needsFix === '要') {
+            specFixYesBtn.classList.add('btn-primary');
+            specFixYesBtn.classList.remove('btn-outline');
+        } else if (currentSpecData.needsFix === '否') {
+            specFixNoBtn.classList.add('btn-primary');
+            specFixNoBtn.classList.remove('btn-outline');
+        }
+    };
+    updateFixBtns();
 
     specMemoInput.value = currentSpecData.memo || '';
 }
@@ -2352,9 +2354,11 @@ function renderSheetMetalModal() {
     const setBtnState = (btn, inputEl, dateVal) => {
         if (dateVal) {
             btn.classList.add('btn-primary');
+            btn.classList.remove('btn-outline', 'btn-toggle');
             inputEl.value = dateVal;
         } else {
             btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline');
             inputEl.value = '';
         }
     };
@@ -2403,9 +2407,11 @@ function renderPartsModal() {
     const setBtnState = (btn, inputEl, dateVal) => {
         if (dateVal) {
             btn.classList.add('btn-primary');
+            btn.classList.remove('btn-outline', 'btn-toggle');
             inputEl.value = dateVal;
         } else {
             btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline');
             inputEl.value = '';
         }
     };
@@ -2437,9 +2443,11 @@ function renderNameplateModal() {
     const setBtnState = (btn, inputEl, dateVal) => {
         if (dateVal) {
             btn.classList.add('btn-primary');
+            btn.classList.remove('btn-outline', 'btn-toggle');
             inputEl.value = dateVal;
         } else {
             btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline');
             inputEl.value = '';
         }
     };
@@ -2467,9 +2475,11 @@ function renderInternalDrawingsModal() {
     const setBtnState = (btn, inputEl, dateVal) => {
         if (dateVal) {
             btn.classList.add('btn-primary');
+            btn.classList.remove('btn-outline', 'btn-toggle');
             inputEl.value = dateVal;
         } else {
             btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline');
             inputEl.value = '';
         }
     };
@@ -2497,9 +2507,11 @@ function renderSoftwareModal() {
     const setBtnState = (btn, inputEl, dateVal) => {
         if (dateVal) {
             btn.classList.add('btn-primary');
+            btn.classList.remove('btn-outline', 'btn-toggle');
             inputEl.value = dateVal;
         } else {
             btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline');
             inputEl.value = '';
         }
     };

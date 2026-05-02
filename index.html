@@ -79,15 +79,18 @@
                         <div class="filter-row"
                             style="margin-top: 1rem; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
                             <span
-                                style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted);">工程フィルタ:</span>
-                            <div class="btn-group" id="process-filter-group" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                                <select id="filter-specDoc" style="padding: 0.25rem; font-size: 0.875rem; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2); color: var(--text-color); min-width: 140px;">
-                                    <option value="">納入仕様書 (全て)</option>
+                                style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-right: 1rem;">工程フィルタ:</span>
+                            <div class="filter-item" style="flex: 0 0 180px;">
+                                <label>納入仕様書</label>
+                                <select id="filter-specDoc">
+                                    <option value="">すべて</option>
                                     <option value="unissued">未出図</option>
                                     <option value="unreturned">未返却</option>
                                     <option value="fixing">修正要</option>
                                     <option value="unapproved">未承認</option>
                                 </select>
+                            </div>
+                            <div class="btn-group" id="process-filter-group" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-left: 1rem;">
                                 <button type="button" class="btn btn-sm btn-outline"
                                     data-filter="sheetMetal">板金</button>
                                 <button type="button" class="btn btn-sm btn-outline"
