@@ -1983,8 +1983,8 @@ function renderTable() {
             td.className = 'info-cell';
             td.style.cursor = 'pointer';
             td.onclick = async (e) => {
-                // aタグ（リンク）クリック時は編集画面を開かない
-                if (e.target.closest('a')) return;
+                // ボタンやリンク（コピーアイコンなど）クリック時は編集画面を開かない
+                if (e.target.closest('button') || e.target.closest('a')) return;
                 await refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
@@ -1994,28 +1994,24 @@ function renderTable() {
                 }
                 openEditModal(latestProject);
             };
-
             if (field.special === 'link') {
                 if (project.link) {
-                    const a = document.createElement('a');
-                    a.href = project.link;
-                    a.target = '_blank';
-                    a.className = 'btn-icon';
-                    a.style.display = 'inline-flex';
-                    a.innerHTML = '<i data-lucide="external-link" style="width:16px; height:16px;"></i>';
-                    a.title = 'ブラウザで開く＆パスをコピー';
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn-icon';
+                    copyBtn.style.display = 'inline-flex';
+                    copyBtn.innerHTML = '<i data-lucide="copy" style="width:16px; height:16px;"></i>';
+                    copyBtn.title = 'パスをコピー';
 
-                    a.onclick = (e) => {
-                        // コピー処理を実行（失敗してもリンクは開く）
+                    copyBtn.onclick = (e) => {
+                        e.stopPropagation();
                         navigator.clipboard.writeText(project.link).then(() => {
                             showToast('パスをクリップボードにコピーしました');
                         }).catch(err => {
                             console.error('Clipboard copy failed:', err);
                         });
-                        // e.preventDefault() は呼ばないため、<a>タグの標準動作（別タブで開く）がそのまま実行される
                     };
 
-                    td.appendChild(a);
+                    td.appendChild(copyBtn);
                     td.style.textAlign = 'center';
                 } else {
                     td.textContent = '-';
@@ -2071,6 +2067,9 @@ function renderTable() {
 
         const nec = project.necessity;
         const spec = project.processes.specDoc;
+        const isSpecStarted = !!(spec.issueDate || spec.returnDate || spec.approvalDate);
+        const isSpecApproved = !!spec.approvalDate;
+        const alertIconHTML = '<i data-lucide="alert-circle" style="width:16px; height:16px; color:var(--warning-color); vertical-align:middle; margin-right:4px;"></i>';
         let summaryHTML = '-';
 
         if (!nec.specDoc) {
@@ -2085,7 +2084,11 @@ function renderTable() {
                 const fixStr = spec.needsFix === '要' ? '<br><span style="color:var(--danger-color);font-weight:bold;">修正要</span>' : '';
                 summaryHTML = `<span>返却済<br><small>${formatShortDate(spec.returnDate)}</small>${fixStr}</span>`;
             } else if (spec.issueDate) {
-                const dueStr = spec.dueDate ? `<br><small>返却期日:${formatShortDate(spec.dueDate)}</small>` : '';
+                let dueColor = '';
+                if (spec.dueDate && isOverdue(spec.dueDate)) {
+                    dueColor = 'color:var(--danger-color);font-weight:bold;';
+                }
+                const dueStr = spec.dueDate ? `<br><small style="${dueColor}">返却期日:${formatShortDate(spec.dueDate)}</small>` : '';
                 summaryHTML = `<span>出図済${dueStr}</span>`;
             }
             tdSpec.onclick = async (e) => {
@@ -2135,11 +2138,24 @@ function renderTable() {
                 smSummaryHTML = `<span>詳細図送付済<br><small>納期(詳細図):-</small></span>`;
             } else if (sm.poSentDate) {
                 const poDueStr = sm.poDueDate ? `納期(注文書):${formatShortDate(sm.poDueDate)}` : '';
-                const dwgDueStr = sm.drawingDueDate ? `詳細図送付期日:${formatShortDate(sm.drawingDueDate)}` : '';
+                
+                let dwgDueColor = '';
+                if (sm.drawingDueDate && !sm.drawingSentDate && isOverdue(sm.drawingDueDate)) {
+                    dwgDueColor = 'color:var(--danger-color);font-weight:bold;';
+                }
+                const dwgDueStr = sm.drawingDueDate ? `<span style="${dwgDueColor}">詳細図送付期日:${formatShortDate(sm.drawingDueDate)}</span>` : '';
+                
+                let approvalAlert = '';
+                if (isSpecApproved && !sm.drawingSentDate) {
+                    approvalAlert = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">詳細図送付可</span><br>`;
+                }
+
                 const dueStr = [poDueStr, dwgDueStr].filter(Boolean).join('<br>');
-                smSummaryHTML = `<span>注文書送付済<br><small>${dueStr || '-'}</small></span>`;
+                smSummaryHTML = `<span>注文書送付済<br>${approvalAlert}<small>${dueStr || '-'}</small></span>`;
             } else if (sm.quoteDate) {
                 smSummaryHTML = `<span>見積依頼送付済<br><small>${formatShortDate(sm.quoteDate)}</small></span>`;
+            } else if (isSpecStarted) {
+                smSummaryHTML = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">要着手</span>`;
             }
             tdSheetMetal.onclick = async (e) => {
                 e.stopPropagation();
@@ -2180,6 +2196,7 @@ function renderTable() {
         const pp = project.processes.partsProcurement;
         const ppNec = nec.partsProcurement || { main: true, spare: true, provided: true };
         const partsSummary = [];
+        let hasUnstartedRequired = false;
 
         // 全て不要の場合
         if (!ppNec.main && !ppNec.spare && !ppNec.provided) {
@@ -2190,6 +2207,8 @@ function renderTable() {
                 if (pp.main.requestDate) {
                     const mainDueStr = pp.main.dueDate ? formatShortDate(pp.main.dueDate) : '-';
                     partsSummary.push(`<span style="color:#4ade80;">納期(主): ${mainDueStr}</span>`);
+                } else {
+                    hasUnstartedRequired = true;
                 }
             } else {
                 partsSummary.push(`<span style="color:var(--text-muted);">不要(主)</span>`);
@@ -2200,6 +2219,8 @@ function renderTable() {
                     const spareDueStr = pp.spare.dueDate ? formatShortDate(pp.spare.dueDate) : '-';
                     const spareCopyStr = pp.spare.copyDate ? '<span style="color:#4ade80; font-size:0.85em; margin-left:4px;">[コピー済]</span>' : '';
                     partsSummary.push(`<span style="color:#4ade80;">納期(予): ${spareDueStr}${spareCopyStr}</span>`);
+                } else {
+                    hasUnstartedRequired = true;
                 }
             } else {
                 partsSummary.push(`<span style="color:var(--text-muted);">不要(予)</span>`);
@@ -2209,12 +2230,23 @@ function renderTable() {
                 if (pp.provided.requestDate) {
                     const provDueStr = pp.provided.dueDate ? formatShortDate(pp.provided.dueDate) : '-';
                     partsSummary.push(`<span style="color:#4ade80;">納期(支): ${provDueStr}</span>`);
+                } else {
+                    hasUnstartedRequired = true;
                 }
             } else {
                 partsSummary.push(`<span style="color:var(--text-muted);">不要(支)</span>`);
             }
 
-            tdParts.innerHTML = partsSummary.length > 0 ? `<small>${partsSummary.join('<br>')}</small>` : '-';
+            let alertHTML = '';
+            if (hasUnstartedRequired && isSpecStarted) {
+                alertHTML = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">要着手</span><br>`;
+            }
+
+            if (partsSummary.length > 0 || alertHTML) {
+                tdParts.innerHTML = `<small>${alertHTML}${partsSummary.join('<br>')}</small>`;
+            } else {
+                tdParts.innerHTML = '-';
+            }
             
             // 全て完了(または不要)のチェック
             const mainDone = !ppNec.main || pp.main.requestDate;
@@ -2261,6 +2293,15 @@ function renderTable() {
         tdNameplate.style.textAlign = 'center';
 
         const np = project.processes.nameplateProcurement;
+        const idProc = project.processes.internalDrawings;
+
+        const isSmDone = !nec.sheetMetal || sm.drawingSentDate;
+        const isPpDone = (!ppNec.main || pp.main.requestDate) && 
+                         (!ppNec.spare || pp.spare.requestDate) && 
+                         (!ppNec.provided || pp.provided.requestDate);
+        const isNpDone = !nec.nameplateProcurement || np.poSentDate;
+        const isReadyForID = isSmDone && isPpDone && isNpDone;
+
         let npSummaryHTML = '-';
 
         if (!nec.nameplateProcurement) {
@@ -2270,6 +2311,8 @@ function renderTable() {
             if (np.poSentDate) {
                 npSummaryHTML = `<span style="color:#4ade80;font-weight:bold;">注文書送付済<br><small>納期:${np.dueDate ? formatShortDate(np.dueDate) : '-'}</small></span>`;
                 tdNameplate.style.backgroundColor = 'var(--process-done-bg)';
+            } else if (isSpecApproved) {
+                npSummaryHTML = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">要着手</span>`;
             }
             tdNameplate.onclick = async (e) => {
                 e.stopPropagation();
@@ -2300,7 +2343,6 @@ function renderTable() {
         tdInternalDrawings.style.cursor = 'pointer';
         tdInternalDrawings.style.textAlign = 'center';
 
-        const idProc = project.processes.internalDrawings;
         let idSummaryHTML = '-';
 
         if (!nec.internalDrawings) {
@@ -2310,6 +2352,8 @@ function renderTable() {
             if (idProc.issueDate) {
                 idSummaryHTML = `<span style="color:#4ade80;font-weight:bold;">出図済<br><small>${formatShortDate(idProc.issueDate)}</small></span>`;
                 tdInternalDrawings.style.backgroundColor = 'var(--process-done-bg)';
+            } else if (isReadyForID) {
+                idSummaryHTML = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">要着手</span>`;
             }
             tdInternalDrawings.onclick = async (e) => {
                 e.stopPropagation();
@@ -2759,6 +2803,15 @@ function isWithinTwoMonths(dateStr) {
 function formatShortDate(dateStr) {
     const d = new Date(dateStr);
     return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+function isOverdue(dateStr) {
+    if (!dateStr) return false;
+    const target = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    target.setHours(0, 0, 0, 0);
+    return target <= today;
 }
 
 function renderNecessityButtons() {

@@ -1,0 +1,4 @@
+- [x] `renderTable` 関数内での納入仕様書着手状況（`isSpecStarted`）の判定追加
+- [x] 板金手配（`sheetMetal`）の未着手アラート表示実装
+- [x] 部品手配（`partsProcurement`）の未着手アラート表示実装
+- [x] 動作確認（アイコンの表示条件と解除条件のテスト）

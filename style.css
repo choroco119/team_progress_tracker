@@ -42,7 +42,7 @@ body {
 /* Header */
 header {
     background-color: var(--card-bg);
-    padding: 1.5rem 2rem;
+    padding: 0.8rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
@@ -151,7 +151,7 @@ main {
 }
 
 .card-header {
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
@@ -178,7 +178,7 @@ table {
 
 th {
     background-color: #334155 !important;
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 0.75rem;
     font-size: 0.75rem;
     font-weight: 600;
     color: #e2e8f0;
@@ -221,7 +221,7 @@ th.sort-active .sort-icon {
 }
 
 td {
-    padding: 1rem;
+    padding: 0.6rem 0.75rem;
     border-bottom: 1px solid var(--border-color);
     border-left: 1px solid var(--border-color);
     font-size: 0.875rem;
@@ -353,9 +353,9 @@ tr:hover .info-cell {
 /* Filter Controls */
 .filter-controls {
     background-color: #1e293b;
-    padding: 1rem;
+    padding: 0.75rem;
     border-radius: var(--radius-md);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     border: 1px solid var(--border-color);
 }
 
@@ -451,7 +451,7 @@ tr:hover .info-cell {
 
 .tab-nav .tab-btn {
     flex: 0 1 auto;
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1.25rem;
     background: none;
     border: none;
     border-bottom: 3px solid transparent;

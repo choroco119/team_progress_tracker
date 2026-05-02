@@ -1,0 +1,3 @@
+- [x] `renderTable` 関数内での前工程完了（`isReadyForInternalDrawings`）の判定ロジック追加
+- [x] 社内工事図（`internalDrawings`）の未着手アラート実装
+- [x] 動作確認（全前工程完了後のアラート表示テスト）
