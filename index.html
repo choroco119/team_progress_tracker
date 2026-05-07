@@ -186,7 +186,7 @@
                         </label>
                         <div style="position: relative;">
                             <input type="text" id="copy-search-input" placeholder="製番・客先・件名で検索..." autocomplete="off" style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
-                            <div id="copy-search-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; max-height: 250px; overflow-y: auto; background: #2d2d2d; border: 1px solid var(--primary-color); border-radius: 0 0 4px 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                            <div id="copy-search-results" class="dropdown-results">
                                 <!-- 検索結果がここに動的に追加される -->
                             </div>
                         </div>
@@ -206,17 +206,19 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="project-staff">担当者</label>
-                                    <select id="project-staff">
-                                        <option value="">選択してください</option>
-                                        <!-- JSで動的に追加 -->
-                                    </select>
+                                    <div class="custom-select-wrapper">
+                                        <input type="text" id="project-staff-input" class="custom-select-input" placeholder="選択してください" readonly autocomplete="off">
+                                        <div id="project-staff-results" class="dropdown-results custom-select-results"></div>
+                                        <input type="hidden" id="project-staff">
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="project-customer">客先</label>
-                                    <select id="project-customer">
-                                        <option value="">選択してください</option>
-                                        <!-- JSで動的に追加 -->
-                                    </select>
+                                    <div class="custom-select-wrapper">
+                                        <input type="text" id="project-customer-input" class="custom-select-input" placeholder="選択してください" readonly autocomplete="off">
+                                        <div id="project-customer-results" class="dropdown-results custom-select-results"></div>
+                                        <input type="hidden" id="project-customer">
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="project-subject">件名</label>
@@ -236,10 +238,11 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="project-spec">規格</label>
-                                    <select id="project-spec">
-                                        <option value="">選択してください</option>
-                                        <!-- JSで動的に追加 -->
-                                    </select>
+                                    <div class="custom-select-wrapper">
+                                        <input type="text" id="project-spec-input" class="custom-select-input" placeholder="選択してください" readonly autocomplete="off">
+                                        <div id="project-spec-results" class="dropdown-results custom-select-results"></div>
+                                        <input type="hidden" id="project-spec">
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="project-inspection">検査</label>
@@ -432,10 +435,11 @@
                 </div>
                 <div class="form-group row-align">
                     <label for="sm-vendor">手配先</label>
-                    <select id="sm-vendor">
-                        <option value="">選択してください</option>
-                        <!-- JSで動的に追加 -->
-                    </select>
+                    <div class="custom-select-wrapper" style="flex: 1; max-width: 250px;">
+                        <input type="text" id="sm-vendor-input" class="custom-select-input" placeholder="選択してください" readonly autocomplete="off">
+                        <div id="sm-vendor-results" class="dropdown-results custom-select-results"></div>
+                        <input type="hidden" id="sm-vendor">
+                    </div>
                 </div>
                 <div class="form-group row-align">
                     <label>注文書送付</label>

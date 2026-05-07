@@ -321,9 +321,9 @@ function setupInputFormatters() {
         e.target.value = val;
     });
 
-    // リンク: 半角英数字記号に変換
+    // リンク: 入力された文字をそのまま保持（全角を許可）
     projectLinkInput.addEventListener('input', (e) => {
-        e.target.value = toHalfWidth(e.target.value);
+        // e.target.value = toHalfWidth(e.target.value); // 強制半角化をコメントアウトまたは削除
     });
 
     // オートフリガナ（客先名の入力から自動補完）
@@ -362,40 +362,78 @@ function setupInputFormatters() {
     });
 }
 
-// Logic: Populate Select Options
-function populateSelectOptions() {
-    const createOptions = (list, selectEl, isObject = false) => {
-        selectEl.innerHTML = '<option value="">選択してください</option>';
-        list.forEach(item => {
-            const opt = document.createElement('option');
-            const val = isObject ? item.name : item;
-            opt.value = val;
-            opt.textContent = val;
-            selectEl.appendChild(opt);
-        });
+// Logic: Custom Select Dropdown (Scrollable)
+function setupCustomSearchDropdown(inputId, hiddenId, resultsId, dataProvider, isObjectList = false) {
+    const input = document.getElementById(inputId);
+    const hidden = document.getElementById(hiddenId);
+    const results = document.getElementById(resultsId);
+
+    if (!input || !hidden || !results) return;
+
+    const renderResults = () => {
+        const list = dataProvider();
+        
+        results.innerHTML = '';
+        if (list.length > 0) {
+            list.forEach(item => {
+                const val = isObjectList ? item.name : item;
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.textContent = val;
+                div.onclick = () => {
+                    input.value = val;
+                    hidden.value = val;
+                    results.style.display = 'none';
+                    hidden.dispatchEvent(new Event('change'));
+                };
+                results.appendChild(div);
+            });
+            results.style.display = 'block';
+        } else {
+            results.style.display = 'none';
+        }
     };
 
-    // 後方互換性：文字列の配列が来た場合は変換して扱う
-    const safeCustomerList = (state.config.customerList || []).map(item =>
-        typeof item === 'string' ? { name: item, kana: item } : item
-    );
+    // クリックまたはフォーカス時に全表示
+    input.onclick = () => {
+        if (results.style.display === 'block') {
+            results.style.display = 'none';
+        } else {
+            renderResults();
+        }
+    };
+    
+    // リスト外クリックで閉じる
+    document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !results.contains(e.target)) {
+            results.style.display = 'none';
+        }
+    });
+}
 
-    createOptions(safeCustomerList, projectCustomerSelect, true);
-    createOptions(state.config.specList || [], projectSpecSelect, false);
-    createOptions(state.config.sheetMetalVendors || [], smVendorSelect, false);
-    createOptions(state.config.staffList || [], projectStaffSelect, false);
-
+// Logic: Populate Select Options
+function populateSelectOptions() {
     // フィルタ用のセレクトボックスを更新
-    const filterStaff = document.getElementById('filter-staff');
-    if (filterStaff) {
-        filterStaff.innerHTML = '<option value="">全員</option>';
+    const filterStaffSelect = document.getElementById('filter-staff');
+    if (filterStaffSelect) {
+        filterStaffSelect.innerHTML = '<option value="">全員</option>';
         (state.config.staffList || []).forEach(staff => {
             const opt = document.createElement('option');
             opt.value = staff;
             opt.textContent = staff;
-            filterStaff.appendChild(opt);
+            filterStaffSelect.appendChild(opt);
         });
     }
+
+    // カスタムドロップダウンの初期化
+    setupCustomSearchDropdown('project-staff-input', 'project-staff', 'project-staff-results', () => state.config.staffList || []);
+    setupCustomSearchDropdown('project-customer-input', 'project-customer', 'project-customer-results', () => {
+        return (state.config.customerList || []).map(item =>
+            typeof item === 'string' ? { name: item, kana: item } : item
+        );
+    }, true);
+    setupCustomSearchDropdown('project-spec-input', 'project-spec', 'project-spec-results', () => state.config.specList || []);
+    setupCustomSearchDropdown('sm-vendor-input', 'sm-vendor', 'sm-vendor-results', () => state.config.sheetMetalVendors || []);
 }
 
 // Event Listeners
@@ -408,6 +446,12 @@ function setupEventListeners() {
         deleteProjectBtn.style.display = 'none';
         copyFromSection.style.display = 'block'; // コピー機能を表示
         copySearchInput.value = ''; // 検索窓をリセット
+        
+        // カスタムドロップダウンの入力値をリセット
+        ['project-staff', 'project-customer', 'project-spec'].forEach(id => {
+            document.getElementById(id).value = '';
+            document.getElementById(id + '-input').value = '';
+        });
         copySearchResults.style.display = 'none';
         addProjectForm.reset();
         
@@ -446,10 +490,6 @@ function setupEventListeners() {
             matches.forEach(project => {
                 const div = document.createElement('div');
                 div.className = 'search-result-item';
-                div.style.padding = '0.75rem';
-                div.style.cursor = 'pointer';
-                div.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-                
                 div.innerHTML = `
                     <div style="font-weight: 600; color: var(--primary-color); font-size: 0.95rem;">${project.id}</div>
                     <div style="font-size: 0.8rem; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
@@ -461,17 +501,6 @@ function setupEventListeners() {
                     applyCopyFrom(project);
                     copySearchResults.style.display = 'none';
                     copySearchInput.value = '';
-                };
-                
-                // Hover effect
-                div.onmouseenter = () => {
-                    div.style.backgroundColor = 'var(--primary-color)';
-                    div.querySelectorAll('div').forEach(el => el.style.color = 'white');
-                };
-                div.onmouseleave = () => {
-                    div.style.backgroundColor = 'transparent';
-                    div.querySelector('div:first-child').style.color = 'var(--primary-color)';
-                    div.querySelector('div:last-child').style.color = '#e2e8f0';
                 };
                 
                 copySearchResults.appendChild(div);
@@ -2544,7 +2573,11 @@ function openSheetMetalModal(project) {
     }
 
     currentSheetMetalData = { ...project.processes.sheetMetal };
-    smVendorSelect.value = currentSheetMetalData.vendor || '';
+    
+    // カスタムドロップダウン (Hidden + Visible Input)
+    document.getElementById('sm-vendor').value = currentSheetMetalData.vendor || '';
+    document.getElementById('sm-vendor-input').value = currentSheetMetalData.vendor || '';
+    
     smPoDueDate.value = currentSheetMetalData.poDueDate || '';
     smDrawingDueDate.value = currentSheetMetalData.drawingDueDate || '';
     smDrawingLimitDate.value = currentSheetMetalData.drawingLimitDate || '';
@@ -2734,13 +2767,23 @@ function openEditModal(project) {
 
     document.getElementById('project-id').value = project.id;
     document.getElementById('project-deadline').value = project.deadline;
+    
+    // カスタムドロップダウン (Hidden + Visible Input)
     document.getElementById('project-customer').value = project.customer || '';
+    document.getElementById('project-customer-input').value = project.customer || '';
+    
     document.getElementById('project-subject').value = project.subject || '';
     document.getElementById('project-destination').value = project.destination || '';
     document.getElementById('project-name').value = project.name || '';
     document.getElementById('project-quantity').value = project.quantity || 1;
+    
+    // カスタムドロップダウン
     document.getElementById('project-spec').value = project.spec || '';
+    document.getElementById('project-spec-input').value = project.spec || '';
+    
     document.getElementById('project-staff').value = project.staff || '';
+    document.getElementById('project-staff-input').value = project.staff || '';
+    
     document.getElementById('project-inspection').value = project.inspection || '';
     document.getElementById('project-budget').value = project.budget || '';
     document.getElementById('project-link').value = project.link || '';
@@ -2763,13 +2806,21 @@ function openEditModal(project) {
 function applyCopyFrom(project) {
     // 基本情報をセット (製番以外)
     document.getElementById('project-deadline').value = project.deadline || '';
+    
     document.getElementById('project-customer').value = project.customer || '';
+    document.getElementById('project-customer-input').value = project.customer || '';
+    
     document.getElementById('project-subject').value = project.subject || '';
     document.getElementById('project-destination').value = project.destination || '';
     document.getElementById('project-name').value = project.name || '';
     document.getElementById('project-quantity').value = project.quantity || 1;
+    
     document.getElementById('project-spec').value = project.spec || '';
+    document.getElementById('project-spec-input').value = project.spec || '';
+    
     document.getElementById('project-staff').value = project.staff || '';
+    document.getElementById('project-staff-input').value = project.staff || '';
+    
     document.getElementById('project-inspection').value = project.inspection || '';
     document.getElementById('project-budget').value = project.budget || '';
     document.getElementById('project-link').value = project.link || '';

@@ -739,6 +739,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     background-color: #1e293b;
+    max-height: 200px;
+    /* リスト自体をスクロール可能に */
+    overflow-y: auto;
 }
 
 .list-item {
@@ -834,4 +837,69 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
+}
+
+/* Dropdown/Search Results in Modal */
+.dropdown-results {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 250px;
+    overflow-y: auto;
+    background: #2d2d2d;
+    border: 1px solid var(--primary-color);
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    scrollbar-width: thin;
+}
+
+.search-result-item {
+    padding: 0.5rem 0.75rem; /* パディングを少し小さく */
+    cursor: pointer;
+    transition: background-color 0.1s;
+    font-size: 0.875rem;
+}
+
+.search-result-item:hover {
+    background-color: var(--primary-color);
+}
+
+.search-result-item:hover div {
+    color: white !important;
+}
+
+/* Custom Select Dropdown Styling */
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select-input {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    padding-right: 2.5rem !important; /* アイコン用 */
+    background-color: #0f172a;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 0.875rem;
+    cursor: pointer; /* 選択ボックスらしく */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+}
+
+.custom-select-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.custom-select-results {
+    width: 100%;
+    top: 100%;
+    margin-top: 4px;
 }
