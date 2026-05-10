@@ -38,7 +38,7 @@
 
     <nav class="tab-nav">
         <button class="tab-btn active" data-tab="progress-tab">製番別進捗一覧</button>
-        <button class="tab-btn" data-tab="other-tab" disabled title="将来の拡張用">その他（準備中）</button>
+        <button class="tab-btn" data-tab="diff-tab" id="diff-tab-btn">進捗差分比較</button>
     </nav>
 
     <main>
@@ -128,9 +128,11 @@
                                     <option value="undebugged">未デバッグ</option>
                                 </select>
                             </div>
-                            <div class="btn-group" id="process-filter-group" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-left: 1rem;">
+                            <div class="btn-group" id="process-filter-group"
+                                style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-left: 1rem;">
                             </div>
-                            <button type="button" class="btn btn-sm btn-outline" id="filter-exclude-completed" style="margin-left: auto;">完了を表示</button>
+                            <button type="button" class="btn btn-sm btn-outline" id="filter-exclude-completed"
+                                style="margin-left: auto;">完了を表示</button>
                             <button class="btn btn-sm" id="clear-filters" style="margin-left: 0.5rem;">
                                 <i data-lucide="rotate-ccw" style="width:14px; height:14px; margin-right:4px;"></i> 全て解除
                             </button>
@@ -160,13 +162,60 @@
                     </table>
                 </div>
             </div>
+        </div><!-- progress-tabの閉じタグ -->
 
-            <!-- 将来用の空タブ -->
-            <div id="other-tab" class="tab-content">
-                <div class="content-card">
-                    <p>今後、ガントチャートやリソース管理などの機能を追加予定です。</p>
+        <div id="diff-tab" class="tab-content">
+            <div class="content-card animate-fade-in">
+                <div class="card-header">
+                    <div class="card-title">進捗差分比較(3ヵ月リスト用)</div>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <label for="diff-backup-select"
+                            style="font-size: 0.875rem; font-weight: 600;">比較対象バックアップ:</label>
+                        <select id="diff-backup-select"
+                            style="padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color);">
+                            <option value="">フォルダを接続してください</option>
+                        </select>
+                        <button class="btn btn-primary" id="run-diff-btn">
+                            <i data-lucide="diff"></i> 比較実行
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container" style="margin-top: 1.5rem;">
+                    <table id="diff-table" class="compact-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="width: 150px;">製番</th>
+                                <th rowspan="2" style="width: 110px;">納期</th>
+                                <th rowspan="2" style="width: 300px;">客先 / 件名</th>
+                                <th colspan="3" style="text-align: center; background: rgba(59, 130, 246, 0.1);">納入仕様書
+                                </th>
+                                <th colspan="5" style="text-align: center; background: rgba(16, 185, 129, 0.1);">板金手配
+                                </th>
+                                <th style="text-align: center; background: rgba(245, 158, 11, 0.1);">主部品</th>
+                            </tr>
+                            <tr>
+                                <th style="font-size: 0.75rem;">出図</th>
+                                <th style="font-size: 0.75rem;">返却期日</th>
+                                <th style="font-size: 0.75rem;">承認</th>
+                                <th style="font-size: 0.75rem;">手配先</th>
+                                <th style="font-size: 0.75rem;">注文納期</th>
+                                <th style="font-size: 0.75rem;">受領</th>
+                                <th style="font-size: 0.75rem;">詳細図納期</th>
+                                <th style="font-size: 0.75rem;">納期確定</th>
+                                <th style="font-size: 0.75rem;">納期</th>
+                            </tr>
+                        </thead>
+                        <tbody id="diff-body">
+                            <tr>
+                                <td colspan="12" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                                    比較対象のバックアップを選択して「比較実行」をクリックしてください。
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
     </main>
 
     <!-- Modal for New Project -->
@@ -179,13 +228,17 @@
             <form id="add-project-form">
                 <div class="modal-body">
                     <!-- Copy from existing (only for new registration) -->
-                    <div id="copy-from-section" class="content-card" style="margin-bottom: 1.5rem; padding: 1rem; background-color: rgba(255,255,255,0.03); border: 1px solid var(--border-color); overflow: visible;">
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: var(--primary-color);">
-                            <i data-lucide="copy" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"></i>
+                    <div id="copy-from-section" class="content-card"
+                        style="margin-bottom: 1.5rem; padding: 1rem; background-color: rgba(255,255,255,0.03); border: 1px solid var(--border-color); overflow: visible;">
+                        <label
+                            style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: var(--primary-color);">
+                            <i data-lucide="copy"
+                                style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"></i>
                             既存案件から情報をコピー
                         </label>
                         <div style="position: relative;">
-                            <input type="text" id="copy-search-input" placeholder="製番・客先・件名で検索..." autocomplete="off" style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                            <input type="text" id="copy-search-input" placeholder="製番・客先・件名で検索..." autocomplete="off"
+                                style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
                             <div id="copy-search-results" class="dropdown-results">
                                 <!-- 検索結果がここに動的に追加される -->
                             </div>
@@ -207,16 +260,20 @@
                                 <div class="form-group">
                                     <label for="project-staff">担当者</label>
                                     <div class="custom-select-wrapper">
-                                        <input type="text" id="project-staff-input" class="custom-select-input" placeholder="選択してください" readonly autocomplete="off">
-                                        <div id="project-staff-results" class="dropdown-results custom-select-results"></div>
+                                        <input type="text" id="project-staff-input" class="custom-select-input"
+                                            placeholder="選択してください" readonly autocomplete="off">
+                                        <div id="project-staff-results" class="dropdown-results custom-select-results">
+                                        </div>
                                         <input type="hidden" id="project-staff">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="project-customer">客先</label>
                                     <div class="custom-select-wrapper">
-                                        <input type="text" id="project-customer-input" class="custom-select-input" placeholder="選択してください" readonly autocomplete="off">
-                                        <div id="project-customer-results" class="dropdown-results custom-select-results"></div>
+                                        <input type="text" id="project-customer-input" class="custom-select-input"
+                                            placeholder="選択してください" readonly autocomplete="off">
+                                        <div id="project-customer-results"
+                                            class="dropdown-results custom-select-results"></div>
                                         <input type="hidden" id="project-customer">
                                     </div>
                                 </div>
@@ -239,8 +296,10 @@
                                 <div class="form-group">
                                     <label for="project-spec">規格</label>
                                     <div class="custom-select-wrapper">
-                                        <input type="text" id="project-spec-input" class="custom-select-input" placeholder="選択してください" readonly autocomplete="off">
-                                        <div id="project-spec-results" class="dropdown-results custom-select-results"></div>
+                                        <input type="text" id="project-spec-input" class="custom-select-input"
+                                            placeholder="選択してください" readonly autocomplete="off">
+                                        <div id="project-spec-results" class="dropdown-results custom-select-results">
+                                        </div>
                                         <input type="hidden" id="project-spec">
                                     </div>
                                 </div>
@@ -436,7 +495,8 @@
                 <div class="form-group row-align">
                     <label for="sm-vendor">手配先</label>
                     <div class="custom-select-wrapper" style="flex: 1; max-width: 250px;">
-                        <input type="text" id="sm-vendor-input" class="custom-select-input" placeholder="選択してください" readonly autocomplete="off">
+                        <input type="text" id="sm-vendor-input" class="custom-select-input" placeholder="選択してください"
+                            readonly autocomplete="off">
                         <div id="sm-vendor-results" class="dropdown-results custom-select-results"></div>
                         <input type="hidden" id="sm-vendor">
                     </div>

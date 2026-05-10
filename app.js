@@ -247,6 +247,12 @@ const processFilterBtns = document.querySelectorAll('#process-filter-group butto
 const sortIdHeader = document.getElementById('sort-id');
 const sortDeadlineHeader = document.getElementById('sort-deadline');
 
+// Diff Tab Elements
+const diffBackupSelect = document.getElementById('diff-backup-select');
+const runDiffBtn = document.getElementById('run-diff-btn');
+const diffBody = document.getElementById('diff-body');
+const diffTabBtn = document.getElementById('diff-tab-btn');
+
 // State for Modal
 let editingProjectId = null;
 let editingCustomerIndex = null;
@@ -314,11 +320,17 @@ function setupInputFormatters() {
             .replace(/　/g, ' '); // 全角スペースを半角スペースに
     };
 
-    // 予算: 半角数字とカンマのみに制限
+    // 予算: 半角数字とカンマのみに制限し、リアルタイムでカンマ区切りにする
     projectBudgetInput.addEventListener('input', (e) => {
         let val = toHalfWidth(e.target.value);
-        val = val.replace(/[^0-9,]/g, ''); // 数字とカンマ以外を除去
-        e.target.value = val;
+        // 数字以外を除去
+        let numVal = val.replace(/[^0-9]/g, '');
+        if (numVal) {
+            // カンマ区切りに変換
+            e.target.value = Number(numVal).toLocaleString();
+        } else {
+            e.target.value = '';
+        }
     });
 
     // リンク: 入力された文字をそのまま保持（全角を許可）
@@ -1167,6 +1179,24 @@ function setupEventListeners() {
 
     if (sortIdHeader) sortIdHeader.onclick = () => toggleSort('id');
     if (sortDeadlineHeader) sortDeadlineHeader.onclick = () => toggleSort('deadline');
+
+    // Diff Tab Logic
+    if (diffTabBtn) {
+        diffTabBtn.addEventListener('click', async () => {
+            await updateBackupList();
+        });
+    }
+
+    if (runDiffBtn) {
+        runDiffBtn.onclick = async () => {
+            const fileName = diffBackupSelect.value;
+            if (!fileName) {
+                alert('バックアップファイルを選択してください。');
+                return;
+            }
+            await runComparison(fileName);
+        };
+    }
 }
 
 // Logic: Update Project
@@ -1954,7 +1984,7 @@ function renderTable() {
                 `数量: ${qty}<br>` +
                 `規格: ${project.spec || '-'}<br>` +
                 `検査: ${project.inspection || '-'}<br>` +
-                `板金予算: ${project.budget || '-'}<br>` +
+                `板金予算: ${formatNumberWithCommas(project.budget)}<br>` +
                 `リンク: ${project.link || '-'}<br>` +
                 `メモ: ${memo}`;
         };
@@ -2785,7 +2815,7 @@ function openEditModal(project) {
     document.getElementById('project-staff-input').value = project.staff || '';
     
     document.getElementById('project-inspection').value = project.inspection || '';
-    document.getElementById('project-budget').value = project.budget || '';
+    document.getElementById('project-budget').value = formatNumberWithCommas(project.budget);
     document.getElementById('project-link').value = project.link || '';
     document.getElementById('project-remarks').value = project.remarks || '';
     
@@ -2822,7 +2852,7 @@ function applyCopyFrom(project) {
     document.getElementById('project-staff-input').value = project.staff || '';
     
     document.getElementById('project-inspection').value = project.inspection || '';
-    document.getElementById('project-budget').value = project.budget || '';
+    document.getElementById('project-budget').value = formatNumberWithCommas(project.budget);
     document.getElementById('project-link').value = project.link || '';
     document.getElementById('project-remarks').value = project.remarks || '';
 
@@ -2897,5 +2927,223 @@ function renderNecessityButtons() {
 const tooltipEl = document.createElement('div');
 tooltipEl.className = 'custom-tooltip';
 document.body.appendChild(tooltipEl);
+
+function formatNumberWithCommas(val) {
+    if (val === null || val === undefined || val === '' || val === '-') return '-';
+    // すでにカンマが含まれている場合は一旦除去
+    const cleanVal = String(val).replace(/,/g, '');
+    const num = parseFloat(cleanVal);
+    if (isNaN(num)) return val;
+    return num.toLocaleString();
+}
+
+// --- Difference Comparison Logic ---
+
+async function updateBackupList() {
+    if (!dirHandle) {
+        diffBackupSelect.innerHTML = '<option value="">フォルダを接続してください</option>';
+        return;
+    }
+
+    try {
+        const backupsDir = await dirHandle.getDirectoryHandle('backups', { create: true });
+        const files = [];
+        for await (const entry of backupsDir.values()) {
+            if (entry.kind === 'file' && entry.name.startsWith('daily_')) {
+                files.push(entry.name);
+            }
+        }
+
+        files.sort().reverse(); // 降順（新しい順）
+
+        if (files.length === 0) {
+            diffBackupSelect.innerHTML = '<option value="">バックアップが見つかりません</option>';
+        } else {
+            diffBackupSelect.innerHTML = files.map(f => {
+                const dateStr = f.replace('daily_', '').replace('.json', '');
+                const formattedDate = `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}/${dateStr.substring(6, 8)}`;
+                return `<option value="${f}">${formattedDate} (${f})</option>`;
+            }).join('');
+        }
+    } catch (e) {
+        console.error('Failed to list backups:', e);
+        diffBackupSelect.innerHTML = '<option value="">読み込みエラー</option>';
+    }
+}
+
+async function runComparison(fileName) {
+    if (!dirHandle) return;
+
+    try {
+        const backupsDir = await dirHandle.getDirectoryHandle('backups');
+        const fileHandle = await backupsDir.getFileHandle(fileName);
+        const file = await fileHandle.getFile();
+        const content = await file.text();
+        const oldData = JSON.parse(content);
+        const oldProjects = oldData.projects || [];
+
+        renderDiffResults(oldProjects, state.projects);
+        showToast('比較が完了しました');
+    } catch (e) {
+        console.error('Comparison failed:', e);
+        alert('バックアップの読み込みに失敗しました。');
+    }
+}
+
+function renderDiffResults(oldProjects, newProjects) {
+    diffBody.innerHTML = '';
+    const diffRows = [];
+
+    // 比較対象のフィールド定義
+    const targetFields = [
+        { proc: 'specDoc', key: 'issueDate' },
+        { proc: 'specDoc', key: 'dueDate' },
+        { proc: 'specDoc', key: 'approvalDate' },
+        { proc: 'sheetMetal', key: 'vendor' },
+        { proc: 'sheetMetal', key: 'poDueDate' },
+        { proc: 'sheetMetal', key: 'poRecvDate' },
+        { proc: 'sheetMetal', key: 'drawingLimitDate' },
+        { proc: 'sheetMetal', key: 'confirmedDate' },
+        { proc: 'partsProcurement', key: 'main.dueDate' }
+    ];
+
+    newProjects.forEach(newP => {
+        const oldP = oldProjects.find(p => p.id === newP.id);
+        
+        // 指定フィールドのいずれかに変更があるかチェック
+        let hasChange = false;
+        const fieldValues = targetFields.map(f => {
+            const newVal = getFieldValue(newP, f);
+            const oldVal = oldP ? getFieldValue(oldP, f) : null;
+            const changed = oldP ? (newVal !== oldVal) : !!newVal;
+            if (changed) hasChange = true;
+            return { value: newVal, changed };
+        });
+
+        // 新規登録の場合も表示対象とする
+        if (!oldP) hasChange = true;
+
+        if (hasChange) {
+            diffRows.push({
+                id: newP.id,
+                deadline: newP.deadline || '9999-99-99',
+                customer: newP.customer || '-',
+                subject: newP.subject || '-',
+                fields: fieldValues
+            });
+        }
+    });
+
+    if (diffRows.length === 0) {
+        diffBody.innerHTML = '<tr><td colspan="12" style="text-align: center; padding: 3rem; color: var(--text-muted);">指定項目の進捗に差分はありませんでした。</td></tr>';
+        return;
+    }
+
+    // 納期昇順でソート
+    diffRows.sort((a, b) => a.deadline.localeCompare(b.deadline));
+
+    diffRows.forEach(d => {
+        const tr = document.createElement('tr');
+        
+        // 基本情報
+        tr.innerHTML = `
+            <td><strong>${d.id}</strong></td>
+            <td>${d.deadline === '9999-99-99' ? '-' : d.deadline}</td>
+            <td><small>${d.customer}<br>${d.subject}</small></td>
+        `;
+
+        // 各工程フィールド
+        d.fields.forEach(f => {
+            const td = document.createElement('td');
+            td.style.fontSize = '0.85rem';
+            td.style.textAlign = 'center';
+            
+            if (f.changed) {
+                td.innerHTML = `<span style="color:var(--success-color); font-weight:bold;">${f.value || '-'}</span>`;
+                td.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
+            } else {
+                td.textContent = f.value || '-';
+                td.style.color = 'var(--text-muted)';
+            }
+            tr.appendChild(td);
+        });
+        
+        diffBody.appendChild(tr);
+    });
+}
+
+function getFieldValue(project, field) {
+    if (field.proc === 'partsProcurement') {
+        const parts = project.processes?.partsProcurement || {};
+        if (field.key === 'main.dueDate') return parts.main?.dueDate || '';
+        return '';
+    }
+    const proc = project.processes?.[field.proc] || {};
+    return proc[field.key] || '';
+}
+
+function getProjectProgressDiffs(oldP, newP) {
+    const changes = [];
+    
+    if (!oldP) {
+        changes.push({ label: '新規登録', oldValue: 'なし', newValue: '新規', type: 'progress' });
+        return changes;
+    }
+
+    // 1. 納入仕様書 & 板金手配（指定フィールドのみ）
+    const processLabels = {
+        specDoc: { 
+            label: '納入仕様書', 
+            fields: { issueDate: '出図', dueDate: '返却期日', approvalDate: '承認' } 
+        },
+        sheetMetal: { 
+            label: '板金手配', 
+            fields: { 
+                vendor: '手配先', poDueDate: '納期(注文書)', poRecvDate: '注文書受領', 
+                drawingLimitDate: '納期(詳細図)', confirmedDate: '納期確定'
+            } 
+        }
+    };
+
+    Object.keys(processLabels).forEach(procKey => {
+        const procInfo = processLabels[procKey];
+        const oldProc = oldP.processes?.[procKey] || {};
+        const newProc = newP.processes?.[procKey] || {};
+
+        Object.keys(procInfo.fields).forEach(fieldKey => {
+            const oldValue = oldProc[fieldKey];
+            const newValue = newProc[fieldKey];
+
+            if (oldValue !== newValue) {
+                let type = 'update';
+                if (!oldValue && newValue) type = 'progress';
+
+                changes.push({
+                    label: `${procInfo.label} / ${procInfo.fields[fieldKey]}`,
+                    oldValue: oldValue || '-',
+                    newValue: newValue || '-',
+                    type: type
+                });
+            }
+        });
+    });
+
+    // 2. 主部品手配（納期のみ）
+    const ppOld = oldP.processes?.partsProcurement || { main: {} };
+    const ppNew = newP.processes?.partsProcurement || { main: {} };
+    
+    const ov = ppOld.main?.dueDate;
+    const nv = ppNew.main?.dueDate;
+    if (ov !== nv) {
+        changes.push({
+            label: '主部品手配 / 納期',
+            oldValue: ov || '-',
+            newValue: nv || '-',
+            type: (!ov && nv) ? 'progress' : 'update'
+        });
+    }
+
+    return changes;
+}
 
 init();

@@ -113,6 +113,101 @@ h1 {
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
+/* Difference Comparison Tab */
+#diff-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#diff-table th, #diff-table td {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+
+#diff-table th {
+    background-color: rgba(255, 255, 255, 0.05);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+#diff-table td {
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+#diff-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+#diff-backup-select {
+    min-width: 200px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#diff-backup-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.diff-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+.diff-tag-progress { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+.diff-tag-update { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+.diff-tag-memo { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+.compact-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 1400px; /* カラム数に合わせて最小幅を拡張 */
+}
+
+.compact-table thead tr:last-child th {
+    width: 100px; /* 9つの工程カラムを均等幅に設定 */
+}
+
+.diff-item {
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.diff-item:last-child {
+    border-bottom: none;
+}
+.diff-item-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-right: 8px;
+    display: inline-block;
+    min-width: 160px;
+}
+.diff-item-value {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--success-color);
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .stat-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
