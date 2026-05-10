@@ -1223,22 +1223,6 @@ function deleteProject(projectId) {
     return false;
 }
 
-// Logic: File Operations
-function showToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerHTML = `<i data-lucide="check-circle" style="width:16px;height:16px;color:var(--success-color);"></i> ${message}`;
-    document.body.appendChild(toast);
-    lucide.createIcons({ root: toast });
-
-    setTimeout(() => toast.classList.add('show'), 10);
-
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
 // Logic: Render Settings Lists
 function resetEditStates() {
     editingCustomerIndex = null;
@@ -1348,27 +1332,13 @@ function renderSettingsLists() {
 
 // Logic: File Operations (Folder Sync)
 
-// IndexedDB Helper for FileSystemHandle persistence
+// IndexedDB Constants
 const DB_NAME = 'TeamProgressTrackerDB';
 const STORE_NAME = 'handles';
 const KEY_NAME = 'sync-directory';
 
-async function openDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, 1);
-        request.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME);
-            }
-        };
-        request.onsuccess = (e) => resolve(e.target.result);
-        request.onerror = (e) => reject(e.target.error);
-    });
-}
-
 async function storeHandle(handle) {
-    const db = await openDB();
+    const db = await openDB(DB_NAME, STORE_NAME);
     const tx = db.transaction(STORE_NAME, 'readwrite');
     tx.objectStore(STORE_NAME).put(handle, KEY_NAME);
     return new Promise((resolve, reject) => {
@@ -1378,7 +1348,7 @@ async function storeHandle(handle) {
 }
 
 async function getStoredHandle() {
-    const db = await openDB();
+    const db = await openDB(DB_NAME, STORE_NAME);
     const tx = db.transaction(STORE_NAME, 'readonly');
     const request = tx.objectStore(STORE_NAME).get(KEY_NAME);
     return new Promise((resolve, reject) => {
@@ -2872,30 +2842,6 @@ function applyCopyFrom(project) {
 
 
 // Helpers
-function isWithinTwoMonths(dateStr) {
-    if (!dateStr) return false;
-    const target = new Date(dateStr);
-    const limit = new Date();
-    limit.setMonth(limit.getMonth() + 2);
-    limit.setHours(23, 59, 59, 999);
-    
-    // 2ヶ月後までのすべて（過去を含む）
-    return target <= limit;
-}
-
-function formatShortDate(dateStr) {
-    const d = new Date(dateStr);
-    return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
-}
-
-function isOverdue(dateStr) {
-    if (!dateStr) return false;
-    const target = new Date(dateStr);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    target.setHours(0, 0, 0, 0);
-    return target <= today;
-}
 
 function renderNecessityButtons() {
     const updateButtons = (yesBtn, noBtn, isRequired) => {
@@ -2927,15 +2873,6 @@ function renderNecessityButtons() {
 const tooltipEl = document.createElement('div');
 tooltipEl.className = 'custom-tooltip';
 document.body.appendChild(tooltipEl);
-
-function formatNumberWithCommas(val) {
-    if (val === null || val === undefined || val === '' || val === '-') return '-';
-    // すでにカンマが含まれている場合は一旦除去
-    const cleanVal = String(val).replace(/,/g, '');
-    const num = parseFloat(cleanVal);
-    if (isNaN(num)) return val;
-    return num.toLocaleString();
-}
 
 // --- Difference Comparison Logic ---
 
@@ -3070,80 +3007,6 @@ function renderDiffResults(oldProjects, newProjects) {
         
         diffBody.appendChild(tr);
     });
-}
-
-function getFieldValue(project, field) {
-    if (field.proc === 'partsProcurement') {
-        const parts = project.processes?.partsProcurement || {};
-        if (field.key === 'main.dueDate') return parts.main?.dueDate || '';
-        return '';
-    }
-    const proc = project.processes?.[field.proc] || {};
-    return proc[field.key] || '';
-}
-
-function getProjectProgressDiffs(oldP, newP) {
-    const changes = [];
-    
-    if (!oldP) {
-        changes.push({ label: '新規登録', oldValue: 'なし', newValue: '新規', type: 'progress' });
-        return changes;
-    }
-
-    // 1. 納入仕様書 & 板金手配（指定フィールドのみ）
-    const processLabels = {
-        specDoc: { 
-            label: '納入仕様書', 
-            fields: { issueDate: '出図', dueDate: '返却期日', approvalDate: '承認' } 
-        },
-        sheetMetal: { 
-            label: '板金手配', 
-            fields: { 
-                vendor: '手配先', poDueDate: '納期(注文書)', poRecvDate: '注文書受領', 
-                drawingLimitDate: '納期(詳細図)', confirmedDate: '納期確定'
-            } 
-        }
-    };
-
-    Object.keys(processLabels).forEach(procKey => {
-        const procInfo = processLabels[procKey];
-        const oldProc = oldP.processes?.[procKey] || {};
-        const newProc = newP.processes?.[procKey] || {};
-
-        Object.keys(procInfo.fields).forEach(fieldKey => {
-            const oldValue = oldProc[fieldKey];
-            const newValue = newProc[fieldKey];
-
-            if (oldValue !== newValue) {
-                let type = 'update';
-                if (!oldValue && newValue) type = 'progress';
-
-                changes.push({
-                    label: `${procInfo.label} / ${procInfo.fields[fieldKey]}`,
-                    oldValue: oldValue || '-',
-                    newValue: newValue || '-',
-                    type: type
-                });
-            }
-        });
-    });
-
-    // 2. 主部品手配（納期のみ）
-    const ppOld = oldP.processes?.partsProcurement || { main: {} };
-    const ppNew = newP.processes?.partsProcurement || { main: {} };
-    
-    const ov = ppOld.main?.dueDate;
-    const nv = ppNew.main?.dueDate;
-    if (ov !== nv) {
-        changes.push({
-            label: '主部品手配 / 納期',
-            oldValue: ov || '-',
-            newValue: nv || '-',
-            type: (!ov && nv) ? 'progress' : 'update'
-        });
-    }
-
-    return changes;
 }
 
 init();
