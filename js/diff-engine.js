@@ -171,7 +171,7 @@ const DiffEngine = {
             // 基本情報カラム
             tr.innerHTML = `
                 <td><strong>${d.id}</strong></td>
-                <td>${d.deadline === '9999-99-99' ? '-' : d.deadline}</td>
+                <td style="text-align:center;">${d.deadline === '9999-99-99' ? '-' : d.deadline}</td>
                 <td><small>${d.customer}<br>${d.subject}</small></td>
             `;
 

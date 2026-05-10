@@ -120,22 +120,27 @@ h1 {
 }
 
 #diff-table th, #diff-table td {
-    padding: 1rem;
+    padding: 0.6rem 0.75rem;
     border: 1px solid var(--border-color);
-    text-align: left;
+    border-left: 1px solid var(--border-color);
 }
 
 #diff-table th {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: #334155 !important;
     font-weight: 600;
-    font-size: 0.85rem;
-    color: var(--text-muted);
+    font-size: 0.75rem;
+    color: #e2e8f0;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 20;
 }
 
 #diff-table td {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    color: #e2e8f0;
     vertical-align: middle;
 }
 

@@ -20,6 +20,12 @@ var state = {
     }
 };
 
+// Sync State (shared across all scripts)
+var lastLoadedData = null; // 競合検知用
+var lastFsModified = 0; // ファイルシステム上の最終更新時刻
+var syncInterval = null; // 自動同期のタイマー
+var isSaving = false; // 二重保存防止
+
 /**
  * 数値をカンマ区切り形式にフォーマットする
  * @param {number|string} val 

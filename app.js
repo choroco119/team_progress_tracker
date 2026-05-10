@@ -250,10 +250,6 @@ let currentNecessityData = {
     software: true
 };
 
-let lastLoadedData = null; // 競合検知用
-let lastFsModified = 0; // ファイルシステム上の最終更新時刻
-let syncInterval = null;
-let isSaving = false; // 二重保存防止
 let editingProcessProjectId = null;
 
 // Sort & Filter State
@@ -281,10 +277,10 @@ async function init() {
     setupInputFormatters();
     
     // 保存された同期フォルダの確認
-    await checkStoredFolder();
+    await SyncManager.checkStoredFolder();
     
     // 自動更新の開始（接続済みの場合）
-    startAutoSync();
+    SyncManager.startAutoSync();
 }
 
 // Logic: Setup Input Formatters
@@ -427,7 +423,7 @@ function populateSelectOptions() {
 function setupEventListeners() {
     // Project Modal
     addProjectBtn.onclick = async () => {
-        await refreshIfRemoteUpdated();
+        await SyncManager.refreshIfRemoteUpdated();
         editingProjectId = null;
         document.getElementById('modal-title').textContent = '新規製番登録';
         deleteProjectBtn.style.display = 'none';
@@ -519,7 +515,7 @@ function setupEventListeners() {
             if (deleteProject(projectId)) {
                 modalOverlay.classList.remove('active');
                 // 自動保存を実行
-                await saveWithSync(true);
+                await SyncManager.saveWithSync(true);
             }
         }
     };
@@ -545,7 +541,7 @@ function setupEventListeners() {
             state.projects[index].processes.sheetMetal = { ...currentSheetMetalData };
             renderTable();
             // 自動保存を実行
-            await saveWithSync(true);
+            await SyncManager.saveWithSync(true);
         }
         processSheetMetalModal.classList.remove('active');
     };
@@ -567,7 +563,7 @@ function setupEventListeners() {
             state.projects[index].processes.partsProcurement = JSON.parse(JSON.stringify(currentPartsData));
             renderTable();
             // 自動保存を実行
-            await saveWithSync(true);
+            await SyncManager.saveWithSync(true);
         }
         processPartsModal.classList.remove('active');
     };
@@ -586,7 +582,7 @@ function setupEventListeners() {
             state.projects[index].processes.nameplateProcurement = { ...currentNameplateData };
             renderTable();
             // 自動保存を実行
-            await saveWithSync(true);
+            await SyncManager.saveWithSync(true);
         }
         processNameplateModal.classList.remove('active');
     };
@@ -603,7 +599,7 @@ function setupEventListeners() {
             state.projects[index].processes.internalDrawings = { ...currentInternalDrawingsData };
             renderTable();
             // 自動保存を実行
-            await saveWithSync(true);
+            await SyncManager.saveWithSync(true);
         }
         processInternalDrawingsModal.classList.remove('active');
     };
@@ -620,7 +616,7 @@ function setupEventListeners() {
             state.projects[index].processes.software = { ...currentSoftwareData };
             renderTable();
             // 自動保存を実行
-            await saveWithSync(true);
+            await SyncManager.saveWithSync(true);
         }
         processSoftwareModal.classList.remove('active');
     };
@@ -635,7 +631,7 @@ function setupEventListeners() {
             };
             renderTable();
             // 自動保存を実行
-            await saveWithSync(true);
+            await SyncManager.saveWithSync(true);
         }
         processSpecModal.classList.remove('active');
     };
@@ -824,7 +820,7 @@ function setupEventListeners() {
 
     // Settings Modal
     settingsBtn.onclick = async () => {
-        await refreshIfRemoteUpdated();
+        await SyncManager.refreshIfRemoteUpdated();
         // 後方互換性: 古い文字列データがあればオブジェクトに変換してコピー
         tempCustomerList = (state.config.customerList || []).map(item =>
             typeof item === 'string' ? { name: item, kana: item } : { ...item }
@@ -957,15 +953,15 @@ function setupEventListeners() {
         settingsOverlay.classList.remove('active');
         resetEditStates();
         // 自動保存を実行
-        await saveWithSync(true);
+        await SyncManager.saveWithSync(true);
     };
 
     // File Sync
-    syncFolderBtn.onclick = () => connectToFolder();
+    syncFolderBtn.onclick = () => SyncManager.connectToFolder();
     quickSyncBtn.onclick = async () => {
-        const handle = await getStoredHandle();
+        const handle = await SyncManager.getStoredHandle();
         if (handle) {
-            await connectToFolder(handle);
+            await SyncManager.connectToFolder(handle);
         }
     };
     refreshDataBtn.onclick = async () => {
@@ -973,7 +969,7 @@ function setupEventListeners() {
             alert('同期フォルダが設定されていません。「同期設定」からフォルダを選択してください。');
             return;
         }
-        await loadFromFolder();
+        await SyncManager.loadFromFolder();
         showToast('最新データを読み込みました');
     };
 
@@ -1013,7 +1009,7 @@ function setupEventListeners() {
         modalOverlay.classList.remove('active');
         
         // 自動保存を実行
-        await saveWithSync(true);
+        await SyncManager.saveWithSync(true);
     };
 
     // Filter Events
@@ -1292,278 +1288,7 @@ function renderSettingsLists() {
     lucide.createIcons({ root: settingsOverlay });
 }
 
-// Logic: File Operations (Folder Sync)
-
-// IndexedDB Constants
-const DB_NAME = 'TeamProgressTrackerDB';
-const STORE_NAME = 'handles';
-const KEY_NAME = 'sync-directory';
-
-async function storeHandle(handle) {
-    const db = await openDB(DB_NAME, STORE_NAME);
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).put(handle, KEY_NAME);
-    return new Promise((resolve, reject) => {
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-    });
-}
-
-async function getStoredHandle() {
-    const db = await openDB(DB_NAME, STORE_NAME);
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const request = tx.objectStore(STORE_NAME).get(KEY_NAME);
-    return new Promise((resolve, reject) => {
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-}
-
-async function checkStoredFolder() {
-    try {
-        const handle = await getStoredHandle();
-        if (handle) {
-            // 保存されたハンドルがある場合、クイック同期ボタンを表示
-            quickSyncBtn.style.display = 'inline-flex';
-            quickSyncBtn.title = `記憶されたフォルダ: ${handle.name}`;
-            
-            // 権限があるか確認（ブラウザによっては自動で付与されている場合もあるが稀）
-            if (await handle.queryPermission({ mode: 'readwrite' }) === 'granted') {
-                await connectToFolder(handle);
-            }
-        }
-    } catch (e) {
-        console.error('Failed to check stored folder:', e);
-    }
-}
-
-async function refreshIfRemoteUpdated() {
-    if (!dirHandle || isSaving) return;
-    try {
-        const fileHandle = await dirHandle.getFileHandle('team_data.json');
-        const file = await fileHandle.getFile();
-        // ファイルシステムの時刻が異なれば中身を確認
-        if (file.lastModified !== lastFsModified) {
-            const content = await file.text();
-            const remoteData = JSON.parse(content);
-            if (remoteData.lastUpdated !== state.lastUpdated) {
-                console.log('Detected remote update before action, refreshing...');
-                await loadFromFolder();
-                showToast('最新データを読み込みました');
-            }
-        }
-    } catch (e) {
-        // Ignore
-    }
-}
-
-async function connectToFolder(existingHandle = null) {
-    try {
-        if (existingHandle) {
-            dirHandle = existingHandle;
-            // 権限のリクエスト（ユーザーのアクションが必要）
-            if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
-                if (await dirHandle.requestPermission({ mode: 'readwrite' }) !== 'granted') {
-                    return;
-                }
-            }
-        } else {
-            dirHandle = await window.showDirectoryPicker();
-            // 権限の確認
-            if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
-                await dirHandle.requestPermission({ mode: 'readwrite' });
-            }
-            // ハンドルを保存
-            await storeHandle(dirHandle);
-            quickSyncBtn.style.display = 'inline-flex';
-            quickSyncBtn.title = `記憶されたフォルダ: ${dirHandle.name}`;
-        }
-        
-        await loadFromFolder();
-        updateSyncStatusUI('connected');
-        showToast('同期フォルダに接続しました');
-        startAutoSync();
-    } catch (err) {
-        if (err.name !== 'AbortError') {
-            console.error('Folder connection failed:', err);
-            alert('フォルダ接続に失敗しました');
-        }
-    }
-}
-
-async function loadFromFolder() {
-    if (!dirHandle) return;
-    try {
-        const fileHandle = await dirHandle.getFileHandle('team_data.json', { create: true });
-        const file = await fileHandle.getFile();
-        const content = await file.text();
-        
-        if (!content || content.trim() === '') {
-            // 新規ファイルの場合は現在のstateを保存
-            await saveToFolder(state);
-            return;
-        }
-
-        const data = JSON.parse(content);
-        if (data.projects && data.config) {
-            state = data;
-            lastLoadedData = JSON.parse(JSON.stringify(data)); // クローンを保存
-            lastFsModified = file.lastModified; // FS時刻を保存
-            renderHeader();
-            renderTable();
-            populateSelectOptions();
-            updateSyncStatusUI('connected');
-            
-            // その日最初の接続時にバックアップを作成
-            await saveToDailyBackup(data);
-        }
-    } catch (err) {
-        console.error('Loading failed:', err);
-        showToast('データの読み込みに失敗しました');
-    }
-}
-
-async function saveWithSync(isAutoSave = false) {
-    if (!dirHandle) {
-        if (!isAutoSave) {
-            alert('同期フォルダが設定されていません。「同期設定」からフォルダを選択してください。');
-        }
-        return;
-    }
-
-    if (isSaving) return;
-    isSaving = true;
-    updateSyncStatusUI('locked');
-
-    try {
-        // 1. ロックファイルの確認と作成
-        let lockHandle;
-        try {
-            lockHandle = await dirHandle.getFileHandle('lock.json', { create: false });
-            // すでにロックファイルがある場合
-            const lockFile = await lockHandle.getFile();
-            const lockTime = lockFile.lastModified;
-            const now = Date.now();
-            
-            // 5分以上古いロックは無視（デッドロック対策）
-            if (now - lockTime < 5 * 60 * 1000) {
-                // 削除を試みる
-                await dirHandle.removeEntry('lock.json');
-            } else {
-                alert('現在、他の人が保存中です。数秒待ってからやり直してください。');
-                isSaving = false;
-                updateSyncStatusUI('connected');
-                return;
-            }
-        } catch (e) {
-            // ロックファイルがない場合は正常
-        }
-
-        // ロック作成
-        lockHandle = await dirHandle.getFileHandle('lock.json', { create: true });
-        const writableLock = await lockHandle.createWritable();
-        await writableLock.write(JSON.stringify({ user: 'active-user', time: Date.now() }));
-        await writableLock.close();
-
-        // 2. 競合チェック
-        const fileHandle = await dirHandle.getFileHandle('team_data.json');
-        const file = await fileHandle.getFile();
-        const content = await file.text();
-        const currentFileData = JSON.parse(content);
-
-        if (currentFileData.lastUpdated && lastLoadedData && currentFileData.lastUpdated !== lastLoadedData.lastUpdated) {
-            alert('編集中に他の人がデータを更新しました。データ整合性を守るため、最新のデータを読み込みます。\n恐れ入りますが、もう一度編集をお願いいたします。');
-            await dirHandle.removeEntry('lock.json');
-            await loadFromFolder();
-            isSaving = false;
-            updateSyncStatusUI('connected');
-            return;
-        }
-
-        // 3. 書き込み
-        state.lastUpdated = new Date().toISOString();
-        await saveToFolder(state);
-        lastLoadedData = JSON.parse(JSON.stringify(state));
-        
-        // 保存後のファイルシステム時刻を再取得
-        const updatedFile = await (await dirHandle.getFileHandle('team_data.json')).getFile();
-        lastFsModified = updatedFile.lastModified;
-
-        // 4. ロック解除
-        await dirHandle.removeEntry('lock.json');
-        showToast('データを同期しました');
-
-    } catch (err) {
-        console.error('Sync failed:', err);
-        alert('同期に失敗しました：' + err.message);
-    } finally {
-        isSaving = false;
-        updateSyncStatusUI('connected');
-    }
-}
-
-async function saveToFolder(data) {
-    const fileHandle = await dirHandle.getFileHandle('team_data.json', { create: true });
-    const writable = await fileHandle.createWritable();
-    await writable.write(JSON.stringify(data, null, 2));
-    await writable.close();
-}
-
-async function saveToDailyBackup(data) {
-    if (!dirHandle) return;
-    try {
-        const backupsDir = await dirHandle.getDirectoryHandle('backups', { create: true });
-        const now = new Date();
-        const today = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
-        const fileName = `daily_${today}.json`;
-        
-        // 今日の分が既に存在するかチェック
-        let exists = false;
-        try {
-            await backupsDir.getFileHandle(fileName, { create: false });
-            exists = true;
-        } catch (e) {}
-
-        if (!exists) {
-            const backupFile = await backupsDir.getFileHandle(fileName, { create: true });
-            const writable = await backupFile.createWritable();
-            await writable.write(JSON.stringify(data, null, 2));
-            await writable.close();
-            console.log('Daily backup created:', fileName);
-            
-            // 古いバックアップの削除（30日分保持）
-            await cleanupOldBackups(backupsDir);
-        }
-    } catch (err) {
-        console.error('Backup failed:', err);
-    }
-}
-
-async function cleanupOldBackups(backupsDir) {
-    try {
-        const entries = [];
-        for await (const entry of backupsDir.values()) {
-            if (entry.kind === 'file' && entry.name.startsWith('daily_')) {
-                entries.push(entry);
-            }
-        }
-        
-        // 名前順（日付順）にソートして、古いもの（先頭）を削除
-        entries.sort((a, b) => a.name.localeCompare(b.name));
-        
-        const MAX_BACKUPS = 30;
-        if (entries.length > MAX_BACKUPS) {
-            const toDelete = entries.slice(0, entries.length - MAX_BACKUPS);
-            for (const entry of toDelete) {
-                await backupsDir.removeEntry(entry.name);
-                console.log('Old backup removed:', entry.name);
-            }
-        }
-    } catch (e) {
-        console.error('Cleanup failed:', e);
-    }
-}
-
+// Logic: UI Sync Status (SyncManagerから呼び出されるUI更新処理)
 function updateSyncStatusUI(status) {
     if (!syncStatusEl) return;
     
@@ -1576,38 +1301,19 @@ function updateSyncStatusUI(status) {
     } else {
         syncStatusEl.innerHTML = `<i data-lucide="cloud-off"></i> フォルダ未接続`;
     }
-    lucide.createIcons({ root: syncStatusEl });
+    if (window.lucide) {
+        window.lucide.createIcons({ root: syncStatusEl });
+    }
 }
 
 function formatTime(isoStr) {
+    if (!isoStr) return '';
     const d = new Date(isoStr);
     return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-function startAutoSync() {
-    if (syncInterval) clearInterval(syncInterval);
-    syncInterval = setInterval(async () => {
-        if (!dirHandle || isSaving) return;
-        
-        try {
-            const fileHandle = await dirHandle.getFileHandle('team_data.json');
-            const file = await fileHandle.getFile();
-            // ファイルシステムの時刻が異なれば中身を確認
-            if (file.lastModified !== lastFsModified) {
-                // 内容を軽くチェック
-                const content = await file.text();
-                const remoteData = JSON.parse(content);
-                if (remoteData.lastUpdated !== state.lastUpdated) {
-                    console.log('Detected remote update, refreshing...');
-                    await loadFromFolder();
-                    showToast('最新のデータを読み込みました');
-                }
-            }
-        } catch (e) {
-            // ファイルがないなどの場合は無視
-        }
-    }, 30000); // 30秒ごとにチェック
-}
+// 他のモジュールからUI更新関数を参照できるように公開
+window.updateSyncStatusUI = updateSyncStatusUI;
 
 // Logic: Add New Project
 function addNewProject(data) {
@@ -1976,7 +1682,7 @@ function renderTable() {
             td.onclick = async (e) => {
                 // ボタンやリンク（コピーアイコンなど）クリック時は編集画面を開かない
                 if (e.target.closest('button') || e.target.closest('a')) return;
-                await refreshIfRemoteUpdated();
+                await SyncManager.refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
                     alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
@@ -2086,7 +1792,7 @@ function renderTable() {
             }
             tdSpec.onclick = async (e) => {
                 e.stopPropagation();
-                await refreshIfRemoteUpdated();
+                await SyncManager.refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
                     alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
@@ -2152,7 +1858,7 @@ function renderTable() {
             }
             tdSheetMetal.onclick = async (e) => {
                 e.stopPropagation();
-                await refreshIfRemoteUpdated();
+                await SyncManager.refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
                     alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
@@ -2251,7 +1957,7 @@ function renderTable() {
             }
             tdParts.onclick = async (e) => {
                 e.stopPropagation();
-                await refreshIfRemoteUpdated();
+                await SyncManager.refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
                     alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
@@ -2309,7 +2015,7 @@ function renderTable() {
             }
             tdNameplate.onclick = async (e) => {
                 e.stopPropagation();
-                await refreshIfRemoteUpdated();
+                await SyncManager.refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
                     alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
@@ -2350,7 +2056,7 @@ function renderTable() {
             }
             tdInternalDrawings.onclick = async (e) => {
                 e.stopPropagation();
-                await refreshIfRemoteUpdated();
+                await SyncManager.refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
                     alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
@@ -2391,7 +2097,7 @@ function renderTable() {
             }
             tdSoftware.onclick = async (e) => {
                 e.stopPropagation();
-                await refreshIfRemoteUpdated();
+                await SyncManager.refreshIfRemoteUpdated();
                 const latestProject = state.projects.find(p => p.id === project.id);
                 if (!latestProject) {
                     alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
@@ -2426,7 +2132,7 @@ function renderTable() {
         
         completedBtn.onclick = async (e) => {
             e.stopPropagation();
-            await refreshIfRemoteUpdated();
+            await SyncManager.refreshIfRemoteUpdated();
             const latestProject = state.projects.find(p => p.id === project.id);
             if (!latestProject) {
                 alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
@@ -2436,7 +2142,7 @@ function renderTable() {
             latestProject.isCompleted = !latestProject.isCompleted;
             renderTable();
             // 自動保存を実行
-            await saveWithSync(true);
+            await SyncManager.saveWithSync(true);
         };
 
         tdCompleted.appendChild(completedBtn);
