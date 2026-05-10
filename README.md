@@ -47,6 +47,7 @@
 
 - HTML5 / CSS3 (Vanilla CSS)
 - JavaScript (ES6+)
+  - **モジュール構造**: 大規模な `app.js` を `utils.js`（共通基盤）、`diff-engine.js`（差分エンジン）へと分割し、保守性を向上。
 - **File System Access API** (ディレクトリ操作・ファイル同期)
 - Lucide Icons (アイコンライブラリ)
 

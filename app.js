@@ -1,21 +1,3 @@
-// Application State
-let state = {
-    lastUpdated: null, // 同期用タイムスタンプ
-    projects: [
-        // ... (existing sample data)
-    ],
-    config: {
-        customerList: [
-            { name: 'A社', kana: 'エーシャ' },
-            { name: 'B社', kana: 'ビーシャ' },
-            { name: 'C工業', kana: 'シーコウギョウ' }
-        ],
-        specList: ['JIS規格', '社内規格', '特注'],
-        sheetMetalVendors: ['株式会社D鈑金', 'E工業株式会社'],
-        staffList: ['田中', '佐藤', '鈴木']
-    }
-};
-
 // UI Elements
 const tableHeaderRow = document.getElementById('table-header-row');
 const progressBody = document.getElementById('progress-body');
@@ -247,12 +229,6 @@ const processFilterBtns = document.querySelectorAll('#process-filter-group butto
 const sortIdHeader = document.getElementById('sort-id');
 const sortDeadlineHeader = document.getElementById('sort-deadline');
 
-// Diff Tab Elements
-const diffBackupSelect = document.getElementById('diff-backup-select');
-const runDiffBtn = document.getElementById('run-diff-btn');
-const diffBody = document.getElementById('diff-body');
-const diffTabBtn = document.getElementById('diff-tab-btn');
-
 // State for Modal
 let editingProjectId = null;
 let editingCustomerIndex = null;
@@ -274,7 +250,6 @@ let currentNecessityData = {
     software: true
 };
 
-let dirHandle = null;
 let lastLoadedData = null; // 競合検知用
 let lastFsModified = 0; // ファイルシステム上の最終更新時刻
 let syncInterval = null;
@@ -1181,21 +1156,8 @@ function setupEventListeners() {
     if (sortDeadlineHeader) sortDeadlineHeader.onclick = () => toggleSort('deadline');
 
     // Diff Tab Logic
-    if (diffTabBtn) {
-        diffTabBtn.addEventListener('click', async () => {
-            await updateBackupList();
-        });
-    }
-
-    if (runDiffBtn) {
-        runDiffBtn.onclick = async () => {
-            const fileName = diffBackupSelect.value;
-            if (!fileName) {
-                alert('バックアップファイルを選択してください。');
-                return;
-            }
-            await runComparison(fileName);
-        };
+    if (window.DiffEngine) {
+        window.DiffEngine.init();
     }
 }
 
@@ -2873,140 +2835,5 @@ function renderNecessityButtons() {
 const tooltipEl = document.createElement('div');
 tooltipEl.className = 'custom-tooltip';
 document.body.appendChild(tooltipEl);
-
-// --- Difference Comparison Logic ---
-
-async function updateBackupList() {
-    if (!dirHandle) {
-        diffBackupSelect.innerHTML = '<option value="">フォルダを接続してください</option>';
-        return;
-    }
-
-    try {
-        const backupsDir = await dirHandle.getDirectoryHandle('backups', { create: true });
-        const files = [];
-        for await (const entry of backupsDir.values()) {
-            if (entry.kind === 'file' && entry.name.startsWith('daily_')) {
-                files.push(entry.name);
-            }
-        }
-
-        files.sort().reverse(); // 降順（新しい順）
-
-        if (files.length === 0) {
-            diffBackupSelect.innerHTML = '<option value="">バックアップが見つかりません</option>';
-        } else {
-            diffBackupSelect.innerHTML = files.map(f => {
-                const dateStr = f.replace('daily_', '').replace('.json', '');
-                const formattedDate = `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}/${dateStr.substring(6, 8)}`;
-                return `<option value="${f}">${formattedDate} (${f})</option>`;
-            }).join('');
-        }
-    } catch (e) {
-        console.error('Failed to list backups:', e);
-        diffBackupSelect.innerHTML = '<option value="">読み込みエラー</option>';
-    }
-}
-
-async function runComparison(fileName) {
-    if (!dirHandle) return;
-
-    try {
-        const backupsDir = await dirHandle.getDirectoryHandle('backups');
-        const fileHandle = await backupsDir.getFileHandle(fileName);
-        const file = await fileHandle.getFile();
-        const content = await file.text();
-        const oldData = JSON.parse(content);
-        const oldProjects = oldData.projects || [];
-
-        renderDiffResults(oldProjects, state.projects);
-        showToast('比較が完了しました');
-    } catch (e) {
-        console.error('Comparison failed:', e);
-        alert('バックアップの読み込みに失敗しました。');
-    }
-}
-
-function renderDiffResults(oldProjects, newProjects) {
-    diffBody.innerHTML = '';
-    const diffRows = [];
-
-    // 比較対象のフィールド定義
-    const targetFields = [
-        { proc: 'specDoc', key: 'issueDate' },
-        { proc: 'specDoc', key: 'dueDate' },
-        { proc: 'specDoc', key: 'approvalDate' },
-        { proc: 'sheetMetal', key: 'vendor' },
-        { proc: 'sheetMetal', key: 'poDueDate' },
-        { proc: 'sheetMetal', key: 'poRecvDate' },
-        { proc: 'sheetMetal', key: 'drawingLimitDate' },
-        { proc: 'sheetMetal', key: 'confirmedDate' },
-        { proc: 'partsProcurement', key: 'main.dueDate' }
-    ];
-
-    newProjects.forEach(newP => {
-        const oldP = oldProjects.find(p => p.id === newP.id);
-        
-        // 指定フィールドのいずれかに変更があるかチェック
-        let hasChange = false;
-        const fieldValues = targetFields.map(f => {
-            const newVal = getFieldValue(newP, f);
-            const oldVal = oldP ? getFieldValue(oldP, f) : null;
-            const changed = oldP ? (newVal !== oldVal) : !!newVal;
-            if (changed) hasChange = true;
-            return { value: newVal, changed };
-        });
-
-        // 新規登録の場合も表示対象とする
-        if (!oldP) hasChange = true;
-
-        if (hasChange) {
-            diffRows.push({
-                id: newP.id,
-                deadline: newP.deadline || '9999-99-99',
-                customer: newP.customer || '-',
-                subject: newP.subject || '-',
-                fields: fieldValues
-            });
-        }
-    });
-
-    if (diffRows.length === 0) {
-        diffBody.innerHTML = '<tr><td colspan="12" style="text-align: center; padding: 3rem; color: var(--text-muted);">指定項目の進捗に差分はありませんでした。</td></tr>';
-        return;
-    }
-
-    // 納期昇順でソート
-    diffRows.sort((a, b) => a.deadline.localeCompare(b.deadline));
-
-    diffRows.forEach(d => {
-        const tr = document.createElement('tr');
-        
-        // 基本情報
-        tr.innerHTML = `
-            <td><strong>${d.id}</strong></td>
-            <td>${d.deadline === '9999-99-99' ? '-' : d.deadline}</td>
-            <td><small>${d.customer}<br>${d.subject}</small></td>
-        `;
-
-        // 各工程フィールド
-        d.fields.forEach(f => {
-            const td = document.createElement('td');
-            td.style.fontSize = '0.85rem';
-            td.style.textAlign = 'center';
-            
-            if (f.changed) {
-                td.innerHTML = `<span style="color:var(--success-color); font-weight:bold;">${f.value || '-'}</span>`;
-                td.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
-            } else {
-                td.textContent = f.value || '-';
-                td.style.color = 'var(--text-muted)';
-            }
-            tr.appendChild(td);
-        });
-        
-        diffBody.appendChild(tr);
-    });
-}
 
 init();

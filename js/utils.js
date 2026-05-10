@@ -3,6 +3,23 @@
  * プロジェクト全体で使用される独立した補助関数を管理します。
  */
 
+// Global Application State (shared across all scripts)
+var dirHandle = null;
+var state = {
+    lastUpdated: null,
+    projects: [],
+    config: {
+        customerList: [
+            { name: 'A社', kana: 'エーシャ' },
+            { name: 'B社', kana: 'ビーシャ' },
+            { name: 'C工業', kana: 'シーコウギョウ' }
+        ],
+        specList: ['JIS規格', '社内規格', '特注'],
+        sheetMetalVendors: ['株式会社D鈑金', 'E工業株式会社'],
+        staffList: ['田中', '佐藤', '鈴木']
+    }
+};
+
 /**
  * 数値をカンマ区切り形式にフォーマットする
  * @param {number|string} val 
