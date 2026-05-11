@@ -37,6 +37,12 @@ const SyncManager = {
      * @param {FileSystemDirectoryHandle} existingHandle 
      */
     async connectToFolder(existingHandle = null) {
+        // APIサポートチェック
+        if (!window.showDirectoryPicker) {
+            alert('お使いのブラウザ環境では同期機能（File System Access API）がサポートされていません。\nHTTPS接続、または localhost でのアクセスが必要です。');
+            return;
+        }
+
         try {
             if (existingHandle) {
                 dirHandle = existingHandle;
@@ -61,7 +67,7 @@ const SyncManager = {
         } catch (err) {
             if (err.name !== 'AbortError') {
                 console.error('Folder connection failed:', err);
-                alert('フォルダ接続に失敗しました');
+                alert('フォルダ接続に失敗しました: ' + err.message);
             }
         }
     },

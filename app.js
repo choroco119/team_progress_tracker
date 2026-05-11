@@ -179,7 +179,7 @@ const addStaffBtn = document.getElementById('add-staff-btn');
 const staffListContainer = document.getElementById('staff-list-container');
 
 const syncFolderBtn = document.getElementById('sync-folder-btn');
-const quickSyncBtn = document.getElementById('quick-sync-btn');
+window.quickSyncBtn = document.getElementById('quick-sync-btn');
 const refreshDataBtn = document.getElementById('save-sync-btn');
 const copyFromSection = document.getElementById('copy-from-section');
 const copySearchInput = document.getElementById('copy-search-input');
@@ -275,12 +275,22 @@ async function init() {
     renderTable();
     setupEventListeners();
     setupInputFormatters();
-    
-    // 保存された同期フォルダの確認
-    await SyncManager.checkStoredFolder();
-    
-    // 自動更新の開始（接続済みの場合）
-    SyncManager.startAutoSync();
+
+    // File System Access API のサポートチェック
+    if (!window.showDirectoryPicker) {
+        console.warn('File System Access API is not supported in this environment.');
+        const syncStatus = document.getElementById('sync-status');
+        if (syncStatus) {
+            syncStatus.innerHTML = '<i data-lucide="alert-triangle"></i> 同期非対応環境 (非HTTPS)';
+            syncStatus.className = 'sync-status error';
+            if (window.lucide) window.lucide.createIcons({ root: syncStatus });
+        }
+    } else {
+        // 保存された同期フォルダの確認
+        await SyncManager.checkStoredFolder();
+        // 自動更新の開始（接続済みの場合）
+        SyncManager.startAutoSync();
+    }
 }
 
 // Logic: Setup Input Formatters
