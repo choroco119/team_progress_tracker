@@ -1,0 +1,1929 @@
+/* ==========================================================================
+   Design System Tokens (Light Mode & Dark Mode)
+   ========================================================================== */
+:root {
+    /* Base Surface (Light Mode: 鳥の子色ベース) */
+    --bg-base: #F4F0E6;           /* 鳥の子色 (和紙調エクリュ) */
+    --bg-card: #FFFFFF;           /* カード・コンテナ白 */
+    --bg-subtle: #E8E2D4;         /* 薄グレージュ (ホバー・サブエリア・行ハイライト) */
+    --bg-input: #FFFFFF;          /* 入力欄背景 */
+    --text-main: #2C2926;         /* 墨黒 */
+    --text-muted: #6E6862;        /* 補助テキスト */
+    --border-color: #C5BCB0;      /* 明確な境界線 */
+    --border-strong: #8C8275;     /* 強いセパレーター・見出し境界線 */
+    --border-subtle: #DCD5C9;     /* 補助グリッド線 */
+    --border-focus: #3B5766;      /* フォーカス時境界線 (鉄紺) */
+
+    /* Core 5 Colors (伝統色) */
+    --color-define: #3B5766;      /* 1. 鉄紺 (知性・青写真・プライマリ) */
+    --color-experiment: #B85C43;  /* 2. 弁柄 (情熱・アクセント・要着手) */
+    --color-verify: #5C4B40;      /* 3. 黒茶 (検証・客観事実・ニュートラル) */
+    --color-engrave: #4E6F5A;     /* 4. 常磐緑 (調和・刻印・完了) */
+    --color-refine: #6B5B6E;      /* 5. 古代紫 (洗練・昇華・特殊) */
+    --color-danger: #C2412D;      /* 期限超過・警告赤 */
+    --color-warning: #D97706;     /* 警告アンバー */
+
+    /* Functional Colors */
+    --primary-color: var(--color-define);
+    --primary-hover: #2D434F;
+    --accent-color: var(--color-experiment);
+    --accent-hover: #9E4D36;
+    --success-color: var(--color-engrave);
+    --danger-color: var(--color-danger);
+    --warning-color: var(--color-warning);
+
+    --process-done-bg: rgba(78, 111, 90, 0.14); /* 完了工程セル背景 */
+    --process-done-border: rgba(78, 111, 90, 0.45);
+    --process-ready-bg: rgba(184, 92, 67, 0.14);/* 要着手セル背景 */
+
+    /* Typography */
+    --font-heading: 'Noto Serif JP', 'Cinzel', serif;
+    --font-body: 'Inter', 'Noto Sans JP', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* UI Shapes & Shadows */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-pill: 20px;
+    --shadow-sm: 0 1px 3px rgba(44, 41, 38, 0.08), 0 1px 2px rgba(44, 41, 38, 0.04);
+    --shadow-md: 0 4px 16px rgba(44, 41, 38, 0.10);
+    --shadow-lg: 0 10px 25px -5px rgba(44, 41, 38, 0.14);
+
+    /* Form Controls */
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236E6862' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    --calendar-filter: none;
+}
+
+[data-theme="dark"] {
+    /* Base Surface (Dark Mode: 深墨茶ベース) */
+    --bg-base: #1E1D1B;           /* 深墨茶 */
+    --bg-card: #272623;           /* カード墨茶 */
+    --bg-subtle: #2E2C28;         /* サブエリア・行ハイライト */
+    --bg-input: #1A1917;          /* 入力欄背景 */
+    --text-main: #EAE6DF;         /* 生成り白 */
+    --text-muted: #ADA69E;        /* 補助テキスト */
+    --border-color: #4A453F;      /* 境界線 */
+    --border-strong: #736B62;     /* 強いセパレーター・見出し境界線 */
+    --border-subtle: #36332F;     /* 補助グリッド線 */
+    --border-focus: #678696;      /* フォーカス時境界線 (ダーク鉄紺) */
+
+    /* Dark Mode Core Colors (高コントラスト調整色) */
+    --color-define: #678696;      /* ダーク鉄紺 */
+    --color-experiment: #D17962;  /* ダーク弁柄 */
+    --color-verify: #968B82;      /* ダーク黒茶 */
+    --color-engrave: #70947D;     /* ダーク常磐緑 */
+    --color-refine: #9B899E;      /* ダーク古代紫 */
+    --color-danger: #E55A43;      /* 期限超過赤 */
+    --color-warning: #F59E0B;     /* 警告アンバー */
+
+    /* Functional Colors */
+    --primary-color: var(--color-define);
+    --primary-hover: #7E9EB0;
+    --accent-color: var(--color-experiment);
+    --accent-hover: #DC8E7A;
+    --success-color: var(--color-engrave);
+    --danger-color: var(--color-danger);
+    --warning-color: var(--color-warning);
+
+    --process-done-bg: rgba(112, 148, 125, 0.18);
+    --process-done-border: rgba(112, 148, 125, 0.5);
+    --process-ready-bg: rgba(209, 121, 98, 0.18);
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.55);
+
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ADA69E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    --calendar-filter: invert(1);
+}
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    line-height: 1.5;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ==========================================================================
+   Header & Navigation
+   ========================================================================== */
+header {
+    background-color: var(--bg-card);
+    padding: 0.65rem 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(44, 41, 38, 0.05);
+    z-index: 50;
+}
+
+.header-brand {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+h1 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-define);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+}
+
+h1 i {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2.2;
+}
+
+.header-subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.sync-status {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    background-color: var(--bg-card);
+    padding: 0.35rem 0.8rem;
+    border-radius: var(--radius-pill);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1.5px solid var(--border-color);
+    font-weight: 600;
+}
+
+.sync-status i {
+    width: 14px;
+    height: 14px;
+}
+
+.sync-status.connected {
+    color: var(--color-engrave);
+    border-color: var(--color-engrave);
+    background-color: var(--process-done-bg);
+}
+
+.sync-status.locked {
+    color: var(--color-warning);
+    border-color: var(--color-warning);
+    background-color: rgba(217, 119, 6, 0.12);
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-main);
+    padding: 0 12px;
+    height: 32px;
+    box-sizing: border-box;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 1px 2px rgba(44, 41, 38, 0.04);
+    transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+    border-color: var(--color-define);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(44, 41, 38, 0.08);
+}
+
+/* Tab Navigation (Segment Control Style) */
+.tab-nav {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+    padding: 0.5rem 1.25rem;
+    flex-shrink: 0;
+    background-color: var(--bg-subtle);
+}
+
+.tab-nav .tab-btn {
+    padding: 0.45rem 1.25rem;
+    background-color: transparent;
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-weight: 700;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-nav .tab-btn:hover:not(:disabled) {
+    color: var(--text-main);
+    background-color: rgba(255, 255, 255, 0.7);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .tab-nav .tab-btn:hover:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: var(--border-color);
+}
+
+.tab-nav .tab-btn.active {
+    background-color: var(--color-define) !important;
+    color: #FFFFFF !important;
+    border-color: var(--color-define) !important;
+    box-shadow: 0 2px 6px rgba(59, 87, 102, 0.35);
+}
+
+[data-theme="dark"] .tab-nav .tab-btn.active {
+    background-color: var(--color-define) !important;
+    color: #FFFFFF !important;
+    border-color: var(--color-define) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.tab-content {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+/* ==========================================================================
+   Buttons & Controls
+   ========================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 0.95rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.825rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1.5px solid var(--border-color);
+    gap: 0.45rem;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    box-shadow: 0 1px 2px rgba(44, 41, 38, 0.04);
+    line-height: 1;
+}
+
+.btn:hover {
+    background-color: var(--bg-subtle);
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background-color: var(--color-define);
+    color: #FFFFFF !important;
+    border-color: var(--color-define);
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(59, 87, 102, 0.25);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.btn-accent {
+    background-color: var(--color-experiment);
+    color: #FFFFFF !important;
+    border-color: var(--color-experiment);
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(184, 92, 67, 0.25);
+}
+
+.btn-accent:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn-outline {
+    background-color: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-main);
+}
+
+.btn-outline:hover {
+    background-color: var(--bg-subtle);
+    border-color: var(--color-define);
+}
+
+.btn-outline.active {
+    background-color: var(--color-engrave) !important;
+    border-color: var(--color-engrave) !important;
+    color: #FFFFFF !important;
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(78, 111, 90, 0.3);
+}
+
+[data-theme="dark"] .btn-outline.active {
+    background-color: var(--color-engrave) !important;
+    border-color: var(--color-engrave) !important;
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: #FFFFFF !important;
+    border-color: var(--color-danger);
+    font-weight: 700;
+}
+
+.btn-danger:hover {
+    filter: brightness(0.9);
+}
+
+.btn-icon {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    cursor: pointer;
+    color: var(--text-main);
+    padding: 0.45rem;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(44, 41, 38, 0.04);
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background-color: var(--bg-subtle);
+    color: var(--color-define);
+    border-color: var(--border-focus);
+}
+
+/* リンクコピー成功時のチェックマーク表示 */
+.btn-icon.copied {
+    color: var(--color-engrave) !important;
+    background-color: rgba(78, 111, 90, 0.15) !important;
+    border-color: var(--color-engrave) !important;
+    transform: scale(1.15);
+    box-shadow: 0 2px 6px rgba(78, 111, 90, 0.25);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s, color 0.2s;
+}
+
+[data-theme="dark"] .btn-icon.copied {
+    color: #6EE7B7 !important;
+    background-color: rgba(110, 231, 183, 0.18) !important;
+    border-color: rgba(110, 231, 183, 0.5) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.btn-sm {
+    padding: 0.28rem 0.7rem;
+    font-size: 0.75rem;
+}
+
+#sync-folder-btn {
+    border-color: rgba(78, 111, 90, 0.5);
+    color: var(--color-engrave);
+    font-weight: 700;
+}
+
+#sync-folder-btn:hover {
+    background-color: var(--process-done-bg);
+    border-color: var(--color-engrave);
+}
+
+#quick-sync-btn {
+    border-color: var(--color-experiment);
+    color: var(--color-experiment);
+    background-color: var(--process-ready-bg);
+    font-weight: 700;
+}
+
+#quick-sync-btn:hover {
+    background-color: rgba(184, 92, 67, 0.22);
+}
+
+/* 完了ボタンスタイル */
+.btn-completed {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-muted);
+    font-weight: 600;
+    transition: all 0.15s ease;
+}
+
+.btn-completed.is-done {
+    background-color: var(--color-engrave) !important;
+    border-color: var(--color-engrave) !important;
+    color: #FFFFFF !important;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(78, 111, 90, 0.3);
+}
+
+.btn-completed:hover {
+    border-color: var(--color-engrave);
+}
+
+/* ==========================================================================
+   Main Layout & Content Cards
+   ========================================================================== */
+main {
+    flex: 1;
+    padding: 0.75rem 1rem 0.75rem 1rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.content-card {
+    flex: 1;
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 1.5px solid var(--border-color);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.card-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1.5px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    background-color: var(--bg-card);
+}
+
+.card-title {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Filter Controls */
+.filter-controls {
+    background-color: var(--bg-subtle);
+    padding: 0.75rem 0.95rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.5rem;
+    border: 1.5px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(44, 41, 38, 0.05);
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.filter-item {
+    flex: 1;
+    min-width: 130px;
+}
+
+.filter-item label {
+    display: block;
+    font-size: 0.74rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.3rem;
+}
+
+.filter-item input,
+.filter-item select {
+    width: 100%;
+    background-color: var(--bg-input);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.35rem 0.6rem;
+    color: var(--text-main);
+    font-size: 0.825rem;
+    font-family: var(--font-body);
+    transition: all 0.2s;
+}
+
+.filter-item select {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 1.8rem;
+    background-image: var(--select-arrow);
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+}
+
+.filter-item input:focus,
+.filter-item select:focus {
+    outline: none;
+    border-color: var(--color-define);
+    box-shadow: 0 0 0 2px rgba(59, 87, 102, 0.2);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    font-size: 0.825rem;
+    user-select: none;
+    font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-define);
+}
+
+#process-filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.filter-item-process {
+    flex: 1;
+    min-width: 140px;
+}
+
+#clear-filters {
+    background-color: var(--bg-card) !important;
+    border: 1.5px solid var(--color-experiment) !important;
+    color: var(--color-experiment) !important;
+    font-weight: 700 !important;
+    transition: all 0.2s ease;
+}
+
+#clear-filters:hover {
+    background-color: var(--process-ready-bg) !important;
+    border-color: var(--accent-hover) !important;
+    transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Table & High-Density Progress Layout (FHD 1920x1080 Optimized)
+   ========================================================================== */
+.table-container {
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+    background-color: var(--bg-card);
+    border-top: 1.5px solid var(--border-color);
+}
+
+table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 0.825rem;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--bg-card);
+}
+
+th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--bg-card) !important;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.74rem;
+    color: var(--text-main);
+    letter-spacing: 0.04em;
+    padding: 0.55rem 0.65rem;
+    border-bottom: 2px solid var(--border-strong);
+    border-left: 1px solid var(--border-color);
+    box-shadow: inset 0 -2px 0 var(--border-strong);
+    text-align: center !important;
+}
+
+th:first-child {
+    border-left: none;
+}
+
+/* 基本情報列ヘッダー (#progress-table 1〜8列目: 鉄紺チント＋完全不透明カード下地でスクロール透過防止) */
+#progress-table th:nth-child(-n+8) {
+    background: linear-gradient(rgba(59, 87, 102, 0.08), rgba(59, 87, 102, 0.08)), var(--bg-card) !important;
+    color: var(--color-define) !important;
+    font-weight: 700;
+}
+
+[data-theme="dark"] #progress-table th:nth-child(-n+8) {
+    background: linear-gradient(rgba(103, 134, 150, 0.16), rgba(103, 134, 150, 0.16)), var(--bg-card) !important;
+    color: #A8C9DC !important; /* 明るい鉄紺・高コントラスト */
+}
+
+/* 納期列 (#progress-table 8番目の列: 基本情報と工程の境界ディバイダー) */
+#progress-table th:nth-child(8),
+#progress-table td:nth-child(8),
+#progress-table th#sort-deadline,
+#progress-table td.deadline-cell {
+    border-right: 3px solid var(--color-define) !important;
+}
+
+[data-theme="dark"] #progress-table th:nth-child(8),
+[data-theme="dark"] #progress-table td:nth-child(8),
+[data-theme="dark"] #progress-table th#sort-deadline,
+[data-theme="dark"] #progress-table td.deadline-cell {
+    border-right: 3px solid #678696 !important;
+}
+
+/* 工程列ヘッダー (伝統色5色順序ループ: D:鉄紺 ➔ E:弁柄 ➔ V:黒茶 ➔ E:常磐緑 ➔ R:古代紫 ➔ D:鉄紺 ➔ E:弁柄) */
+th.th-process {
+    border-left: 1px solid var(--border-color);
+    font-weight: 700;
+}
+
+/* 1. 納入仕様書: D (Define - 鉄紺) */
+th.th-spec {
+    border-top: 3.5px solid var(--color-define) !important;
+    background: linear-gradient(rgba(59, 87, 102, 0.06), rgba(59, 87, 102, 0.06)), var(--bg-card) !important;
+    color: var(--color-define) !important;
+}
+
+/* 2. 板金手配: E (Experiment - 弁柄) */
+th.th-sheet-metal {
+    border-top: 3.5px solid var(--color-experiment) !important;
+    background: linear-gradient(rgba(184, 92, 67, 0.06), rgba(184, 92, 67, 0.06)), var(--bg-card) !important;
+    color: var(--color-experiment) !important;
+}
+
+/* 3. 部品手配: V (Verify - 黒茶) */
+th.th-parts {
+    border-top: 3.5px solid var(--color-verify) !important;
+    background: linear-gradient(rgba(92, 75, 64, 0.06), rgba(92, 75, 64, 0.06)), var(--bg-card) !important;
+    color: var(--color-verify) !important;
+}
+
+/* 4. 銘板手配: E (Engrave - 常磐緑) */
+th.th-nameplate {
+    border-top: 3.5px solid var(--color-engrave) !important;
+    background: linear-gradient(rgba(78, 111, 90, 0.06), rgba(78, 111, 90, 0.06)), var(--bg-card) !important;
+    color: var(--color-engrave) !important;
+}
+
+/* 5. 社内工事図: R (Refine - 古代紫) */
+th.th-internal-drawings {
+    border-top: 3.5px solid var(--color-refine) !important;
+    background: linear-gradient(rgba(107, 91, 110, 0.06), rgba(107, 91, 110, 0.06)), var(--bg-card) !important;
+    color: var(--color-refine) !important;
+}
+
+/* 6. ソフト: D (Define - 鉄紺 / ループ1) */
+th.th-software {
+    border-top: 3.5px solid var(--color-define) !important;
+    background: linear-gradient(rgba(59, 87, 102, 0.06), rgba(59, 87, 102, 0.06)), var(--bg-card) !important;
+    color: var(--color-define) !important;
+}
+
+/* 7. 完了: E (Experiment - 弁柄 / ループ2) */
+th.th-completed {
+    border-top: 3.5px solid var(--color-experiment) !important;
+    background: linear-gradient(rgba(184, 92, 67, 0.08), rgba(184, 92, 67, 0.08)), var(--bg-card) !important;
+    color: var(--color-experiment) !important;
+}
+
+/* Darkモード時の工程ヘッダー背景 ＆ 文字コントラスト底上げ (伝統色5色順序ループ) */
+/* 1. 納入仕様書: D (Define - 鉄紺系) */
+[data-theme="dark"] th.th-spec {
+    background: linear-gradient(rgba(103, 134, 150, 0.14), rgba(103, 134, 150, 0.14)), var(--bg-card) !important;
+    color: #A8C9DC !important;
+}
+
+/* 2. 板金手配: E (Experiment - 弁柄系) */
+[data-theme="dark"] th.th-sheet-metal {
+    background: linear-gradient(rgba(209, 121, 98, 0.14), rgba(209, 121, 98, 0.14)), var(--bg-card) !important;
+    color: #E89582 !important;
+}
+
+/* 3. 部品手配: V (Verify - 黒茶系) */
+[data-theme="dark"] th.th-parts {
+    background: linear-gradient(rgba(158, 143, 133, 0.14), rgba(158, 143, 133, 0.14)), var(--bg-card) !important;
+    color: #C8BEB5 !important;
+}
+
+/* 4. 銘板手配: E (Engrave - 常磐緑系) */
+[data-theme="dark"] th.th-nameplate {
+    background: linear-gradient(rgba(112, 148, 125, 0.14), rgba(112, 148, 125, 0.14)), var(--bg-card) !important;
+    color: #8EBF9F !important;
+}
+
+/* 5. 社内工事図: R (Refine - 古代紫系) */
+[data-theme="dark"] th.th-internal-drawings {
+    background: linear-gradient(rgba(155, 136, 159, 0.14), rgba(155, 136, 159, 0.14)), var(--bg-card) !important;
+    color: #CBB9CE !important;
+}
+
+/* 6. ソフト: D (Define - 鉄紺系 / ループ1) */
+[data-theme="dark"] th.th-software {
+    background: linear-gradient(rgba(103, 134, 150, 0.14), rgba(103, 134, 150, 0.14)), var(--bg-card) !important;
+    color: #A8C9DC !important;
+}
+
+/* 7. 完了: E (Experiment - 弁柄系 / ループ2) */
+[data-theme="dark"] th.th-completed {
+    background: linear-gradient(rgba(209, 121, 98, 0.16), rgba(209, 121, 98, 0.16)), var(--bg-card) !important;
+    color: #E89582 !important;
+}
+
+/* ==========================================================================
+   Sortable Headers & Active Indicators (視認性特化ソートUI)
+   ========================================================================== */
+.sort-header-inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    vertical-align: middle;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.sort-title {
+    font-weight: 700;
+}
+
+.sort-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 1px 4px;
+    border-radius: var(--radius-sm);
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-tertiary);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sort-indicator .sort-icon {
+    width: 13px;
+    height: 13px;
+    opacity: 0.45;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.sort-indicator .sort-label {
+    display: none;
+}
+
+/* 非アクティブ時のホバー */
+th.sortable-th:not(.sort-active):hover {
+    background-color: rgba(59, 87, 102, 0.05) !important;
+    color: var(--color-define) !important;
+}
+
+[data-theme="dark"] th.sortable-th:not(.sort-active):hover {
+    background-color: rgba(103, 134, 150, 0.1) !important;
+    color: var(--color-experiment) !important;
+}
+
+th.sortable-th:not(.sort-active):hover .sort-indicator {
+    color: var(--color-define);
+}
+
+[data-theme="dark"] th.sortable-th:not(.sort-active):hover .sort-indicator {
+    color: var(--color-experiment);
+}
+
+th.sortable-th:not(.sort-active):hover .sort-icon {
+    opacity: 0.85;
+}
+
+/* アクティブ時：背景ハイライト ＆ 下端インジケーターライン ＆ バッジ強調 */
+th.sort-active {
+    background-color: rgba(59, 87, 102, 0.09) !important;
+    color: var(--color-define) !important;
+    box-shadow: inset 0 -3px 0 var(--color-define) !important;
+}
+
+[data-theme="dark"] th.sort-active {
+    background-color: rgba(103, 134, 150, 0.18) !important;
+    color: var(--color-experiment) !important;
+    box-shadow: inset 0 -3px 0 var(--color-experiment) !important;
+}
+
+th.sort-active .sort-title {
+    font-weight: 800;
+}
+
+th.sort-active .sort-indicator {
+    background-color: rgba(59, 87, 102, 0.14);
+    color: var(--color-define);
+    border: 1px solid rgba(59, 87, 102, 0.28);
+    padding: 1px 5px;
+}
+
+[data-theme="dark"] th.sort-active .sort-indicator {
+    background-color: rgba(103, 134, 150, 0.24);
+    color: var(--color-experiment);
+    border: 1px solid rgba(103, 134, 150, 0.4);
+}
+
+th.sort-active .sort-indicator .sort-icon {
+    opacity: 1;
+    width: 13px;
+    height: 13px;
+    stroke-width: 2.5px;
+}
+
+th.sort-active .sort-indicator .sort-label {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-family: var(--font-sans);
+    letter-spacing: -0.02em;
+}
+
+/* ==========================================================================
+   Column Widths (FHD 1920px 全幅最適化・15列バランス配分)
+   ========================================================================== */
+/* 1. 製番 */
+th:nth-child(1), td:nth-child(1) {
+    width: 110px;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    font-weight: 600;
+}
+
+/* 2. 担当者 */
+th:nth-child(2), td:nth-child(2) {
+    width: 75px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* 3. リンク (縦折れ防止・ゆったり幅) */
+th:nth-child(3), td:nth-child(3) {
+    width: 65px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* 4. 客先 */
+th:nth-child(4), td:nth-child(4) {
+    width: 110px;
+}
+
+/* 5. 件名 (名称が長いためゆったり拡張) */
+th:nth-child(5), td:nth-child(5) {
+    width: 165px;
+}
+
+/* 6. 向先 */
+th:nth-child(6), td:nth-child(6) {
+    width: 110px;
+}
+
+/* 7. 品名 (名称が長いためゆったり拡張) */
+th:nth-child(7), td:nth-child(7) {
+    width: 140px;
+}
+
+/* 8. 納期 */
+th:nth-child(8), td:nth-child(8) {
+    width: 110px;
+    text-align: center;
+    font-family: var(--font-mono);
+}
+
+/* 9. 納入仕様書 */
+th:nth-child(9), td:nth-child(9) {
+    width: 145px;
+    text-align: center;
+}
+
+/* 10. 板金手配 (日付が2行入るためゆったり) */
+th:nth-child(10), td:nth-child(10) {
+    width: 175px;
+    text-align: center;
+}
+
+/* 11. 部品手配 (主・予・支が入るためゆったり) */
+th:nth-child(11), td:nth-child(11) {
+    width: 160px;
+    text-align: center;
+}
+
+/* 12. 銘板手配 */
+th:nth-child(12), td:nth-child(12) {
+    width: 145px;
+    text-align: center;
+}
+
+/* 13. 社内工事図 */
+th:nth-child(13), td:nth-child(13) {
+    width: 135px;
+    text-align: center;
+}
+
+/* 14. ソフト */
+th:nth-child(14), td:nth-child(14) {
+    width: 135px;
+    text-align: center;
+}
+
+/* 15. 完了 */
+th:nth-child(15), td:nth-child(15) {
+    width: 80px;
+    text-align: center;
+}
+
+/* ==========================================================================
+   Table Cell Styles (td)
+   ========================================================================== */
+td {
+    padding: 0.55rem 0.65rem;
+    border-bottom: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+    font-size: 0.825rem;
+    color: var(--text-main);
+    line-height: 1.35;
+    vertical-align: middle;
+}
+
+td:first-child {
+    border-left: none;
+}
+
+/* テーブル最終行の下端ボーダー（データ少数時でも表の底を力強く引き締める） */
+tbody tr:last-child td {
+    border-bottom: 2px solid var(--border-strong);
+}
+
+/* ゼブラストライプ (偶数行にわずかな明暗) */
+tbody tr:nth-child(even) td.info-cell {
+    background-color: rgba(44, 41, 38, 0.02);
+}
+
+[data-theme="dark"] tbody tr:nth-child(even) td.info-cell {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Row Hover & 連動ハイライト */
+tr:hover .info-cell {
+    background-color: var(--bg-subtle) !important;
+}
+
+.process-cell {
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.15s ease;
+    user-select: none;
+}
+
+.process-cell:hover {
+    background-color: var(--bg-subtle) !important;
+}
+
+/* 完了工程 */
+.process-cell.process-done {
+    background-color: var(--process-done-bg) !important;
+    color: var(--color-engrave) !important;
+    font-weight: 600;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
+    color: transparent;
+    font-size: 0.7rem;
+}
+
+.status-badge.done {
+    background-color: var(--color-engrave);
+    border-color: var(--color-engrave);
+    color: #FFFFFF;
+}
+
+.date-text {
+    display: block;
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+    line-height: 1.25;
+}
+
+/* 要着手バッジ */
+.badge-alert {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background-color: var(--process-ready-bg);
+    color: var(--color-experiment);
+    border: 1px solid var(--color-experiment);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+/* 期限超過強調 */
+.text-danger, .overdue {
+    color: var(--color-danger) !important;
+    font-weight: 700 !important;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* ==========================================================================
+   Difference Comparison Table (Diff Tab)
+   ========================================================================== */
+.diff-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.85rem;
+    border-bottom: 1.5px solid var(--border-color);
+}
+
+.diff-controls-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.diff-control-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-main);
+}
+
+.diff-select {
+    min-width: 260px;
+    background-color: var(--bg-input);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    padding: 0.4rem 2rem 0.4rem 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.825rem;
+    appearance: none;
+    cursor: pointer;
+    background-image: var(--select-arrow);
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    transition: all 0.2s ease;
+}
+
+.diff-select:focus {
+    outline: none;
+    border-color: var(--color-define);
+    box-shadow: 0 0 0 2px rgba(59, 87, 102, 0.2);
+}
+
+.diff-table-container {
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+    background-color: var(--bg-card);
+    border-top: 1.5px solid var(--border-color);
+    margin-top: 0.65rem;
+}
+
+#diff-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 0.825rem;
+    min-width: 1380px;
+}
+
+#diff-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: var(--bg-card);
+}
+
+#diff-table th {
+    position: sticky;
+    padding: 0.45rem 0.55rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    border-left: 1px solid var(--border-color);
+    text-align: center !important;
+}
+
+#diff-table th:first-child {
+    border-left: none;
+}
+
+/* 差分テーブル 基本情報列ヘッダー（製番・客先・件名・品名・納期: 鉄紺チント） */
+th.diff-th-basic {
+    top: 0;
+    z-index: 22;
+    background: linear-gradient(rgba(59, 87, 102, 0.08), rgba(59, 87, 102, 0.08)), var(--bg-card) !important;
+    color: var(--color-define) !important;
+    border-bottom: 2px solid var(--border-strong);
+    box-shadow: inset 0 -2px 0 var(--border-strong);
+    vertical-align: middle;
+}
+
+[data-theme="dark"] th.diff-th-basic {
+    background: linear-gradient(rgba(103, 134, 150, 0.16), rgba(103, 134, 150, 0.16)), var(--bg-card) !important;
+    color: #A8C9DC !important;
+}
+
+/* 納期列: 基本情報と工程エリアの境界ディバイダー (3px 鉄紺ボーダー) */
+th.diff-th-deadline,
+td.diff-cell-deadline {
+    border-right: 3px solid var(--color-define) !important;
+}
+
+[data-theme="dark"] th.diff-th-deadline,
+[data-theme="dark"] td.diff-cell-deadline {
+    border-right: 3px solid #678696 !important;
+}
+
+/* 工程大項目ヘッダー（1段目） */
+th.diff-th-group {
+    top: 0;
+    z-index: 21;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.42rem 0.5rem;
+}
+
+/* 1. 納入仕様書: D (Define - 鉄紺) */
+th.diff-th-spec {
+    border-top: 3.5px solid var(--color-define) !important;
+    background: linear-gradient(rgba(59, 87, 102, 0.06), rgba(59, 87, 102, 0.06)), var(--bg-card) !important;
+    color: var(--color-define) !important;
+}
+
+[data-theme="dark"] th.diff-th-spec {
+    background: linear-gradient(rgba(103, 134, 150, 0.14), rgba(103, 134, 150, 0.14)), var(--bg-card) !important;
+    color: #A8C9DC !important;
+}
+
+/* 2. 板金手配: E (Experiment - 弁柄) */
+th.diff-th-sheet-metal {
+    border-top: 3.5px solid var(--color-experiment) !important;
+    background: linear-gradient(rgba(184, 92, 67, 0.06), rgba(184, 92, 67, 0.06)), var(--bg-card) !important;
+    color: var(--color-experiment) !important;
+}
+
+[data-theme="dark"] th.diff-th-sheet-metal {
+    background: linear-gradient(rgba(209, 121, 98, 0.14), rgba(209, 121, 98, 0.14)), var(--bg-card) !important;
+    color: #E89582 !important;
+}
+
+/* 3. 主部品: V (Verify - 黒茶) */
+th.diff-th-parts {
+    border-top: 3.5px solid var(--color-verify) !important;
+    background: linear-gradient(rgba(92, 75, 64, 0.06), rgba(92, 75, 64, 0.06)), var(--bg-card) !important;
+    color: var(--color-verify) !important;
+}
+
+[data-theme="dark"] th.diff-th-parts {
+    background: linear-gradient(rgba(158, 143, 133, 0.14), rgba(158, 143, 133, 0.14)), var(--bg-card) !important;
+    color: #C8BEB5 !important;
+}
+
+/* 工程列幅の完全均等制御 (右側9列すべて120px均等幅) */
+#diff-table col.diff-col-proc {
+    width: 120px !important;
+    min-width: 120px !important;
+}
+
+/* 工程詳細ヘッダー（2段目サブヘッダー: 改行完全防止） */
+th.diff-th-sub {
+    top: 29px;
+    z-index: 20;
+    font-size: 0.72rem;
+    padding: 0.32rem 0.45rem;
+    border-bottom: 2px solid var(--border-strong);
+    box-shadow: inset 0 -2px 0 var(--border-strong);
+    white-space: nowrap !important;
+}
+
+th.diff-th-sub-spec {
+    background: linear-gradient(rgba(59, 87, 102, 0.04), rgba(59, 87, 102, 0.04)), var(--bg-card) !important;
+    color: var(--color-define) !important;
+}
+
+[data-theme="dark"] th.diff-th-sub-spec {
+    background: linear-gradient(rgba(103, 134, 150, 0.10), rgba(103, 134, 150, 0.10)), var(--bg-card) !important;
+    color: #A8C9DC !important;
+}
+
+th.diff-th-sub-sheet-metal {
+    background: linear-gradient(rgba(184, 92, 67, 0.04), rgba(184, 92, 67, 0.04)), var(--bg-card) !important;
+    color: var(--color-experiment) !important;
+}
+
+[data-theme="dark"] th.diff-th-sub-sheet-metal {
+    background: linear-gradient(rgba(209, 121, 98, 0.10), rgba(209, 121, 98, 0.10)), var(--bg-card) !important;
+    color: #E89582 !important;
+}
+
+th.diff-th-sub-parts {
+    background: linear-gradient(rgba(92, 75, 64, 0.04), rgba(92, 75, 64, 0.04)), var(--bg-card) !important;
+    color: var(--color-verify) !important;
+}
+
+[data-theme="dark"] th.diff-th-sub-parts {
+    background: linear-gradient(rgba(158, 143, 133, 0.10), rgba(158, 143, 133, 0.10)), var(--bg-card) !important;
+    color: #C8BEB5 !important;
+}
+
+/* 差分テーブル セルスタイル */
+#diff-table td {
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+    color: var(--text-main);
+    vertical-align: middle;
+    transition: background-color 0.15s ease;
+}
+
+#diff-table td:first-child {
+    border-left: none;
+}
+
+#diff-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+#diff-table tbody tr:hover td {
+    background-color: var(--bg-subtle);
+}
+
+#diff-table tbody tr:last-child td {
+    border-bottom: 2px solid var(--border-strong);
+}
+
+/* 基本情報セル */
+.diff-cell-id {
+    text-align: left !important;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--color-define);
+    white-space: nowrap !important;
+}
+
+[data-theme="dark"] .diff-cell-id {
+    color: #A8C9DC;
+}
+
+.diff-cell-customer,
+.diff-cell-subject,
+.diff-cell-name {
+    text-align: left !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.diff-cell-deadline {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap !important;
+}
+
+/* 工程セル (右側データ部分: 改行完全防止) */
+.diff-cell-process {
+    text-align: center;
+    font-size: 0.78rem;
+    font-family: var(--font-mono);
+    white-space: nowrap !important;
+}
+
+/* 差分あり（変更箇所）: 常磐緑チント＋太字 */
+.diff-cell-changed {
+    background-color: var(--process-done-bg) !important;
+}
+
+.diff-value-changed {
+    color: var(--color-engrave);
+    font-weight: 700;
+}
+
+[data-theme="dark"] .diff-value-changed {
+    color: #6EE7B7;
+}
+
+/* 差分なし（未変更箇所） */
+.diff-value-unchanged {
+    color: var(--text-muted);
+}
+
+/* 空状態メッセージ */
+.diff-empty-message {
+    text-align: center;
+    padding: 3.5rem 1rem !important;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border-bottom: 2px solid var(--border-strong);
+}
+
+/* ==========================================================================
+   Modals & Forms
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(30, 29, 27, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(6px);
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background-color: var(--bg-card);
+    width: 95%;
+    max-width: 980px;
+    border-radius: var(--radius-lg);
+    overflow: visible;
+    box-shadow: var(--shadow-lg);
+    border: 1.5px solid var(--border-color);
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1.5px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header .btn-icon {
+    padding: 0.3rem;
+    border-radius: var(--radius-sm);
+}
+
+.modal-header .btn-icon:hover {
+    background-color: rgba(194, 65, 45, 0.1);
+    color: var(--color-danger);
+    border-color: rgba(194, 65, 45, 0.3);
+}
+
+.modal-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-define);
+}
+
+[data-theme="dark"] .modal-title {
+    color: #A8C9DC;
+}
+
+.modal-body {
+    padding: 0.75rem 1.25rem;
+    overflow-y: auto;
+    max-height: calc(90vh - 100px);
+}
+
+.modal-footer {
+    padding: 0.65rem 1.25rem;
+    background-color: var(--bg-subtle);
+    border-top: 1.5px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+}
+
+.modal-footer .btn {
+    padding: 0.4rem 1.1rem;
+    font-size: 0.825rem;
+    font-weight: 600;
+}
+
+.modal-flex-layout {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.modal-column-main {
+    flex: 1.4;
+}
+
+.modal-column-side {
+    flex: 1;
+    border-left: 1.5px solid var(--border-color);
+    padding-left: 1.25rem;
+}
+
+.modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 0;
+}
+
+.form-group {
+    padding: 0.25rem 0.45rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.74rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    margin-bottom: 0.18rem;
+    color: var(--text-muted);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.32rem 0.55rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.825rem;
+    font-family: var(--font-body);
+    transition: all 0.2s;
+    background-color: var(--bg-input);
+    color: var(--text-main);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-define);
+    box-shadow: 0 0 0 2px rgba(59, 87, 102, 0.2);
+}
+
+/* 工程詳細モーダル等の横並び行スタイル */
+.form-group.row-align {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0.45rem;
+}
+
+.form-group.row-align label {
+    margin-bottom: 0 !important;
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+
+/* 済トグルボタン */
+.btn-toggle {
+    padding: 0.22rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-toggle:hover {
+    border-color: var(--color-define);
+    color: var(--text-main);
+}
+
+.btn-toggle.btn-primary,
+.btn-toggle.active {
+    background-color: var(--color-engrave) !important;
+    border-color: var(--color-engrave) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 1px 3px rgba(78, 111, 90, 0.3);
+}
+
+/* 日付入力欄 (yyyy/mm/dd プレースホルダー対応) */
+input[type="date"] {
+    position: relative;
+    font-family: var(--font-mono);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: var(--calendar-filter);
+    cursor: pointer;
+}
+
+/* 空欄かつ非フォーカス時にブラウザ標準のテキストを透明化 */
+input[type="date"]:not(.has-val):not(:focus)::-webkit-datetime-edit {
+    color: transparent;
+}
+
+/* 空欄かつ非フォーカス時に yyyy/mm/dd を等幅フォントでオーバーレイ表示 */
+input[type="date"]:not(.has-val):not(:focus)::before {
+    content: "yyyy/mm/dd";
+    position: absolute;
+    left: 0.55rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    opacity: 0.55;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 既存案件から情報をコピー枠の品格あるチントデザイン */
+.existing-copy-container {
+    margin-bottom: 0.65rem !important;
+    padding: 0.45rem 0.85rem !important;
+    background: linear-gradient(rgba(59, 87, 102, 0.04), rgba(59, 87, 102, 0.04)), var(--bg-card) !important;
+    border: 1.5px dashed var(--color-define) !important;
+    border-radius: var(--radius-md) !important;
+}
+
+[data-theme="dark"] .existing-copy-container {
+    background: linear-gradient(rgba(103, 134, 150, 0.08), rgba(103, 134, 150, 0.08)), var(--bg-card) !important;
+    border-color: #678696 !important;
+}
+
+/* ボタン群 (要/否トグルなど) */
+.btn-group {
+    display: inline-flex;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1.5px solid var(--border-color);
+}
+
+.btn-group .btn {
+    border-radius: 0 !important;
+    border: none !important;
+    border-right: 1px solid var(--border-color) !important;
+    padding: 0.2rem 0.65rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    background-color: var(--bg-card);
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+}
+
+.btn-group .btn:last-child {
+    border-right: none !important;
+}
+
+/* 「要」ボタン（1番目・左側）がアクティブのとき: 常磐緑 */
+.btn-group .btn:first-child.btn-primary,
+.btn-group .btn:first-child.active {
+    background-color: var(--color-engrave) !important;
+    border-color: var(--color-engrave) !important;
+    color: #FFFFFF !important;
+}
+
+/* 「否」ボタン（2番目・右側）がアクティブのとき: 落ち着いたグレーチント */
+.btn-group .btn:last-child.btn-primary,
+.btn-group .btn:last-child.active {
+    background-color: var(--border-strong) !important;
+    border-color: var(--border-strong) !important;
+    color: #FFFFFF !important;
+}
+
+.necessity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.necessity-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.12rem 0;
+}
+
+.necessity-row span {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* Settings Modal (マスターデータ設定モーダル) */
+.settings-modal {
+    width: 90%;
+    max-width: 740px !important;
+}
+
+/* Settings Modal Tabs */
+.settings-modal .tabs {
+    display: flex;
+    border-bottom: 1.5px solid var(--border-color);
+    background-color: var(--bg-subtle);
+}
+
+.settings-modal .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 0.75rem 0.5rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.settings-modal .tab-btn:hover {
+    color: var(--text-main);
+    background-color: var(--bg-card);
+}
+
+.settings-modal .tab-btn.active {
+    color: var(--color-define);
+    border-bottom-color: var(--color-define);
+    background-color: var(--bg-card);
+}
+
+.settings-modal .tab-content {
+    display: none;
+    padding: 1.25rem 1.5rem;
+    background-color: var(--bg-card);
+}
+
+.settings-modal .tab-content.active {
+    display: block;
+}
+
+.input-group {
+    display: flex;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.input-group input {
+    flex: 1;
+    min-width: 0;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.85rem;
+    color: var(--text-main);
+    font-size: 0.85rem;
+}
+
+.input-group input:focus {
+    border-color: var(--color-define);
+    box-shadow: 0 0 0 2px rgba(59, 87, 102, 0.15);
+    outline: none;
+}
+
+.list-group {
+    list-style: none;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-card);
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.85rem;
+    color: var(--text-main);
+    transition: background-color 0.15s;
+    gap: 0.75rem;
+}
+
+.list-item:hover {
+    background-color: var(--bg-subtle);
+}
+
+.list-item.editing {
+    background-color: var(--bg-subtle);
+    border-left: 3.5px solid var(--color-define);
+    padding-left: calc(1rem - 3.5px);
+}
+
+.list-item:last-child {
+    border-bottom: none;
+}
+
+/* ==========================================================================
+   Tooltips, Toast & Custom Dropdowns
+   ========================================================================== */
+.custom-tooltip {
+    position: absolute;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    padding: 0.65rem 0.9rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    line-height: 1.45;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    box-shadow: var(--shadow-lg);
+    max-width: 420px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    border: 1px solid var(--border-color);
+}
+
+.custom-tooltip.show {
+    opacity: 1;
+}
+
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    padding: 0.7rem 1.25rem;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    z-index: 2000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.25s ease;
+    font-size: 0.825rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.dropdown-results {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 250px;
+    overflow-y: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--color-define);
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    scrollbar-width: thin;
+}
+
+.search-result-item {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.1s;
+    font-size: 0.825rem;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-result-item:hover {
+    background-color: var(--color-define);
+    color: #FFFFFF !important;
+}
+
+.search-result-item:hover div {
+    color: #FFFFFF !important;
+}
+
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    padding-right: 2.2rem !important;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    font-size: 0.85rem;
+    cursor: pointer;
+    background-image: var(--select-arrow);
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+}
+
+.custom-select-input:focus {
+    outline: none;
+    border-color: var(--color-define);
+    box-shadow: 0 0 0 2px rgba(59, 87, 102, 0.2);
+}
+
+.custom-select-results {
+    width: 100%;
+    top: 100%;
+    margin-top: 4px;
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .modal-flex-layout {
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+    .modal-column-side {
+        border-left: none;
+        padding-left: 0;
+        border-top: 1px solid var(--border-color);
+        padding-top: 1.25rem;
+    }
+}

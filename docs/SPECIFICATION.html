@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Progress Tracker 取扱・機能設計仕様書</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Surface & Base (Light Mode: 鳥の子色パレット) */
+      --bg-base: #F4F0E6;           /* 鳥の子色 (和紙調エクリュ) */
+      --bg-card: #FFFFFF;           /* カード白 */
+      --bg-subtle: #EBE6DA;         /* 薄グレージュ */
+      --text-main: #2C2926;         /* 墨黒 */
+      --text-muted: #6E6862;        /* 補助テキスト */
+      --border-color: #DDD7CC;      /* やさしい境界線 */
+      --border-strong: #C4BCAC;     /* 明瞭な区切り線 */
+
+      /* 伝統色アクセント (Light Mode) */
+      --color-primary: #3B5766;     /* 鉄紺 (Primary) */
+      --color-accent: #B85C43;      /* 弁柄 (Accent / Ready) */
+      --color-verify: #5C4B40;      /* 黒茶 (Neutral / Verify) */
+      --color-success: #4E6F5A;     /* 常磐緑 (Success / Complete) */
+      --color-purple: #6B5B6E;      /* 古代紫 (Secondary) */
+
+      /* Typography */
+      --font-heading: 'Noto Serif JP', 'Cinzel', serif;
+      --font-body: 'Inter', 'Noto Sans JP', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* UI Tokens */
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow-sm: 0 2px 8px rgba(44, 41, 38, 0.04);
+      --shadow-md: 0 4px 20px rgba(44, 41, 38, 0.06);
+    }
+
+    [data-theme="dark"] {
+      /* Surface & Base (Dark Mode: 深墨茶パレット) */
+      --bg-base: #1E1D1B;           /* 深墨茶 */
+      --bg-card: #272623;           /* カード墨茶 */
+      --bg-subtle: #32302C;         /* サブ墨茶 */
+      --text-main: #EAE6DF;         /* 生成り白 */
+      --text-muted: #ADA69E;        /* 補助テキスト */
+      --border-color: #3E3B37;      /* ダーク境界線 */
+      --border-strong: #5A554E;     /* ダーク強調線 */
+
+      /* 伝統色アクセント (Dark Mode視認性調整色) */
+      --color-primary: #678696;     /* 明鉄紺 (Primary) */
+      --color-accent: #D17962;      /* 明弁柄 (Accent / Ready) */
+      --color-verify: #968B82;      /* 明黒茶 (Neutral / Verify) */
+      --color-success: #70947D;     /* 明常磐緑 (Success / Complete) */
+      --color-purple: #9B899E;      /* 明古代紫 (Secondary) */
+
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.7;
+      padding: 24px 20px 80px;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+    }
+
+    /* ==========================================================================
+       1. フローティング Universal Header Shell
+       ========================================================================== */
+    .top-controls {
+      position: sticky;
+      top: 16px;
+      z-index: 100;
+      width: 100%;
+      max-width: 1060px;
+      height: 54px;
+      box-sizing: border-box;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 30px;
+      padding: 0 20px;
+      margin: 0 auto 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .brand-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon-box {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+
+    .brand-title-group {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .brand-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      color: var(--text-main);
+    }
+
+    .brand-subtitle {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--color-primary);
+      letter-spacing: 0.03em;
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg-subtle);
+      border: 1px solid transparent;
+      color: var(--text-main);
+      padding: 0 14px;
+      height: 32px;
+      box-sizing: border-box;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--border-color);
+      transform: translateY(-1px);
+    }
+
+    /* ==========================================================================
+       2. タイトルヘッダー & メインコンテンツ
+       ========================================================================== */
+    .doc-header {
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tool-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-accent);
+      background: rgba(184, 92, 67, 0.08);
+      border: 1px solid rgba(184, 92, 67, 0.25);
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+    }
+
+    [data-theme="dark"] .tool-tag {
+      background: rgba(209, 121, 98, 0.12);
+      border-color: rgba(209, 121, 98, 0.3);
+    }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: 2.1rem;
+      font-weight: 900;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+      margin-bottom: 16px;
+    }
+
+    .meta-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      font-size: 12.5px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-symbol {
+      color: var(--color-primary);
+      font-size: 10px;
+    }
+
+    /* ==========================================================================
+       3. セクション & カードコンポーネント
+       ========================================================================== */
+    section {
+      margin-bottom: 44px;
+    }
+
+    h2 {
+      font-family: var(--font-heading);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-left: 4px solid var(--color-primary);
+      padding-left: 12px;
+    }
+
+    h2 .section-indicator {
+      color: var(--color-accent);
+      font-size: 12px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      margin: 20px 0 10px;
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: var(--text-main);
+      font-size: 14.5px;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      border-top: 3px solid var(--color-primary);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    /* テーブル */
+    .table-container {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      margin: 16px 0 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    th {
+      background-color: var(--bg-subtle);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      letter-spacing: 0.03em;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: rgba(59, 87, 102, 0.03);
+    }
+
+    /* コード・ブロック */
+    pre {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    p code, li code, td code {
+      background: rgba(184, 92, 67, 0.07);
+      border: 1px solid rgba(184, 92, 67, 0.22);
+      color: #9E4630;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12.5px;
+    }
+
+    [data-theme="dark"] p code, 
+    [data-theme="dark"] li code, 
+    [data-theme="dark"] td code {
+      background: rgba(209, 121, 98, 0.12);
+      border-color: rgba(209, 121, 98, 0.3);
+      color: #E29D8B;
+    }
+
+    /* コールアウト / アラート */
+    .callout {
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      margin: 18px 0;
+      display: flex;
+      gap: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--color-primary);
+    }
+
+    .callout.accent {
+      border-left-color: var(--color-accent);
+    }
+
+    .callout.success {
+      border-left-color: var(--color-success);
+    }
+
+    .callout-title {
+      font-family: var(--font-heading);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .callout-body {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ステップリスト */
+    .step-list {
+      list-style: none;
+      counter-reset: step-seq;
+      margin: 14px 0;
+    }
+
+    .step-list li {
+      counter-increment: step-seq;
+      position: relative;
+      padding-left: 44px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .step-list li::before {
+      content: counter(step-seq, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--color-primary);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+
+    .step-title {
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 3px;
+    }
+
+    /* バッジ */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .badge-primary { background: rgba(59, 87, 102, 0.12); color: var(--color-primary); border: 1px solid var(--color-primary); }
+    .badge-accent { background: rgba(184, 92, 67, 0.12); color: var(--color-accent); border: 1px solid var(--color-accent); }
+    .badge-success { background: rgba(78, 111, 90, 0.12); color: var(--color-success); border: 1px solid var(--color-success); }
+    .badge-purple { background: rgba(107, 91, 110, 0.12); color: var(--color-purple); border: 1px solid var(--color-purple); }
+
+    /* ==========================================================================
+       4. フッター規格
+       ========================================================================== */
+    .spec-footer {
+      width: 100%;
+      max-width: 1060px;
+      margin-top: 56px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .spec-footer-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px 14px 60px;
+      }
+      .top-controls {
+        height: 50px;
+        padding: 0 14px;
+        margin-bottom: 24px;
+      }
+      .brand-subtitle {
+        display: none;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 共通フローティングヘッダー -->
+    <header class="top-controls">
+      <div class="brand-status">
+        <div class="brand-icon-box">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <rect x="2" y="2" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.4"/>
+            <rect x="9" y="2" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.4"/>
+            <rect x="2" y="9" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.4"/>
+            <rect x="9" y="9" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.4"/>
+          </svg>
+        </div>
+        <div class="brand-title-group">
+          <span class="brand-title">Team Progress Tracker</span>
+          <span class="brand-subtitle">SYSTEM & ARCHITECTURE SPECIFICATION</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <span class="nav-badge">完全ローカル動作型ツール</span>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-toggle-btn" aria-label="テーマ切替">
+          <span id="theme-icon">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" fill="#1E1D1B" stroke="#5E5850" stroke-width="1.2"/></svg>
+          </span>
+          <span id="theme-text">Dark</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ドキュメントヘッダー -->
+    <div class="doc-header">
+      <div class="tool-tag">
+        <span>■</span>
+        <span>OFFICIAL SPECIFICATION</span>
+      </div>
+      <h1>Team Progress Tracker 製造工程進捗管理システム 設計仕様書</h1>
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span class="meta-symbol">●</span>
+          <span><strong>実行環境:</strong> ローカルブラウザ環境 (Google Chrome / Microsoft Edge 等)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-symbol">●</span>
+          <span><strong>動作形態:</strong> 完全ローカル・オフライン動作（Webサーバー不要 / LAN共有フォルダ同期）</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-symbol">●</span>
+          <span><strong>データストレージ:</strong> 単一JSON永続化 (<code>team_data.json</code>) ＋ デイリー自動バックアップ</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-symbol">●</span>
+          <span><strong>デザイン設計:</strong> 高密度実務レイアウト (鳥の子色 / 深墨茶 和紙調パレット)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. 概要と開発目的 -->
+    <section>
+      <h2><span class="section-indicator">01.</span> 概要と開発目的 (What & Why)</h2>
+      <p>
+        <strong>Team Progress Tracker</strong> は、電気制御盤・機械制御盤・受配電盤などの製造現場において、製番（製造番号）単位での複数工程（納入仕様書・板金手配・部品手配・銘板手配・社内工事図・ソフト開発）の進捗を高密度かつ一覧性に優れた形で管理するための、<strong>完全ローカル動作型の進捗管理ツール</strong>です。ブラウザを表示インターフェースとして使用しますが、Webサーバーやインターネット通信を一切必要とせず、完全にローカルの閉じた環境（スタンドアロンまたは社内LANのファイル共有）で安全に動作します。
+      </p>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3 style="margin-top:0;">現場の課題 (Before)</h3>
+          <ul style="padding-left: 20px; font-size: 13.5px; color: var(--text-muted); line-height: 1.8;">
+            <li>Excelでの管理によるファイル共有競合、保存ロック、上書きによる更新漏れ</li>
+            <li>前工程の進捗状況が把握しづらいことによる手待ち時間</li>
+            <li>返却期日や詳細図送付リミットの見落としによる納期遅延リスク</li>
+            <li>定例会や朝会での「前回からの変更点抽出」にかかる確認工数</li>
+          </ul>
+        </div>
+        <div class="card" style="border-top-color: var(--color-success);">
+          <h3 style="margin-top:0; color: var(--color-success);">達成仕様と効果 (After)</h3>
+          <ul style="padding-left: 20px; font-size: 13.5px; color: var(--text-muted); line-height: 1.8;">
+            <li>Webサーバー・外部DB不要。社内LANのファイル共有領域を指定することで複数端末からの同時運用が可能</li>
+            <li>前工程の完了状態に連動した <code>！要着手</code> 表示による次工程着手判断の補助</li>
+            <li>返却期日超過・図面リミット超過の即時赤字ハイライト警告</li>
+            <li>過去バックアップデータとの差分比較により、変更箇所のみを迅速に抽出</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout success">
+        <div>
+          <div class="callout-title">完全ローカル・閉域環境動作アーキテクチャ</div>
+          <div class="callout-body">
+            外部のWebサーバー、クラウドサービス、外部データベースとの通信は一切行いません。ブラウザ標準のローカルファイルアクセス機能（File System Access API）を利用し、端末ローカルまたは社内LAN上の共有フォルダ内にある <code>team_data.json</code> を直接読み書きします。インターネットから完全に隔離された閉域環境・オフライン環境でも同一の操作性で安全に稼働し、社外への情報流出リスクを構造的に排除しています。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. システムアーキテクチャとデータ同期 -->
+    <section>
+      <h2><span class="section-indicator">02.</span> システムアーキテクチャとデータ同期仕様</h2>
+      <p>
+        複数の担当者が同時に利用する運用に対応するため、排他制御（ロック制御）および自動バックアップ機能を備えています。
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 220px;">機能・機構</th>
+              <th>技術仕様・動作挙動</th>
+              <th style="width: 180px;">メリット・効果</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>File System Access API</strong></td>
+              <td>ユーザーが指定した共有フォルダのハンドル（<code>dirHandle</code>）を取得し、直接ファイル操作を実行。</td>
+              <td>専用サーバー不要。社内LANのファイル共有環境で運用可能</td>
+            </tr>
+            <tr>
+              <td><strong>排他制御 (Lock Mechanism)</strong></td>
+              <td>データ保存時に <code>lock.json</code> を作成し、他端末からの同時上書きを一時的に待機。ロックファイルのタイムアウト自動解除機構を実装。</td>
+              <td>同時更新時の競合やデータの上書き不整合を防止</td>
+            </tr>
+            <tr>
+              <td><strong>デイリー自動バックアップ</strong></td>
+              <td>日々の初回接続時、<code>backups/daily_YYYYMMDD.json</code> を自動生成。直近30世代のバックアップファイルを自動保持・ローテーション。</td>
+              <td>過去データの復元担保および進捗差分比較の入力ソースとして活用</td>
+            </tr>
+            <tr>
+              <td><strong>クイック同期</strong></td>
+              <td>ヘッダーの「最新データに更新」または「クイック同期」操作により、ファイル上の最新データを再読込して画面を即時更新。</td>
+              <td>他端末で行われた進捗更新を即座に反映</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3. 画面レイアウトとデザインシステム -->
+    <section>
+      <h2><span class="section-indicator">03.</span> 画面レイアウトとデザインシステム</h2>
+      <p>
+        長時間の現場業務における眼精疲労を軽減し、高密度な進捗情報の視認性を確保するため、鳥の子色・深墨茶を基調とした落ち着いた配色設計を採用しています。
+      </p>
+
+      <div class="card">
+        <h3 style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">① フルHD (1920×1080) 解像度 最適化レイアウト</h3>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+          一般的なオフィスのフルHDディスプレイにおいて、横スクロールなしで基本情報8列＋工程7列の全15列を一画面で俯瞰・確認できます。テーブルヘッダーは上部に固定（Sticky）され、多数の製番行をスクロールしても列見出しが常時表示されます。
+        </p>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">② 工程ヘッダーの配色区分とアクセントバー</h3>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 14px;">
+          一覧表の各工程ヘッダー上端には、視認性を高める 3.5px のアクセントバーと淡い背景色を配置しています。各工程は以下のカラーコードで区分されています：
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; font-family: var(--font-mono);">
+          <span class="badge badge-primary">1. 納入仕様書: 鉄紺 (#3B5766)</span>
+          <span class="badge badge-accent">2. 板金手配: 弁柄 (#B85C43)</span>
+          <span class="badge" style="background: rgba(92, 75, 64, 0.12); color: #5C4B40; border: 1px solid #5C4B40;">3. 部品手配: 黒茶 (#5C4B40)</span>
+          <span class="badge badge-success">4. 銘板手配: 常磐緑 (#4E6F5A)</span>
+          <span class="badge badge-purple">5. 社内工事図: 古代紫 (#6B5B6E)</span>
+          <span class="badge badge-primary">6. ソフト開発: 鉄紺 (#3B5766)</span>
+          <span class="badge badge-accent">7. 完了: 弁柄 (#B85C43)</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">③ 基本情報エリア境界ディバイダー (3px 鉄紺ボーダー)</h3>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+          第8列の「納期」セルの右端に、太さ <strong>3px の鉄紺縦境界線</strong>（Dark時は明鉄紺 <code>#678696</code>）を配置。案件の基本情報エリアと、日々更新される工程進捗エリアを明確に視覚区分しています。
+        </p>
+      </div>
+    </section>
+
+    <!-- 4. 製番別進捗一覧 機能仕様 -->
+    <section>
+      <h2><span class="section-indicator">04.</span> 製番別進捗一覧 機能仕様</h2>
+      <p>
+        日々の業務の中心となるメイン画面（製番別進捗一覧）の詳細な列仕様と機能構成です。
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">No</th>
+              <th style="width: 140px;">列名</th>
+              <th style="width: 90px;">幅 (FHD)</th>
+              <th style="width: 90px;">配置</th>
+              <th>管理内容・仕様詳細</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td><strong>製番</strong></td>
+              <td><code>110px</code></td>
+              <td>左揃え</td>
+              <td>製造番号（主キー）。<strong>一意性制約</strong>により重複登録・重複変更をリアルタイムに防止。等幅フォント。</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><strong>担当者</strong></td>
+              <td><code>75px</code></td>
+              <td>中央揃え</td>
+              <td>電気設計主担当者名。マスターデータから選択。</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><strong>リンク</strong></td>
+              <td><code>65px</code></td>
+              <td>中央揃え</td>
+              <td>図面フォルダや共有パスへのリンク。クリックでクリップボードへコピー（コピー完了時に一定時間チェックマークを表示）。</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><strong>客先</strong></td>
+              <td><code>110px</code></td>
+              <td>左揃え</td>
+              <td>クライアント企業名。文字あふれ時は「...」で省略表示。</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td><strong>件名</strong></td>
+              <td><code>165px</code></td>
+              <td>左揃え</td>
+              <td>工事名称・案件名。十分な表示幅を確保。</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><strong>向先</strong></td>
+              <td><code>110px</code></td>
+              <td>左揃え</td>
+              <td>納入先工場・現場名。</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td><strong>品名</strong></td>
+              <td><code>140px</code></td>
+              <td>左揃え</td>
+              <td>制御盤名・製品名。</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td><strong>納期</strong></td>
+              <td><code>110px</code></td>
+              <td>中央揃え</td>
+              <td>最終納期（YYYY-MM-DD）。ソート対応。右端に3px境界ディバイダー。</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td><strong>納入仕様書</strong></td>
+              <td><code>145px</code></td>
+              <td>中央揃え</td>
+              <td>出図日、返却期日、承認日。返却期日超過時は<strong>赤字強調</strong>。</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td><strong>板金手配</strong></td>
+              <td><code>155px</code></td>
+              <td>中央揃え</td>
+              <td>外注先、注文納期、受領、詳細図納期、納期確定。詳細図リミット超過時は<strong>赤字強調</strong>。板金予算管理（自動カンマ区切り）。</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td><strong>部品手配</strong></td>
+              <td><code>160px</code></td>
+              <td>中央揃え</td>
+              <td><strong>主部品・予備品・支給品</strong> の3系統独立管理。進捗サマリー（<code>納期(主部品): 日付</code>、<code>不要(予備品)</code>、<code>[コピー済]</code> 等）。</td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td><strong>銘板手配</strong></td>
+              <td><code>120px</code></td>
+              <td>中央揃え</td>
+              <td>手配業者、注文日、納期。仕様書承認後に「！要着手」点灯。</td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td><strong>社内工事図</strong></td>
+              <td><code>110px</code></td>
+              <td>中央揃え</td>
+              <td>出図日。板金・部品・銘板の完了後に「！要着手」点灯。</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td><strong>ソフト開発</strong></td>
+              <td><code>110px</code></td>
+              <td>中央揃え</td>
+              <td>作成日、デバッグ完了日。銘板完了後に「！要着手」点灯。</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td><strong>完了</strong></td>
+              <td><code>75px</code></td>
+              <td>中央揃え</td>
+              <td>案件全体の完了トグルスイッチ。完了時は常磐緑ボタンが点灯。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">視認性強化ソート (製番・納期)</h3>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+          ヘッダーの「製番」「納期」をクリックすると昇順・降順を切り替え。現在どの列が有効かを <strong>ピル型バッジ（<code>[↑ 昇順]</code> / <code>[↓ 降順]</code>）、背景チントハイライト、下端3pxアクセントライン</strong> で表示し、現在の並び順を即座に判別可能です。
+        </p>
+      </div>
+    </section>
+
+    <!-- 5. 進捗差分比較 (Diff Engine) 機能仕様 -->
+    <section>
+      <h2><span class="section-indicator">05.</span> 進捗差分比較 (Diff Engine) 仕様</h2>
+      <p>
+        前回ミーティング時や過去バックアップ時点からの工程変更点を抽出し、報告・進捗確認業務の効率化を図る比較機能です。
+      </p>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3 style="margin-top:0;">一覧表示とのレイアウト統一 ＆ 列幅均等化</h3>
+          <ul style="padding-left: 20px; font-size: 13.5px; color: var(--text-muted); line-height: 1.8;">
+            <li>基本情報は <strong>製番・客先・件名・品名・納期</strong> の独立5列で構成</li>
+            <li>基本情報データ部は製番別進捗一覧と揃えて <strong>左揃え</strong> で統一</li>
+            <li>右側工程データ9列すべてを <code>&lt;colgroup&gt;</code> で <strong>120px の均等幅</strong> に固定</li>
+            <li><code>white-space: nowrap</code> により日付等の改行（折り返し）を防止</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;">複合安定ソート ＆ 変更点強調</h3>
+          <ul style="padding-left: 20px; font-size: 13.5px; color: var(--text-muted); line-height: 1.8;">
+            <li><strong>第1キー「納期昇順」＋ 第2キー「製番昇順（自然順）」</strong> の複合ソート</li>
+            <li>同日納期の案件が多数存在する場合でも、製番の若い順に自動整列</li>
+            <li>前回バックアップから変更のあったセルは <strong>常磐緑チント背景 ＋ 太字</strong> でハイライト表示</li>
+            <li>新規追加された案件も自動検出して差分行として抽出</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>対象工程</th>
+              <th>比較対象項目 (全9列・各120px均等幅)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>納入仕様書 (鉄紺)</strong></td>
+              <td><code>出図</code>、<code>返却期日</code>、<code>承認</code></td>
+            </tr>
+            <tr>
+              <td><strong>板金手配 (弁柄)</strong></td>
+              <td><code>手配先</code>、<code>注文納期</code>、<code>受領</code>、<code>詳細図納期</code>、<code>納期確定</code></td>
+            </tr>
+            <tr>
+              <td><strong>主部品 (黒茶)</strong></td>
+              <td><code>納期</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 6. 案件登録・編集とマスターデータ管理 -->
+    <section>
+      <h2><span class="section-indicator">06.</span> 案件登録・編集 ＆ マスターデータ管理</h2>
+      <p>
+        入力誤りや二重登録を防止し、効率的なデータ登録を支援する入力制御機能を備えています。
+      </p>
+
+      <div class="card">
+        <h3 style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">① 既存案件からの情報一括コピー</h3>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+          新規製番登録モーダル上部の検索窓から過去の類似案件を検索・選択すると、客先・件名・品名・担当者・規格だけでなく、<strong>各工程の「要・不要」設定や板金予算まで一括転記</strong>されます。リピート案件や類似案件の登録作業を大幅に省力化します。
+        </p>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">② 製番の一意性制約 ＆ リアルタイム警告UI</h3>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+          製番入力欄に文字を入力した時点で既存の全製番とリアルタイム照合を行い、重複を検知した場合は入力枠を強調表示し、「※この製番は既に登録されています」と警告を表示します。保存処理時にも最新データと照合し、同一製番の重複登録を確実に抑止します。
+        </p>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">③ マスターデータの一意性制約 ＆ Enterキー対応</h3>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+          「設定」モーダル内の各マスターデータ（客先、担当者、規格、板金外注先）において、重複登録および編集時の重複を防止します。入力中のリアルタイム重複判定に加え、Enterキーによる項目追加（日本語入力IME変換確定時の誤動作防止を含む）に対応しています。
+        </p>
+      </div>
+    </section>
+
+    <!-- 7. 操作マニュアル ＆ 運用ステップ -->
+    <section>
+      <h2><span class="section-indicator">07.</span> 操作マニュアル ＆ 運用ステップ (Step-by-Step)</h2>
+      <p>
+        現場導入時の標準的な運用手順です。
+      </p>
+
+      <ol class="step-list">
+        <li>
+          <div class="step-title">共有フォルダの接続</div>
+          初回起動時、ヘッダーの「同期設定」をクリックし、社内LAN上の共有フォルダ（例: <code>\\fileserver\製造部\進捗管理\</code> または <code>Z:\製造部\進捗管理\</code>）を選択します。接続状態が「同期中」となれば設定完了です。
+        </li>
+        <li>
+          <div class="step-title">新規製番の登録</div>
+          ヘッダー右上の「＋新規製番登録」をクリックします。類似案件やリピート案件の場合は「既存案件からコピー」で過去案件を検索して転記し、納期等を設定して「保存」をクリックします。
+        </li>
+        <li>
+          <div class="step-title">日々の工程進捗更新</div>
+          一覧表の各工程セル（納入仕様書、板金、部品…）をクリックすると、専用の詳細モーダルが開きます。
+          <ul style="padding-left: 20px; font-size: 13px; color: var(--text-muted); margin-top: 6px; line-height: 1.6;">
+            <li>「済」ボタンをクリックすると当日の日付が自動入力され、完了状態（常磐緑）となります。</li>
+            <li>日付欄をクリックしてキーボードから直接 <code>yyyy/mm/dd</code> を打ち込むか、右端のカレンダーアイコンから選択。</li>
+          </ul>
+        </li>
+        <li>
+          <div class="step-title">朝会・週次定例での差分比較実行</div>
+          上部タブを「進捗差分比較」に切り替え、比較対象とする過去のバックアップファイルを選択して「比較実行」をクリックします。変更のあった工程セルが常磐緑でハイライト表示されます。
+        </li>
+      </ol>
+
+      <div class="callout accent">
+        <div>
+          <div class="callout-title">トラブルシューティング</div>
+          <div class="callout-body">
+            <strong>Q. フォルダへのアクセス許可が求められる場合:</strong><br>
+            ブラウザのセキュリティ保護仕様により、ブラウザを完全に閉じて再起動した後はフォルダへのアクセス再許可が必要です。ヘッダーの「同期設定」または「最新データに更新」をクリックし、確認ダイアログで「アクセスを許可」を選択してください。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- フッター -->
+    <footer class="spec-footer">
+      <div class="spec-footer-sub">
+        Team Progress Tracker &middot; Official System Specification
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function updateThemeUI(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      const textSpan = document.getElementById('theme-text');
+      const iconSpan = document.getElementById('theme-icon');
+      if (!textSpan || !iconSpan) return;
+
+      if (theme === 'dark') {
+        textSpan.innerText = 'Light';
+        iconSpan.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" fill="#F4F0E6" stroke="#C8C2B8" stroke-width="1.8"/></svg>';
+      } else {
+        textSpan.innerText = 'Dark';
+        iconSpan.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" fill="#1E1D1B" stroke="#5E5850" stroke-width="1.2"/></svg>';
+      }
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      updateThemeUI(next);
+    }
+
+    // OSテーマ自動判定
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    updateThemeUI(prefersDark ? 'dark' : 'light');
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      updateThemeUI(e.matches ? 'dark' : 'light');
+    });
+  </script>
+</body>
+</html>

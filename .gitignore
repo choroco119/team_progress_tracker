@@ -1,0 +1,17 @@
+# Data files
+team_data.json
+lock.json
+backups/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Internal files
+Plan.md
+AICHANGELOG.md
+for_agent/

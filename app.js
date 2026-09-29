@@ -1,0 +1,2911 @@
+// UI Elements
+const tableHeaderRow = document.getElementById('table-header-row');
+const progressBody = document.getElementById('progress-body');
+const activeProjectsEl = document.getElementById('active-projects-count');
+const thisWeekDeadlinesEl = document.getElementById('this-week-deadlines');
+const alertCountEl = document.getElementById('alert-count');
+const modalOverlay = document.getElementById('modal-overlay');
+const addProjectBtn = document.getElementById('add-project-btn');
+const deleteProjectBtn = document.getElementById('delete-project-btn');
+const closeModalBtn = document.getElementById('close-modal');
+const cancelBtn = document.getElementById('cancel-btn');
+const addProjectForm = document.getElementById('add-project-form');
+
+// Settings & Sync Elements
+// Process Modal Elements
+const processSpecModal = document.getElementById('process-spec-modal');
+const closeSpecModalBtn = document.getElementById('close-spec-modal');
+const cancelSpecModalBtn = document.getElementById('cancel-spec-modal');
+const saveSpecModalBtn = document.getElementById('save-spec-modal');
+
+const specIssueBtn = document.getElementById('spec-issue-btn');
+const specIssueDateInput = document.getElementById('spec-issue-date');
+const specDueInput = document.getElementById('spec-due-date');
+const specReturnBtn = document.getElementById('spec-return-btn');
+const specReturnDateInput = document.getElementById('spec-return-date');
+const specFixYesBtn = document.getElementById('spec-fix-yes-btn');
+const specFixNoBtn = document.getElementById('spec-fix-no-btn');
+const specApprovalBtn = document.getElementById('spec-approval-btn');
+const specApprovalDateInput = document.getElementById('spec-approval-date');
+const specMemoInput = document.getElementById('spec-memo');
+
+const processSheetMetalModal = document.getElementById('process-sheetMetal-modal');
+const closeSheetMetalModalBtn = document.getElementById('close-sheetMetal-modal');
+const cancelSheetMetalModalBtn = document.getElementById('cancel-sheetMetal-modal');
+const saveSheetMetalModalBtn = document.getElementById('save-sheetMetal-modal');
+
+const smQuoteBtn = document.getElementById('sm-quote-btn');
+const smQuoteDate = document.getElementById('sm-quote-date');
+const smVendorSelect = document.getElementById('sm-vendor');
+const smPoSentBtn = document.getElementById('sm-po-sent-btn');
+const smPoSentDate = document.getElementById('sm-po-sent-date');
+const smPoDueDate = document.getElementById('sm-po-due-date');
+const smDrawingDueDate = document.getElementById('sm-drawing-due-date');
+const smPoRecvBtn = document.getElementById('sm-po-recv-btn');
+const smPoRecvDate = document.getElementById('sm-po-recv-date');
+const smDrawingSentBtn = document.getElementById('sm-drawing-sent-btn');
+const smDrawingSentDate = document.getElementById('sm-drawing-sent-date');
+const smDrawingLimitDate = document.getElementById('sm-drawing-limit-date');
+const smConfirmedBtn = document.getElementById('sm-confirmed-btn');
+const smConfirmedDate = document.getElementById('sm-confirmed-date');
+const smMemoInput = document.getElementById('sm-memo');
+
+const processPartsModal = document.getElementById('process-parts-modal');
+const closePartsModalBtn = document.getElementById('close-parts-modal');
+const cancelPartsModalBtn = document.getElementById('cancel-parts-modal');
+const savePartsModalBtn = document.getElementById('save-parts-modal');
+
+const ppMainReqBtn = document.getElementById('pp-main-req-btn');
+const ppMainReqDate = document.getElementById('pp-main-req-date');
+const ppMainDueDate = document.getElementById('pp-main-due-date');
+const ppMainSection = document.getElementById('pp-main-section');
+
+const ppSpareReqBtn = document.getElementById('pp-spare-req-btn');
+const ppSpareReqDate = document.getElementById('pp-spare-req-date');
+const ppSpareCopyBtn = document.getElementById('pp-spare-copy-btn');
+const ppSpareCopyDate = document.getElementById('pp-spare-copy-date');
+const ppSpareDueDate = document.getElementById('pp-spare-due-date');
+const ppSpareSection = document.getElementById('pp-spare-section');
+
+const ppProvReqBtn = document.getElementById('pp-prov-req-btn');
+const ppProvReqDate = document.getElementById('pp-prov-req-date');
+const ppProvDueDate = document.getElementById('pp-prov-due-date');
+const ppProvSection = document.getElementById('pp-provided-section');
+const ppMemoInput = document.getElementById('pp-memo');
+
+const processNameplateModal = document.getElementById('process-nameplate-modal');
+const closeNameplateModalBtn = document.getElementById('close-nameplate-modal');
+const cancelNameplateModalBtn = document.getElementById('cancel-nameplate-modal');
+const saveNameplateModalBtn = document.getElementById('save-nameplate-modal');
+
+const npPoSentBtn = document.getElementById('np-po-sent-btn');
+const npPoSentDate = document.getElementById('np-po-sent-date');
+const npDueDate = document.getElementById('np-due-date');
+const npMemoInput = document.getElementById('np-memo');
+
+const processInternalDrawingsModal = document.getElementById('process-internal-drawings-modal');
+const closeInternalDrawingsModalBtn = document.getElementById('close-internal-drawings-modal');
+const cancelInternalDrawingsModalBtn = document.getElementById('cancel-internal-drawings-modal');
+const saveInternalDrawingsModalBtn = document.getElementById('save-internal-drawings-modal');
+
+const idIssueBtn = document.getElementById('id-issue-btn');
+const idIssueDate = document.getElementById('id-issue-date');
+const idMemoInput = document.getElementById('id-memo');
+
+const processSoftwareModal = document.getElementById('process-software-modal');
+const closeSoftwareModalBtn = document.getElementById('close-software-modal');
+const cancelSoftwareModalBtn = document.getElementById('cancel-software-modal');
+const saveSoftwareModalBtn = document.getElementById('save-software-modal');
+
+const swCreationBtn = document.getElementById('sw-creation-btn');
+const swCreationDate = document.getElementById('sw-creation-date');
+const swDebuggingBtn = document.getElementById('sw-debugging-btn');
+const swDebuggingDate = document.getElementById('sw-debugging-date');
+const swMemoInput = document.getElementById('sw-memo');
+
+let currentSpecData = {
+    issueDate: '',
+    dueDate: '',
+    returnDate: '',
+    needsFix: '',
+    approvalDate: '',
+    memo: ''
+};
+
+let currentSheetMetalData = {
+    quoteDate: '',
+    vendor: '',
+    poSentDate: '',
+    poDueDate: '',
+    drawingDueDate: '',
+    poRecvDate: '',
+    drawingSentDate: '',
+    drawingLimitDate: '',
+    confirmedDate: '',
+    memo: ''
+};
+
+let currentPartsData = {
+    main: { requestDate: '', dueDate: '' },
+    spare: { requestDate: '', copyDate: '', dueDate: '' },
+    provided: { requestDate: '', dueDate: '' },
+    memo: ''
+};
+
+let currentNameplateData = {
+    poSentDate: '',
+    dueDate: '',
+    memo: ''
+};
+
+let currentInternalDrawingsData = {
+    issueDate: '',
+    memo: ''
+};
+
+let currentSoftwareData = {
+    creationDate: '',
+    debuggingDate: '',
+    memo: ''
+};
+
+// Settings Elements
+const settingsBtn = document.getElementById('settings-btn');
+const settingsOverlay = document.getElementById('settings-overlay');
+const closeSettingsBtn = document.getElementById('close-settings');
+const cancelSettingsBtn = document.getElementById('cancel-settings');
+const saveSettingsBtn = document.getElementById('save-settings-btn');
+
+const mainTabBtns = document.querySelectorAll('.tab-nav .tab-btn');
+const mainTabContents = document.querySelectorAll('main > .tab-content');
+const settingsTabBtns = document.querySelectorAll('.settings-modal .tabs .tab-btn');
+const settingsTabContents = document.querySelectorAll('.settings-modal .tab-content');
+
+const newCustomerNameInput = document.getElementById('new-customer-name-input');
+const newCustomerKanaInput = document.getElementById('new-customer-kana-input');
+const addCustomerBtn = document.getElementById('add-customer-btn');
+const customerListContainer = document.getElementById('customer-list-container');
+const customerNameError = document.getElementById('customer-name-error');
+
+const newSpecInput = document.getElementById('new-spec-input');
+const addSpecBtn = document.getElementById('add-spec-btn');
+const specListContainer = document.getElementById('spec-list-container');
+const specNameError = document.getElementById('spec-name-error');
+
+const newVendorInput = document.getElementById('new-vendor-input');
+const addVendorBtn = document.getElementById('add-vendor-btn');
+const vendorListContainer = document.getElementById('vendor-list-container');
+const vendorNameError = document.getElementById('vendor-name-error');
+
+const newStaffInput = document.getElementById('new-staff-input');
+const addStaffBtn = document.getElementById('add-staff-btn');
+const staffListContainer = document.getElementById('staff-list-container');
+const staffNameError = document.getElementById('staff-name-error');
+
+const syncFolderBtn = document.getElementById('sync-folder-btn');
+window.quickSyncBtn = document.getElementById('quick-sync-btn');
+const refreshDataBtn = document.getElementById('save-sync-btn');
+const copyFromSection = document.getElementById('copy-from-section');
+const copySearchInput = document.getElementById('copy-search-input');
+const copySearchResults = document.getElementById('copy-search-results');
+const syncStatusEl = document.getElementById('sync-status');
+
+const projectCustomerSelect = document.getElementById('project-customer');
+const projectSpecSelect = document.getElementById('project-spec');
+const projectStaffSelect = document.getElementById('project-staff');
+const projectBudgetInput = document.getElementById('project-budget');
+const projectLinkInput = document.getElementById('project-link');
+
+// Necessity Elements
+const necSpecYes = document.getElementById('nec-spec-yes');
+const necSpecNo = document.getElementById('nec-spec-no');
+const necSmYes = document.getElementById('nec-sm-yes');
+const necSmNo = document.getElementById('nec-sm-no');
+const necPpMainYes = document.getElementById('nec-pp-main-yes');
+const necPpMainNo = document.getElementById('nec-pp-main-no');
+const necPpSpareYes = document.getElementById('nec-pp-spare-yes');
+const necPpSpareNo = document.getElementById('nec-pp-spare-no');
+const necPpProvYes = document.getElementById('nec-pp-prov-yes');
+const necPpProvNo = document.getElementById('nec-pp-prov-no');
+const necNpYes = document.getElementById('nec-np-yes');
+const necNpNo = document.getElementById('nec-np-no');
+const necIdYes = document.getElementById('nec-id-yes');
+const necIdNo = document.getElementById('nec-id-no');
+const necSwYes = document.getElementById('nec-sw-yes');
+const necSwNo = document.getElementById('nec-sw-no');
+// Filter Elements
+const filterId = document.getElementById('filter-id');
+const filterCustomer = document.getElementById('filter-customer');
+const filterSubject = document.getElementById('filter-subject');
+const filterDestination = document.getElementById('filter-destination');
+const filterName = document.getElementById('filter-name');
+const filterStaff = document.getElementById('filter-staff');
+const filterExcludeCompleted = document.getElementById('filter-exclude-completed');
+const filterSpecDoc = document.getElementById('filter-specDoc');
+const filterSheetMetal = document.getElementById('filter-sheetMetal');
+const filterParts = document.getElementById('filter-parts');
+const filterNameplate = document.getElementById('filter-nameplate');
+const filterInternalDrawings = document.getElementById('filter-internalDrawings');
+const filterSoftware = document.getElementById('filter-software');
+const processFilterGroup = document.getElementById('process-filter-group');
+const clearFiltersBtn = document.getElementById('clear-filters');
+const processFilterBtns = document.querySelectorAll('#process-filter-group button');
+const sortIdHeader = document.getElementById('sort-id');
+const sortDeadlineHeader = document.getElementById('sort-deadline');
+
+// State for Modal
+let editingProjectId = null;
+let editingCustomerIndex = null;
+let editingSpecIndex = null;
+let editingVendorIndex = null;
+let editingStaffIndex = null;
+
+let tempCustomerList = [];
+let tempSpecList = [];
+let tempVendorList = [];
+let tempStaffList = [];
+
+let currentNecessityData = {
+    specDoc: true,
+    sheetMetal: true,
+    partsProcurement: { main: true, spare: true, provided: true },
+    nameplateProcurement: true,
+    internalDrawings: true,
+    software: true
+};
+
+let editingProcessProjectId = null;
+
+// Sort & Filter State
+let sortField = 'id'; // 'id' or 'deadline'
+let sortOrder = 'asc'; // 'asc' or 'desc'
+
+// Filter State
+let activeProcessFilters = new Set();
+let processFilterValues = {
+    specDoc: '',
+    sheetMetal: '',
+    partsProcurement: '',
+    nameplateProcurement: '',
+    internalDrawings: '',
+    software: ''
+};
+let showCompletedFilter = false;
+
+// Initialize
+async function init() {
+    populateSelectOptions();
+    renderHeader();
+    renderTable();
+    setupEventListeners();
+    setupInputFormatters();
+
+    // File System Access API のサポートチェック
+    if (!window.showDirectoryPicker) {
+        console.warn('File System Access API is not supported in this environment.');
+        const syncStatus = document.getElementById('sync-status');
+        if (syncStatus) {
+            syncStatus.innerHTML = '<i data-lucide="alert-triangle"></i> 同期非対応環境 (非HTTPS)';
+            syncStatus.className = 'sync-status error';
+            if (window.lucide) window.lucide.createIcons({ root: syncStatus });
+        }
+    } else {
+        // 保存された同期フォルダの確認
+        await SyncManager.checkStoredFolder();
+        // 自動更新の開始（接続済みの場合）
+        SyncManager.startAutoSync();
+    }
+}
+
+// Logic: Setup Input Formatters
+function setupInputFormatters() {
+    // 全角英数字を半角英数字に変換する関数
+    const toHalfWidth = (str) => {
+        return str.replace(/[！-～]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+            .replace(/　/g, ' '); // 全角スペースを半角スペースに
+    };
+
+    // 予算: 半角数字とカンマのみに制限し、リアルタイムでカンマ区切りにする
+    projectBudgetInput.addEventListener('input', (e) => {
+        let val = toHalfWidth(e.target.value);
+        // 数字以外を除去
+        let numVal = val.replace(/[^0-9]/g, '');
+        if (numVal) {
+            // カンマ区切りに変換
+            e.target.value = Number(numVal).toLocaleString();
+        } else {
+            e.target.value = '';
+        }
+    });
+
+    // リンク: 入力された文字をそのまま保持（全角を許可）
+    projectLinkInput.addEventListener('input', (e) => {
+        // e.target.value = toHalfWidth(e.target.value); // 強制半角化をコメントアウトまたは削除
+    });
+
+    // オートフリガナ（客先名の入力から自動補完）
+    let baseKana = '';
+    let isComposing = false;
+
+    newCustomerNameInput.addEventListener('compositionstart', () => {
+        isComposing = true;
+        baseKana = newCustomerKanaInput.value;
+    });
+
+    newCustomerNameInput.addEventListener('compositionupdate', (e) => {
+        // 漢字が含まれていない（ひらがな・カタカナ・アルファベット等）入力中の文字だけを対象にする
+        if (e.data && /^[ぁ-んァ-ンーa-zA-Z0-9]+$/.test(e.data)) {
+            let katakana = e.data.replace(/[ぁ-ん]/g, s => String.fromCharCode(s.charCodeAt(0) + 0x60));
+            katakana = katakana.toUpperCase(); // アルファベットは一応大文字に
+            newCustomerKanaInput.value = baseKana + katakana;
+        }
+    });
+
+    newCustomerNameInput.addEventListener('compositionend', () => {
+        isComposing = false;
+        baseKana = newCustomerKanaInput.value;
+    });
+
+    newCustomerNameInput.addEventListener('input', (e) => {
+        // 名前が完全にクリアされたらフリガナもクリア
+        if (e.target.value === '') {
+            newCustomerKanaInput.value = '';
+            baseKana = '';
+        } else if (!isComposing && e.data && /^[a-zA-Z0-9]+$/.test(e.data)) {
+            // IMEを使わずに直接打たれた英数字などへの対応
+            newCustomerKanaInput.value += e.data.toUpperCase();
+            baseKana = newCustomerKanaInput.value;
+        }
+    });
+
+    // 日付入力欄の空欄時表示（yyyy/mm/dd）初期化
+    initDateInputsPlaceholder();
+}
+
+// Logic: Custom Select Dropdown (Scrollable)
+function setupCustomSearchDropdown(inputId, hiddenId, resultsId, dataProvider, isObjectList = false) {
+    const input = document.getElementById(inputId);
+    const hidden = document.getElementById(hiddenId);
+    const results = document.getElementById(resultsId);
+
+    if (!input || !hidden || !results) return;
+
+    const renderResults = () => {
+        const list = dataProvider();
+        
+        results.innerHTML = '';
+        if (list.length > 0) {
+            list.forEach(item => {
+                const val = isObjectList ? item.name : item;
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.textContent = val;
+                div.onclick = () => {
+                    input.value = val;
+                    hidden.value = val;
+                    results.style.display = 'none';
+                    hidden.dispatchEvent(new Event('change'));
+                };
+                results.appendChild(div);
+            });
+            results.style.display = 'block';
+        } else {
+            results.style.display = 'none';
+        }
+    };
+
+    // クリックまたはフォーカス時に全表示
+    input.onclick = () => {
+        if (results.style.display === 'block') {
+            results.style.display = 'none';
+        } else {
+            renderResults();
+        }
+    };
+    
+    // リスト外クリックで閉じる
+    document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !results.contains(e.target)) {
+            results.style.display = 'none';
+        }
+    });
+}
+
+// Logic: Populate Select Options
+function populateSelectOptions() {
+    // フィルタ用のセレクトボックスを更新
+    const filterStaffSelect = document.getElementById('filter-staff');
+    if (filterStaffSelect) {
+        filterStaffSelect.innerHTML = '<option value="">全員</option>';
+        (state.config.staffList || []).forEach(staff => {
+            const opt = document.createElement('option');
+            opt.value = staff;
+            opt.textContent = staff;
+            filterStaffSelect.appendChild(opt);
+        });
+    }
+
+    // カスタムドロップダウンの初期化
+    setupCustomSearchDropdown('project-staff-input', 'project-staff', 'project-staff-results', () => state.config.staffList || []);
+    setupCustomSearchDropdown('project-customer-input', 'project-customer', 'project-customer-results', () => {
+        return (state.config.customerList || []).map(item =>
+            typeof item === 'string' ? { name: item, kana: item } : item
+        );
+    }, true);
+    setupCustomSearchDropdown('project-spec-input', 'project-spec', 'project-spec-results', () => state.config.specList || []);
+    setupCustomSearchDropdown('sm-vendor-input', 'sm-vendor', 'sm-vendor-results', () => state.config.sheetMetalVendors || []);
+}
+
+// Logic: 製番重複判定
+function isDuplicateProjectId(idVal, excludeId = null) {
+    const targetId = (idVal || '').trim();
+    if (!targetId) return false;
+    return state.projects.some(p => {
+        if (excludeId) {
+            return p.id === targetId && p.id !== excludeId;
+        }
+        return p.id === targetId;
+    });
+}
+
+function updateProjectIdValidationUI() {
+    const idInput = document.getElementById('project-id');
+    const errorEl = document.getElementById('project-id-error');
+    if (!idInput || !errorEl) return false;
+
+    const idVal = idInput.value.trim();
+    const isDup = isDuplicateProjectId(idVal, editingProjectId);
+
+    if (isDup) {
+        idInput.style.borderColor = 'var(--color-danger)';
+        idInput.style.boxShadow = '0 0 0 2px rgba(184, 92, 67, 0.2)';
+        errorEl.style.display = 'block';
+    } else {
+        idInput.style.borderColor = '';
+        idInput.style.boxShadow = '';
+        errorEl.style.display = 'none';
+    }
+    return isDup;
+}
+
+// Logic: マスターデータ重複判定 ＆ バリデーションUI
+
+// 1. 客先
+function isDuplicateCustomer(nameVal, excludeIndex = null) {
+    const target = (nameVal || '').trim();
+    if (!target) return false;
+    return tempCustomerList.some((c, idx) => {
+        const cName = (typeof c === 'string' ? c : (c && c.name) || '').trim();
+        return cName === target && idx !== excludeIndex;
+    });
+}
+
+function updateCustomerValidationUI() {
+    if (!newCustomerNameInput || !customerNameError) return false;
+    const isDup = isDuplicateCustomer(newCustomerNameInput.value, editingCustomerIndex);
+    if (isDup) {
+        newCustomerNameInput.style.borderColor = 'var(--color-danger)';
+        newCustomerNameInput.style.boxShadow = '0 0 0 2px rgba(184, 92, 67, 0.2)';
+        customerNameError.style.display = 'block';
+    } else {
+        newCustomerNameInput.style.borderColor = '';
+        newCustomerNameInput.style.boxShadow = '';
+        customerNameError.style.display = 'none';
+    }
+    return isDup;
+}
+
+// 2. 担当者
+function isDuplicateStaff(nameVal, excludeIndex = null) {
+    const target = (nameVal || '').trim();
+    if (!target) return false;
+    return tempStaffList.some((s, idx) => {
+        const sName = (s || '').trim();
+        return sName === target && idx !== excludeIndex;
+    });
+}
+
+function updateStaffValidationUI() {
+    if (!newStaffInput || !staffNameError) return false;
+    const isDup = isDuplicateStaff(newStaffInput.value, editingStaffIndex);
+    if (isDup) {
+        newStaffInput.style.borderColor = 'var(--color-danger)';
+        newStaffInput.style.boxShadow = '0 0 0 2px rgba(184, 92, 67, 0.2)';
+        staffNameError.style.display = 'block';
+    } else {
+        newStaffInput.style.borderColor = '';
+        newStaffInput.style.boxShadow = '';
+        staffNameError.style.display = 'none';
+    }
+    return isDup;
+}
+
+// 3. 規格
+function isDuplicateSpec(val, excludeIndex = null) {
+    const target = (val || '').trim();
+    if (!target) return false;
+    return tempSpecList.some((s, idx) => {
+        const sVal = (s || '').trim();
+        return sVal === target && idx !== excludeIndex;
+    });
+}
+
+function updateSpecValidationUI() {
+    if (!newSpecInput || !specNameError) return false;
+    const isDup = isDuplicateSpec(newSpecInput.value, editingSpecIndex);
+    if (isDup) {
+        newSpecInput.style.borderColor = 'var(--color-danger)';
+        newSpecInput.style.boxShadow = '0 0 0 2px rgba(184, 92, 67, 0.2)';
+        specNameError.style.display = 'block';
+    } else {
+        newSpecInput.style.borderColor = '';
+        newSpecInput.style.boxShadow = '';
+        specNameError.style.display = 'none';
+    }
+    return isDup;
+}
+
+// 4. 板金業者
+function isDuplicateVendor(val, excludeIndex = null) {
+    const target = (val || '').trim();
+    if (!target) return false;
+    return tempVendorList.some((v, idx) => {
+        const vVal = (v || '').trim();
+        return vVal === target && idx !== excludeIndex;
+    });
+}
+
+function updateVendorValidationUI() {
+    if (!newVendorInput || !vendorNameError) return false;
+    const isDup = isDuplicateVendor(newVendorInput.value, editingVendorIndex);
+    if (isDup) {
+        newVendorInput.style.borderColor = 'var(--color-danger)';
+        newVendorInput.style.boxShadow = '0 0 0 2px rgba(184, 92, 67, 0.2)';
+        vendorNameError.style.display = 'block';
+    } else {
+        newVendorInput.style.borderColor = '';
+        newVendorInput.style.boxShadow = '';
+        vendorNameError.style.display = 'none';
+    }
+    return isDup;
+}
+
+// 全マスターデータ入力エラー表示リセット
+function resetAllMasterValidationUI() {
+    [
+        { input: newCustomerNameInput, error: customerNameError },
+        { input: newStaffInput, error: staffNameError },
+        { input: newSpecInput, error: specNameError },
+        { input: newVendorInput, error: vendorNameError }
+    ].forEach(({ input, error }) => {
+        if (input) {
+            input.style.borderColor = '';
+            input.style.boxShadow = '';
+        }
+        if (error) {
+            error.style.display = 'none';
+        }
+    });
+}
+
+// Event Listeners
+function setupEventListeners() {
+    // 製番入力時のリアルタイム重複チェック
+    const projectIdInput = document.getElementById('project-id');
+    if (projectIdInput) {
+        projectIdInput.addEventListener('input', updateProjectIdValidationUI);
+    }
+
+    // マスターデータ入力欄のリアルタイム重複チェック
+    if (newCustomerNameInput) newCustomerNameInput.addEventListener('input', updateCustomerValidationUI);
+    if (newStaffInput) newStaffInput.addEventListener('input', updateStaffValidationUI);
+    if (newSpecInput) newSpecInput.addEventListener('input', updateSpecValidationUI);
+    if (newVendorInput) newVendorInput.addEventListener('input', updateVendorValidationUI);
+
+    // マスターデータ入力欄のEnterキー登録サポート
+    const handleMasterInputEnter = (inputEl, btnEl) => {
+        if (!inputEl || !btnEl) return;
+        inputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.isComposing) {
+                e.preventDefault();
+                btnEl.click();
+            }
+        });
+    };
+    handleMasterInputEnter(newCustomerNameInput, addCustomerBtn);
+    handleMasterInputEnter(newCustomerKanaInput, addCustomerBtn);
+    handleMasterInputEnter(newStaffInput, addStaffBtn);
+    handleMasterInputEnter(newSpecInput, addSpecBtn);
+    handleMasterInputEnter(newVendorInput, addVendorBtn);
+
+    // Project Modal
+    addProjectBtn.onclick = async () => {
+        await SyncManager.refreshIfRemoteUpdated();
+        editingProjectId = null;
+        document.getElementById('modal-title').textContent = '新規製番登録';
+        deleteProjectBtn.style.display = 'none';
+        copyFromSection.style.display = 'block'; // コピー機能を表示
+        copySearchInput.value = ''; // 検索窓をリセット
+        
+        // カスタムドロップダウンの入力値をリセット
+        ['project-staff', 'project-customer', 'project-spec'].forEach(id => {
+            document.getElementById(id).value = '';
+            document.getElementById(id + '-input').value = '';
+        });
+        copySearchResults.style.display = 'none';
+        addProjectForm.reset();
+        updateProjectIdValidationUI(); // 重複警告表示をリセット
+        
+        // Reset necessity to default all required
+        currentNecessityData = {
+            specDoc: true,
+            sheetMetal: true,
+            partsProcurement: { main: true, spare: true, provided: true },
+            nameplateProcurement: true,
+            internalDrawings: true,
+            software: true
+        };
+        renderNecessityButtons();
+        
+        toggleModal(modalOverlay, true);
+    };
+    if (closeModalBtn) closeModalBtn.onclick = () => toggleModal(modalOverlay, false);
+    if (cancelBtn) cancelBtn.onclick = () => toggleModal(modalOverlay, false);
+
+    // 既存案件からのコピー検索ロジック
+    copySearchInput.oninput = () => {
+        const query = copySearchInput.value.trim().toLowerCase();
+        if (!query) {
+            copySearchResults.style.display = 'none';
+            return;
+        }
+
+        const matches = state.projects.filter(p => 
+            p.id.toLowerCase().includes(query) ||
+            (p.customer || '').toLowerCase().includes(query) ||
+            (p.subject || '').toLowerCase().includes(query)
+        ).slice(0, 15); // 最大15件
+
+        copySearchResults.innerHTML = '';
+        if (matches.length > 0) {
+            matches.forEach(project => {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.innerHTML = `
+                    <div style="font-weight: 600; color: var(--primary-color); font-size: 0.95rem;">${project.id}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+                        ${project.customer || '-'} | ${project.subject || '-'}
+                    </div>
+                `;
+                
+                div.onclick = () => {
+                    applyCopyFrom(project);
+                    copySearchResults.style.display = 'none';
+                    copySearchInput.value = '';
+                };
+                
+                copySearchResults.appendChild(div);
+            });
+        } else {
+            const div = document.createElement('div');
+            div.style.padding = '0.75rem';
+            div.style.color = 'var(--text-muted)';
+            div.style.fontSize = '0.8rem';
+            div.textContent = '一致する案件がありません';
+            copySearchResults.appendChild(div);
+        }
+        copySearchResults.style.display = 'block';
+    };
+
+
+    // 検索結果以外をクリックした時にリストを閉じる
+    document.addEventListener('click', (e) => {
+        if (copySearchInput && copySearchResults) {
+            if (!copySearchInput.contains(e.target) && !copySearchResults.contains(e.target)) {
+                copySearchResults.style.display = 'none';
+            }
+        }
+    });
+
+    deleteProjectBtn.onclick = async () => {
+        if (editingProjectId) {
+            const projectId = editingProjectId;
+            if (deleteProject(projectId)) {
+                modalOverlay.classList.remove('active');
+                // 自動保存を実行
+                await SyncManager.saveWithSync(true);
+            }
+        }
+    };
+
+    // Process Spec Modal
+    if (closeSpecModalBtn) closeSpecModalBtn.onclick = () => toggleModal(processSpecModal, false);
+    if (cancelSpecModalBtn) cancelSpecModalBtn.onclick = () => toggleModal(processSpecModal, false);
+
+    // Process Sheet Metal Modal
+    if (closeSheetMetalModalBtn) closeSheetMetalModalBtn.onclick = () => toggleModal(processSheetMetalModal, false);
+    if (cancelSheetMetalModalBtn) cancelSheetMetalModalBtn.onclick = () => toggleModal(processSheetMetalModal, false);
+    saveSheetMetalModalBtn.onclick = async () => {
+        if (!editingProcessProjectId) return;
+
+        const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
+        if (index !== -1) {
+            currentSheetMetalData.vendor = smVendorSelect.value;
+            currentSheetMetalData.poDueDate = smPoDueDate.value;
+            currentSheetMetalData.drawingDueDate = smDrawingDueDate.value;
+            currentSheetMetalData.drawingLimitDate = smDrawingLimitDate.value;
+            currentSheetMetalData.memo = smMemoInput.value;
+
+            state.projects[index].processes.sheetMetal = { ...currentSheetMetalData };
+            renderTable();
+            // 自動保存を実行
+            await SyncManager.saveWithSync(true);
+        }
+        processSheetMetalModal.classList.remove('active');
+    };
+
+    // Process Parts Procurement Modal
+    if (closePartsModalBtn) closePartsModalBtn.onclick = () => toggleModal(processPartsModal, false);
+    if (cancelPartsModalBtn) cancelPartsModalBtn.onclick = () => toggleModal(processPartsModal, false);
+    if (savePartsModalBtn) savePartsModalBtn.onclick = async () => {
+        if (!editingProcessProjectId) return;
+
+        const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
+        if (index !== -1) {
+            currentPartsData.main.dueDate = ppMainDueDate.value;
+            currentPartsData.spare.dueDate = ppSpareDueDate.value;
+            currentPartsData.provided.dueDate = ppProvDueDate.value;
+            currentPartsData.memo = ppMemoInput.value;
+
+            // deep copy to avoid reference issues
+            state.projects[index].processes.partsProcurement = JSON.parse(JSON.stringify(currentPartsData));
+            renderTable();
+            // 自動保存を実行
+            await SyncManager.saveWithSync(true);
+        }
+        processPartsModal.classList.remove('active');
+    };
+
+    // Process Nameplate Procurement Modal
+    if (closeNameplateModalBtn) closeNameplateModalBtn.onclick = () => toggleModal(processNameplateModal, false);
+    if (cancelNameplateModalBtn) cancelNameplateModalBtn.onclick = () => toggleModal(processNameplateModal, false);
+    if (saveNameplateModalBtn) saveNameplateModalBtn.onclick = async () => {
+        if (!editingProcessProjectId) return;
+
+        const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
+        if (index !== -1) {
+            currentNameplateData.dueDate = npDueDate.value;
+            currentNameplateData.memo = npMemoInput.value;
+
+            state.projects[index].processes.nameplateProcurement = { ...currentNameplateData };
+            renderTable();
+            // 自動保存を実行
+            await SyncManager.saveWithSync(true);
+        }
+        processNameplateModal.classList.remove('active');
+    };
+
+    // Process Internal Drawings Modal
+    if (closeInternalDrawingsModalBtn) closeInternalDrawingsModalBtn.onclick = () => toggleModal(processInternalDrawingsModal, false);
+    if (cancelInternalDrawingsModalBtn) cancelInternalDrawingsModalBtn.onclick = () => toggleModal(processInternalDrawingsModal, false);
+    if (saveInternalDrawingsModalBtn) saveInternalDrawingsModalBtn.onclick = async () => {
+        if (!editingProcessProjectId) return;
+
+        const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
+        if (index !== -1) {
+            currentInternalDrawingsData.memo = idMemoInput.value;
+            state.projects[index].processes.internalDrawings = { ...currentInternalDrawingsData };
+            renderTable();
+            // 自動保存を実行
+            await SyncManager.saveWithSync(true);
+        }
+        processInternalDrawingsModal.classList.remove('active');
+    };
+
+    // Process Software Modal
+    if (closeSoftwareModalBtn) closeSoftwareModalBtn.onclick = () => toggleModal(processSoftwareModal, false);
+    if (cancelSoftwareModalBtn) cancelSoftwareModalBtn.onclick = () => toggleModal(processSoftwareModal, false);
+    if (saveSoftwareModalBtn) saveSoftwareModalBtn.onclick = async () => {
+        if (!editingProcessProjectId) return;
+
+        const index = state.projects.findIndex(p => p.id === editingProcessProjectId);
+        if (index !== -1) {
+            currentSoftwareData.memo = swMemoInput.value;
+            state.projects[index].processes.software = { ...currentSoftwareData };
+            renderTable();
+            // 自動保存を実行
+            await SyncManager.saveWithSync(true);
+        }
+        processSoftwareModal.classList.remove('active');
+    };
+    saveSpecModalBtn.onclick = async () => {
+        if (!editingProcessProjectId) return;
+        const project = state.projects.find(p => p.id === editingProcessProjectId);
+        if (project) {
+            project.processes.specDoc = {
+                ...currentSpecData,
+                dueDate: specDueInput.value,
+                memo: specMemoInput.value
+            };
+            renderTable();
+            // 自動保存を実行
+            await SyncManager.saveWithSync(true);
+        }
+        processSpecModal.classList.remove('active');
+    };
+
+    // Toggle Buttons Logic
+    const getTodayStr = () => {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    specIssueBtn.onclick = () => {
+        currentSpecData.issueDate = currentSpecData.issueDate ? '' : getTodayStr();
+        renderSpecDocModal();
+    };
+    specIssueDateInput.onchange = (e) => {
+        currentSpecData.issueDate = e.target.value;
+        renderSpecDocModal();
+    };
+    specMemoInput.oninput = (e) => {
+        currentSpecData.memo = e.target.value;
+    };
+
+    specReturnBtn.onclick = () => {
+        currentSpecData.returnDate = currentSpecData.returnDate ? '' : getTodayStr();
+        renderSpecDocModal();
+    };
+    specReturnDateInput.onchange = (e) => {
+        currentSpecData.returnDate = e.target.value;
+        renderSpecDocModal();
+    };
+
+    specApprovalBtn.onclick = () => {
+        currentSpecData.approvalDate = currentSpecData.approvalDate ? '' : getTodayStr();
+        renderSpecDocModal();
+    };
+    specApprovalDateInput.onchange = (e) => {
+        currentSpecData.approvalDate = e.target.value;
+        renderSpecDocModal();
+    };
+
+    // Needs Fix Logic
+    if (specFixYesBtn) {
+        specFixYesBtn.onclick = () => {
+            currentSpecData.needsFix = (currentSpecData.needsFix === '要') ? '' : '要';
+            if (currentSpecData.needsFix === '要') {
+                currentSpecData.issueDate = '';
+                currentSpecData.dueDate = '';
+                specDueInput.value = '';
+            }
+            renderSpecDocModal();
+        };
+    }
+
+    if (specFixNoBtn) {
+        specFixNoBtn.onclick = () => {
+            currentSpecData.needsFix = (currentSpecData.needsFix === '否') ? '' : '否';
+            renderSpecDocModal();
+        };
+    }
+
+    // Sheet Metal Toggle Logic
+    const setupSmToggle = (btnEl, inputEl, key) => {
+        btnEl.onclick = () => {
+            currentSheetMetalData[key] = currentSheetMetalData[key] ? '' : getTodayStr();
+            renderSheetMetalModal();
+        };
+        inputEl.onchange = (e) => {
+            currentSheetMetalData[key] = e.target.value;
+            renderSheetMetalModal();
+        };
+    };
+
+    setupSmToggle(smQuoteBtn, smQuoteDate, 'quoteDate');
+    setupSmToggle(smPoSentBtn, smPoSentDate, 'poSentDate');
+    setupSmToggle(smPoRecvBtn, smPoRecvDate, 'poRecvDate');
+    setupSmToggle(smDrawingSentBtn, smDrawingSentDate, 'drawingSentDate');
+    setupSmToggle(smConfirmedBtn, smConfirmedDate, 'confirmedDate');
+    smMemoInput.oninput = (e) => {
+        currentSheetMetalData.memo = e.target.value;
+    };
+
+    // Parts Procurement Toggle Logic
+    const setupPpToggle = (btnEl, inputEl, category, key) => {
+        btnEl.onclick = () => {
+            currentPartsData[category][key] = currentPartsData[category][key] ? '' : getTodayStr();
+            renderPartsModal();
+        };
+        inputEl.onchange = (e) => {
+            currentPartsData[category][key] = e.target.value;
+            renderPartsModal();
+        };
+    };
+
+    setupPpToggle(ppMainReqBtn, ppMainReqDate, 'main', 'requestDate');
+    setupPpToggle(ppSpareReqBtn, ppSpareReqDate, 'spare', 'requestDate');
+    setupPpToggle(ppSpareCopyBtn, ppSpareCopyDate, 'spare', 'copyDate');
+    setupPpToggle(ppProvReqBtn, ppProvReqDate, 'provided', 'requestDate');
+    ppMemoInput.oninput = (e) => {
+        currentPartsData.memo = e.target.value;
+    };
+
+    // Nameplate Procurement Toggle Logic
+    const setupNpToggle = (btnEl, inputEl, key) => {
+        btnEl.onclick = () => {
+            currentNameplateData[key] = currentNameplateData[key] ? '' : getTodayStr();
+            renderNameplateModal();
+        };
+        inputEl.onchange = (e) => {
+            currentNameplateData[key] = e.target.value;
+            renderNameplateModal();
+        };
+    };
+
+    setupNpToggle(npPoSentBtn, npPoSentDate, 'poSentDate');
+    npMemoInput.oninput = (e) => {
+        currentNameplateData.memo = e.target.value;
+    };
+
+    // Internal Drawings Toggle Logic
+    const setupIdToggle = (btnEl, inputEl, key) => {
+        btnEl.onclick = () => {
+            currentInternalDrawingsData[key] = currentInternalDrawingsData[key] ? '' : getTodayStr();
+            renderInternalDrawingsModal();
+        };
+        inputEl.onchange = (e) => {
+            currentInternalDrawingsData[key] = e.target.value;
+            renderInternalDrawingsModal();
+        };
+    };
+
+    setupIdToggle(idIssueBtn, idIssueDate, 'issueDate');
+    idMemoInput.oninput = (e) => {
+        currentInternalDrawingsData.memo = e.target.value;
+    };
+
+    // Software Toggle Logic
+    const setupSwToggle = (btnEl, inputEl, key) => {
+        btnEl.onclick = () => {
+            currentSoftwareData[key] = currentSoftwareData[key] ? '' : getTodayStr();
+            renderSoftwareModal();
+        };
+        inputEl.onchange = (e) => {
+            currentSoftwareData[key] = e.target.value;
+            renderSoftwareModal();
+        };
+    };
+
+    setupSwToggle(swCreationBtn, swCreationDate, 'creationDate');
+    setupSwToggle(swDebuggingBtn, swDebuggingDate, 'debuggingDate');
+    swMemoInput.oninput = (e) => {
+        currentSoftwareData.memo = e.target.value;
+    };
+
+    // Necessity Toggle Handlers
+    const setNecHandler = (yesBtn, noBtn, key, subKey = null) => {
+        if (!yesBtn || !noBtn) return;
+        yesBtn.onclick = () => {
+            if (subKey) {
+                if (!currentNecessityData[key]) currentNecessityData[key] = {};
+                currentNecessityData[key][subKey] = true;
+            }
+            else currentNecessityData[key] = true;
+            renderNecessityButtons();
+        };
+        noBtn.onclick = () => {
+            if (subKey) {
+                if (!currentNecessityData[key]) currentNecessityData[key] = {};
+                currentNecessityData[key][subKey] = false;
+            }
+            else currentNecessityData[key] = false;
+            renderNecessityButtons();
+        };
+    };
+
+    setNecHandler(necSpecYes, necSpecNo, 'specDoc');
+    setNecHandler(necSmYes, necSmNo, 'sheetMetal');
+    setNecHandler(necPpMainYes, necPpMainNo, 'partsProcurement', 'main');
+    setNecHandler(necPpSpareYes, necPpSpareNo, 'partsProcurement', 'spare');
+    setNecHandler(necPpProvYes, necPpProvNo, 'partsProcurement', 'provided');
+    setNecHandler(necNpYes, necNpNo, 'nameplateProcurement');
+    setNecHandler(necIdYes, necIdNo, 'internalDrawings');
+    setNecHandler(necSwYes, necSwNo, 'software');
+
+    // Settings Modal
+    settingsBtn.onclick = async () => {
+        await SyncManager.refreshIfRemoteUpdated();
+        // 後方互換性: 古い文字列データがあればオブジェクトに変換してコピー
+        tempCustomerList = (state.config.customerList || []).map(item =>
+            typeof item === 'string' ? { name: item, kana: item } : { ...item }
+        );
+        tempSpecList = [...(state.config.specList || [])];
+        tempVendorList = [...(state.config.sheetMetalVendors || [])];
+        tempStaffList = [...(state.config.staffList || [])];
+        resetEditStates();
+        renderSettingsLists();
+        toggleModal(settingsOverlay, true);
+    };
+    if (closeSettingsBtn) closeSettingsBtn.onclick = () => { toggleModal(settingsOverlay, false); resetEditStates(); };
+    if (cancelSettingsBtn) cancelSettingsBtn.onclick = () => { toggleModal(settingsOverlay, false); resetEditStates(); };
+
+    // Add/Update Customer
+    addCustomerBtn.onclick = () => {
+        const nameVal = newCustomerNameInput.value.trim();
+        const kanaVal = newCustomerKanaInput.value.trim() || nameVal; // フリガナ未入力なら名前を代入
+
+        if (!nameVal) {
+            alert('客先名を入力してください。');
+            newCustomerNameInput.focus();
+            return;
+        }
+
+        if (isDuplicateCustomer(nameVal, editingCustomerIndex)) {
+            updateCustomerValidationUI();
+            alert(`客先名「${nameVal}」は既に登録されています。\n同一の客先名を重複登録することはできません。`);
+            newCustomerNameInput.focus();
+            newCustomerNameInput.select();
+            return;
+        }
+
+        if (editingCustomerIndex !== null) {
+            tempCustomerList[editingCustomerIndex] = { name: nameVal, kana: kanaVal };
+            editingCustomerIndex = null;
+            addCustomerBtn.textContent = '追加';
+        } else {
+            tempCustomerList.push({ name: nameVal, kana: kanaVal });
+        }
+
+        // フリガナベースでソート
+        tempCustomerList.sort((a, b) => a.kana.localeCompare(b.kana, 'ja'));
+        newCustomerNameInput.value = '';
+        newCustomerKanaInput.value = '';
+        baseKana = '';
+        resetAllMasterValidationUI();
+        renderSettingsLists();
+    };
+
+    // Add/Update Spec
+    addSpecBtn.onclick = () => {
+        const val = newSpecInput.value.trim();
+        if (!val) {
+            alert('規格を入力してください。');
+            newSpecInput.focus();
+            return;
+        }
+
+        if (isDuplicateSpec(val, editingSpecIndex)) {
+            updateSpecValidationUI();
+            alert(`規格「${val}」は既に登録されています。\n同一の規格を重複登録することはできません。`);
+            newSpecInput.focus();
+            newSpecInput.select();
+            return;
+        }
+
+        if (editingSpecIndex !== null) {
+            tempSpecList[editingSpecIndex] = val;
+            editingSpecIndex = null;
+            addSpecBtn.textContent = '追加';
+        } else {
+            tempSpecList.push(val);
+        }
+
+        tempSpecList.sort((a, b) => a.localeCompare(b, 'ja')); // 自動ソート
+        newSpecInput.value = '';
+        resetAllMasterValidationUI();
+        renderSettingsLists();
+    };
+
+    // Add/Update Vendor
+    addVendorBtn.onclick = () => {
+        const val = newVendorInput.value.trim();
+        if (!val) {
+            alert('板金業者を入力してください。');
+            newVendorInput.focus();
+            return;
+        }
+
+        if (isDuplicateVendor(val, editingVendorIndex)) {
+            updateVendorValidationUI();
+            alert(`板金業者「${val}」は既に登録されています。\n同一の板金業者を重複登録することはできません。`);
+            newVendorInput.focus();
+            newVendorInput.select();
+            return;
+        }
+
+        if (editingVendorIndex !== null) {
+            tempVendorList[editingVendorIndex] = val;
+            editingVendorIndex = null;
+            addVendorBtn.textContent = '追加';
+        } else {
+            tempVendorList.push(val);
+        }
+
+        tempVendorList.sort((a, b) => a.localeCompare(b, 'ja')); // 自動ソート
+        newVendorInput.value = '';
+        resetAllMasterValidationUI();
+        renderSettingsLists();
+    };
+
+    // Add/Update Staff
+    addStaffBtn.onclick = () => {
+        const val = newStaffInput.value.trim();
+        if (!val) {
+            alert('担当者名を入力してください。');
+            newStaffInput.focus();
+            return;
+        }
+
+        if (isDuplicateStaff(val, editingStaffIndex)) {
+            updateStaffValidationUI();
+            alert(`担当者「${val}」は既に登録されています。\n同一の担当者を重複登録することはできません。`);
+            newStaffInput.focus();
+            newStaffInput.select();
+            return;
+        }
+
+        if (editingStaffIndex !== null) {
+            tempStaffList[editingStaffIndex] = val;
+            editingStaffIndex = null;
+            addStaffBtn.textContent = '追加';
+        } else {
+            tempStaffList.push(val);
+        }
+
+        tempStaffList.sort((a, b) => a.localeCompare(b, 'ja')); // 自動ソート
+        newStaffInput.value = '';
+        resetAllMasterValidationUI();
+        renderSettingsLists();
+    };
+
+    saveSettingsBtn.onclick = async () => {
+        state.config.customerList = tempCustomerList;
+        state.config.specList = tempSpecList;
+        state.config.sheetMetalVendors = tempVendorList;
+        state.config.staffList = tempStaffList;
+
+        populateSelectOptions();
+        renderHeader();
+        renderTable();
+        settingsOverlay.classList.remove('active');
+        resetEditStates();
+        // 自動保存を実行
+        await SyncManager.saveWithSync(true);
+    };
+
+    // File Sync
+    syncFolderBtn.onclick = () => SyncManager.connectToFolder();
+    quickSyncBtn.onclick = async () => {
+        const handle = await SyncManager.getStoredHandle();
+        if (handle) {
+            await SyncManager.connectToFolder(handle);
+        }
+    };
+    refreshDataBtn.onclick = async () => {
+        if (!dirHandle) {
+            alert('同期フォルダが設定されていません。「同期設定」からフォルダを選択してください。');
+            return;
+        }
+        await SyncManager.loadFromFolder();
+        showToast('最新データを読み込みました');
+    };
+
+    addProjectForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const idInput = document.getElementById('project-id');
+        const newId = (idInput ? idInput.value : '').trim();
+
+        if (!newId) {
+            alert('製番を入力してください。');
+            if (idInput) idInput.focus();
+            return;
+        }
+
+        // リモートの最新データを取り込んで競合チェック
+        await SyncManager.refreshIfRemoteUpdated();
+
+        // 同一製番の重複チェック
+        if (isDuplicateProjectId(newId, editingProjectId)) {
+            updateProjectIdValidationUI();
+            alert(`製番「${newId}」は既に登録されています。\n同一製番の二重登録はできません。異なる製番を入力してください。`);
+            if (idInput) {
+                idInput.focus();
+                idInput.select();
+            }
+            return;
+        }
+
+        const data = {
+            id: newId,
+            deadline: document.getElementById('project-deadline').value,
+            customer: document.getElementById('project-customer').value,
+            subject: document.getElementById('project-subject').value,
+            destination: document.getElementById('project-destination').value,
+            name: document.getElementById('project-name').value,
+            quantity: document.getElementById('project-quantity').value,
+            spec: document.getElementById('project-spec').value,
+            staff: document.getElementById('project-staff').value,
+            inspection: document.getElementById('project-inspection').value,
+            budget: document.getElementById('project-budget').value,
+            link: document.getElementById('project-link').value,
+            remarks: document.getElementById('project-remarks').value,
+            necessity: JSON.parse(JSON.stringify(currentNecessityData))
+        };
+
+        if (editingProjectId) {
+            updateProject(editingProjectId, data);
+        } else {
+            addNewProject(data);
+        }
+
+        addProjectForm.reset();
+        updateProjectIdValidationUI(); // エラー表示クリア
+        modalOverlay.classList.remove('active');
+        
+        // 自動保存を実行
+        await SyncManager.saveWithSync(true);
+    };
+
+    // Filter Events
+    const filterEvents = ['input', 'change'];
+    [filterId, filterCustomer, filterSubject, filterDestination, filterName, filterStaff].forEach(el => {
+        if (!el) return;
+        filterEvents.forEach(evt => {
+            el.addEventListener(evt, renderTable);
+        });
+    });
+
+    processFilterBtns.forEach(btn => {
+        btn.onclick = () => {
+            const filterKey = btn.getAttribute('data-filter');
+            if (activeProcessFilters.has(filterKey)) {
+                activeProcessFilters.delete(filterKey);
+                btn.classList.remove('active');
+            } else {
+                activeProcessFilters.add(filterKey);
+                btn.classList.add('active');
+            }
+            renderTable();
+        };
+    });
+
+    if (filterSpecDoc) {
+        filterSpecDoc.onchange = () => {
+            processFilterValues.specDoc = filterSpecDoc.value;
+            renderTable();
+        };
+    }
+
+    if (filterSheetMetal) {
+        filterSheetMetal.onchange = () => {
+            processFilterValues.sheetMetal = filterSheetMetal.value;
+            renderTable();
+        };
+    }
+
+    if (filterParts) {
+        filterParts.onchange = () => {
+            processFilterValues.partsProcurement = filterParts.value;
+            renderTable();
+        };
+    }
+
+    if (filterNameplate) {
+        filterNameplate.onchange = () => {
+            processFilterValues.nameplateProcurement = filterNameplate.value;
+            renderTable();
+        };
+    }
+
+    if (filterInternalDrawings) {
+        filterInternalDrawings.onchange = () => {
+            processFilterValues.internalDrawings = filterInternalDrawings.value;
+            renderTable();
+        };
+    }
+
+    if (filterSoftware) {
+        filterSoftware.onchange = () => {
+            processFilterValues.software = filterSoftware.value;
+            renderTable();
+        };
+    }
+
+    filterExcludeCompleted.onclick = () => {
+        showCompletedFilter = !showCompletedFilter;
+        filterExcludeCompleted.classList.toggle('active', showCompletedFilter);
+        renderTable();
+    };
+
+    clearFiltersBtn.onclick = () => {
+        [filterId, filterCustomer, filterSubject, filterDestination, filterName, filterStaff].forEach(el => {
+            if (el) el.value = '';
+        });
+        activeProcessFilters.clear();
+        processFilterBtns.forEach(btn => btn.classList.remove('active'));
+        
+        if (filterSpecDoc) {
+            filterSpecDoc.value = '';
+            processFilterValues.specDoc = '';
+        }
+        if (filterSheetMetal) {
+            filterSheetMetal.value = '';
+            processFilterValues.sheetMetal = '';
+        }
+        if (filterParts) {
+            filterParts.value = '';
+            processFilterValues.partsProcurement = '';
+        }
+        if (filterNameplate) {
+            filterNameplate.value = '';
+            processFilterValues.nameplateProcurement = '';
+        }
+        if (filterInternalDrawings) {
+            filterInternalDrawings.value = '';
+            processFilterValues.internalDrawings = '';
+        }
+        if (filterSoftware) {
+            filterSoftware.value = '';
+            processFilterValues.software = '';
+        }
+
+        renderTable();
+    };
+
+    // Tab Events (Main)
+    mainTabBtns.forEach(btn => {
+        btn.onclick = () => {
+            if (btn.disabled) return;
+            const target = btn.getAttribute('data-tab');
+            mainTabBtns.forEach(b => b.classList.toggle('active', b === btn));
+            mainTabContents.forEach(c => c.classList.toggle('active', c.id === target));
+        };
+    });
+
+    // Tab Events (Settings)
+    settingsTabBtns.forEach(btn => {
+        btn.onclick = () => {
+            const target = btn.getAttribute('data-tab');
+            settingsTabBtns.forEach(b => b.classList.toggle('active', b === btn));
+            settingsTabContents.forEach(c => c.classList.toggle('active', c.id === target));
+            resetEditStates();
+        };
+    });
+
+    // Sort Events
+    const toggleSort = (field) => {
+        if (sortField === field) {
+            sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortField = field;
+            sortOrder = 'asc';
+        }
+        renderTable();
+    };
+
+    if (sortIdHeader) sortIdHeader.onclick = () => toggleSort('id');
+    if (sortDeadlineHeader) sortDeadlineHeader.onclick = () => toggleSort('deadline');
+
+    // Diff Tab Logic
+    if (window.DiffEngine) {
+        window.DiffEngine.init();
+    }
+}
+
+// Logic: Update Project
+function updateProject(oldId, newData) {
+    const index = state.projects.findIndex(p => p.id === oldId);
+    if (index !== -1) {
+        // 工程データは維持し、それ以外の情報を上書き
+        state.projects[index] = {
+            ...state.projects[index],
+            ...newData
+        };
+        renderTable();
+
+    }
+}
+
+// Logic: Delete Project
+function deleteProject(projectId) {
+    if (confirm(`製番 ${projectId} を削除してもよろしいですか？\nこの操作は取り消せません。`)) {
+        state.projects = state.projects.filter(p => p.id !== projectId);
+        renderTable();
+        return true;
+    }
+    return false;
+}
+
+// Logic: Render Settings Lists
+function resetEditStates() {
+    editingCustomerIndex = null;
+    editingSpecIndex = null;
+    editingVendorIndex = null;
+    editingStaffIndex = null;
+    addCustomerBtn.textContent = '追加';
+    addSpecBtn.textContent = '追加';
+    addVendorBtn.textContent = '追加';
+    addStaffBtn.textContent = '追加';
+    newCustomerNameInput.value = '';
+    newCustomerKanaInput.value = '';
+    newSpecInput.value = '';
+    newVendorInput.value = '';
+    newStaffInput.value = '';
+    resetAllMasterValidationUI();
+}
+
+function renderSettingsLists() {
+    const createListHTML = (list, container, type) => {
+        container.innerHTML = '';
+        list.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.className = 'list-item';
+
+            if (type === 'customer' && index === editingCustomerIndex) {
+                li.classList.add('editing');
+            } else if (type === 'spec' && index === editingSpecIndex) {
+                li.classList.add('editing');
+            } else if (type === 'vendor' && index === editingVendorIndex) {
+                li.classList.add('editing');
+            } else if (type === 'staff' && index === editingStaffIndex) {
+                li.classList.add('editing');
+            }
+
+            const span = document.createElement('span');
+            span.style.flex = '1';
+            span.style.overflow = 'hidden';
+            span.style.textOverflow = 'ellipsis';
+            span.style.whiteSpace = 'nowrap';
+            span.style.marginRight = '0.75rem';
+            if (type === 'customer') {
+                span.textContent = `${item.name} (${item.kana})`;
+            } else {
+                span.textContent = item;
+            }
+
+            const actionDiv = document.createElement('div');
+            actionDiv.style.display = 'flex';
+            actionDiv.style.gap = '0.25rem';
+            actionDiv.style.flexShrink = '0';
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-icon';
+            editBtn.innerHTML = '<i data-lucide="edit-2" style="width:14px; height:14px;"></i>';
+            editBtn.onclick = () => {
+                resetAllMasterValidationUI();
+                if (type === 'customer') {
+                    newCustomerNameInput.value = item.name;
+                    newCustomerKanaInput.value = item.kana;
+                    editingCustomerIndex = index;
+                    addCustomerBtn.textContent = '更新';
+                    updateCustomerValidationUI();
+                } else if (type === 'spec') {
+                    newSpecInput.value = item;
+                    editingSpecIndex = index;
+                    addSpecBtn.textContent = '更新';
+                    updateSpecValidationUI();
+                } else if (type === 'vendor') {
+                    newVendorInput.value = item;
+                    editingVendorIndex = index;
+                    addVendorBtn.textContent = '更新';
+                    updateVendorValidationUI();
+                } else if (type === 'staff') {
+                    newStaffInput.value = item;
+                    editingStaffIndex = index;
+                    addStaffBtn.textContent = '更新';
+                    updateStaffValidationUI();
+                }
+                renderSettingsLists(); // ハイライトを反映するために再描画
+            };
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-icon';
+            deleteBtn.style.color = 'var(--danger-color)';
+            deleteBtn.innerHTML = '<i data-lucide="trash-2" style="width:14px; height:14px;"></i>';
+            deleteBtn.onclick = () => {
+                if (type === 'customer') {
+                    tempCustomerList.splice(index, 1);
+                    if (editingCustomerIndex === index) resetEditStates();
+                } else if (type === 'spec') {
+                    tempSpecList.splice(index, 1);
+                    if (editingSpecIndex === index) resetEditStates();
+                } else if (type === 'vendor') {
+                    tempVendorList.splice(index, 1);
+                    if (editingVendorIndex === index) resetEditStates();
+                } else if (type === 'staff') {
+                    tempStaffList.splice(index, 1);
+                    if (editingStaffIndex === index) resetEditStates();
+                }
+                renderSettingsLists();
+            };
+
+            actionDiv.appendChild(editBtn);
+            actionDiv.appendChild(deleteBtn);
+
+            li.appendChild(span);
+            li.appendChild(actionDiv);
+            container.appendChild(li);
+        });
+    };
+
+    createListHTML(tempCustomerList, customerListContainer, 'customer');
+    createListHTML(tempSpecList, specListContainer, 'spec');
+    createListHTML(tempVendorList, vendorListContainer, 'vendor');
+    createListHTML(tempStaffList, staffListContainer, 'staff');
+    lucide.createIcons({ root: settingsOverlay });
+}
+
+// Logic: UI Sync Status (SyncManagerから呼び出されるUI更新処理)
+function updateSyncStatusUI(status) {
+    if (!syncStatusEl) return;
+    
+    syncStatusEl.className = 'sync-status ' + status;
+    
+    if (status === 'connected') {
+        syncStatusEl.innerHTML = `<i data-lucide="cloud-check"></i> 同期中: ${state.lastUpdated ? formatTime(state.lastUpdated) : '接続済'}`;
+    } else if (status === 'locked') {
+        syncStatusEl.innerHTML = `<i data-lucide="lock"></i> 同期処理中...`;
+    } else {
+        syncStatusEl.innerHTML = `<i data-lucide="cloud-off"></i> フォルダ未接続`;
+    }
+    if (window.lucide) {
+        window.lucide.createIcons({ root: syncStatusEl });
+    }
+}
+
+function formatTime(isoStr) {
+    if (!isoStr) return '';
+    const d = new Date(isoStr);
+    return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+// 他のモジュールからUI更新関数を参照できるように公開
+window.updateSyncStatusUI = updateSyncStatusUI;
+
+// Logic: Add New Project
+function addNewProject(data) {
+    const newProject = {
+        ...data,
+        isCompleted: false,
+        processes: {
+            specDoc: {
+                issueDate: '',
+                dueDate: '',
+                returnDate: '',
+                needsFix: '',
+                approvalDate: '',
+                memo: ''
+            },
+            sheetMetal: {
+                quoteDate: '',
+                vendor: '',
+                poSentDate: '',
+                poDueDate: '',
+                drawingDueDate: '',
+                poRecvDate: '',
+                drawingSentDate: '',
+                drawingLimitDate: '',
+                confirmedDate: '',
+                memo: ''
+            },
+            partsProcurement: {
+                main: { requestDate: '', dueDate: '' },
+                spare: { requestDate: '', copyDate: '', dueDate: '' },
+                provided: { requestDate: '', dueDate: '' },
+                memo: ''
+            },
+            nameplateProcurement: {
+                poSentDate: '',
+                dueDate: '',
+                memo: ''
+            },
+            internalDrawings: {
+                issueDate: '',
+                memo: ''
+            },
+            software: {
+                creationDate: '',
+                debuggingDate: '',
+                memo: ''
+            }
+        },
+        necessity: data.necessity || {
+            specDoc: true,
+            sheetMetal: true,
+            partsProcurement: { main: true, spare: true, provided: true },
+            nameplateProcurement: true,
+            internalDrawings: true,
+            software: true
+        }
+    };
+
+    state.projects.unshift(newProject);
+    renderTable();
+}
+
+// Render Table Header
+function renderHeader() {
+    const headerRow = document.getElementById('table-header-row');
+    const staticStartCount = 8; // 製番, 担当者, リンク, 客先, 件名, 向先, 品名, 納期
+    const staticEndCount = 0;
+
+    // Remove all dynamic columns
+    while (headerRow.children.length > staticStartCount + staticEndCount) {
+        headerRow.removeChild(headerRow.children[staticStartCount]);
+    }
+
+    const thSpec = document.createElement('th');
+    thSpec.textContent = '納入仕様書';
+    thSpec.style.textAlign = 'center';
+    thSpec.className = 'th-process th-spec';
+    headerRow.appendChild(thSpec);
+
+    const thSheetMetal = document.createElement('th');
+    thSheetMetal.textContent = '板金手配';
+    thSheetMetal.style.textAlign = 'center';
+    thSheetMetal.className = 'th-process th-sheet-metal';
+    headerRow.appendChild(thSheetMetal);
+
+    const thParts = document.createElement('th');
+    thParts.textContent = '部品手配';
+    thParts.style.textAlign = 'center';
+    thParts.className = 'th-process th-parts';
+    headerRow.appendChild(thParts);
+
+    const thNameplate = document.createElement('th');
+    thNameplate.textContent = '銘板手配';
+    thNameplate.style.textAlign = 'center';
+    thNameplate.className = 'th-process th-nameplate';
+    headerRow.appendChild(thNameplate);
+
+    const thInternalDrawings = document.createElement('th');
+    thInternalDrawings.textContent = '社内工事図';
+    thInternalDrawings.style.textAlign = 'center';
+    thInternalDrawings.className = 'th-process th-internal-drawings';
+    headerRow.appendChild(thInternalDrawings);
+
+    const thSoftware = document.createElement('th');
+    thSoftware.textContent = 'ソフト';
+    thSoftware.style.textAlign = 'center';
+    thSoftware.className = 'th-process th-software';
+    headerRow.appendChild(thSoftware);
+
+    const thCompleted = document.createElement('th');
+    thCompleted.textContent = '完了';
+    thCompleted.style.textAlign = 'center';
+    thCompleted.className = 'th-process th-completed';
+    headerRow.appendChild(thCompleted);
+}
+
+// Render Table Body
+function renderTable() {
+    progressBody.innerHTML = '';
+
+    // Apply Sorting
+    const sortedProjects = [...state.projects].sort((a, b) => {
+        let valA = a[sortField] || '';
+        let valB = b[sortField] || '';
+        if (sortOrder === 'desc') {
+            return valB.localeCompare(valA, 'ja', { numeric: true });
+        }
+        return valA.localeCompare(valB, 'ja', { numeric: true });
+    });
+
+    // Update Sort UI
+    const updateHeaderSortUI = (headerEl, field) => {
+        if (!headerEl) return;
+        const isActive = sortField === field;
+        headerEl.classList.toggle('sort-active', isActive);
+
+        const indicator = headerEl.querySelector('.sort-indicator') || headerEl.querySelector('.icon-wrapper');
+        const fieldName = field === 'id' ? '製番' : '納期';
+
+        if (indicator) {
+            if (isActive) {
+                const isAsc = sortOrder === 'asc';
+                const iconName = isAsc ? 'arrow-up' : 'arrow-down';
+                const labelText = isAsc ? '昇順' : '降順';
+                indicator.innerHTML = `<i data-lucide="${iconName}" class="sort-icon"></i><span class="sort-label">${labelText}</span>`;
+                headerEl.setAttribute('title', `${fieldName}で${labelText}ソート中（クリックで${isAsc ? '降順' : '昇順'}に切替）`);
+            } else {
+                indicator.innerHTML = `<i data-lucide="chevrons-up-down" class="sort-icon"></i>`;
+                headerEl.setAttribute('title', `${fieldName}でソート（クリックで昇順ソート）`);
+            }
+        }
+    };
+
+    updateHeaderSortUI(sortIdHeader, 'id');
+    updateHeaderSortUI(sortDeadlineHeader, 'deadline');
+    if (window.lucide) lucide.createIcons({ root: document.getElementById('table-header-row') });
+
+    // Apply Filters
+    const filteredProjects = sortedProjects.filter(project => {
+        const matchId = !filterId.value || project.id.toLowerCase().includes(filterId.value.toLowerCase());
+        const matchCustomer = !filterCustomer.value || (project.customer || '').toLowerCase().includes(filterCustomer.value.toLowerCase());
+        const matchSubject = !filterSubject.value || (project.subject || '').toLowerCase().includes(filterSubject.value.toLowerCase());
+        const matchDestination = !filterDestination.value || (project.destination || '').toLowerCase().includes(filterDestination.value.toLowerCase());
+        const matchName = !filterName.value || (project.name || '').toLowerCase().includes(filterName.value.toLowerCase());
+        const matchStaff = !filterStaff.value || project.staff === filterStaff.value;
+        
+        // 工程フィルタがいずれか有効かチェック
+        const hasActiveProcessFilter = Object.values(processFilterValues).some(v => v !== '');
+        // デフォルトで完了案件は除外、ボタン有効時のみ表示。ただし工程フィルタ使用時は常に除外。
+        const isExcludedCompleted = (!showCompletedFilter || hasActiveProcessFilter) && project.isCompleted;
+        
+        const nec = project.necessity || { specDoc: true, sheetMetal: true, partsProcurement: { main: true, spare: true, provided: true }, nameplateProcurement: true, internalDrawings: true, software: true };
+        const proc = project.processes || {};
+        
+        let matchProcessFilters = true;
+
+        // 1. ボタンによるフィルタ (複数選択時は OR)
+        if (activeProcessFilters.size > 0) {
+            const matchIncompleteButtons = Array.from(activeProcessFilters).some(key => {
+                if (key === 'partsProcurement') {
+                    const ppNec = nec.partsProcurement || { main: true, spare: true, provided: true };
+                    const ppMainDone = !ppNec.main || (proc.partsProcurement && proc.partsProcurement.main.requestDate);
+                    const ppSpareDone = !ppNec.spare || (proc.partsProcurement && proc.partsProcurement.spare.requestDate);
+                    const ppProvDone = !ppNec.provided || (proc.partsProcurement && proc.partsProcurement.provided.requestDate);
+                    return !(ppMainDone && ppSpareDone && ppProvDone);
+                }
+                
+                const isDone = !nec[key] || (proc[key] && (
+                    (key === 'sheetMetal' && proc[key].drawingSentDate && proc[key].drawingLimitDate) ||
+                    (key === 'nameplateProcurement' && proc[key].poSentDate) ||
+                    (key === 'internalDrawings' && proc[key].issueDate) ||
+                    (key === 'software' && proc[key].creationDate)
+                ));
+                return !isDone;
+            });
+            matchProcessFilters = matchProcessFilters && matchIncompleteButtons;
+        }
+
+        // 2. 納入仕様書詳細フィルタ (AND)
+        if (processFilterValues.specDoc) {
+            let matchSpecDetail = false;
+            const s = proc.specDoc || {};
+            const val = processFilterValues.specDoc;
+            
+            // 工程が「要」の場合のみ判定（不要な場合は除外）
+            if (nec.specDoc) {
+                if (val === 'unissued') {
+                    matchSpecDetail = !s.issueDate;
+                } else if (val === 'unreturned') {
+                    matchSpecDetail = s.issueDate && !s.returnDate;
+                } else if (val === 'fixing') {
+                    matchSpecDetail = s.needsFix === '要';
+                } else if (val === 'unapproved') {
+                    matchSpecDetail = (s.issueDate || s.returnDate) && !s.approvalDate;
+                }
+            }
+            
+            matchProcessFilters = matchProcessFilters && matchSpecDetail;
+        }
+
+        // 3. 板金手配詳細フィルタ (AND)
+        if (processFilterValues.sheetMetal) {
+            let matchSMDetail = false;
+            const sm = proc.sheetMetal || {};
+            const val = processFilterValues.sheetMetal;
+            
+            // 工程が「要」の場合のみ判定（不要な場合は除外）
+            if (nec.sheetMetal) {
+                if (val === 'unquoted') {
+                    matchSMDetail = !sm.quoteDate;
+                } else if (val === 'unpo') {
+                    matchSMDetail = sm.quoteDate && !sm.poSentDate;
+                } else if (val === 'undrawing') {
+                    matchSMDetail = sm.poSentDate && !sm.drawingSentDate;
+                }
+            }
+            
+            matchProcessFilters = matchProcessFilters && matchSMDetail;
+        }
+
+        // 4. 部品手配詳細フィルタ (AND)
+        if (processFilterValues.partsProcurement) {
+            let matchPartsDetail = false;
+            const pp = proc.partsProcurement || { main: {}, spare: {}, provided: {} };
+            const ppNec = nec.partsProcurement || { main: true, spare: true, provided: true };
+            const val = processFilterValues.partsProcurement;
+            
+            if (val === 'unordered') {
+                const mainDone = !ppNec.main || (pp.main && pp.main.requestDate);
+                const spareDone = !ppNec.spare || (pp.spare && pp.spare.requestDate);
+                const providedDone = !ppNec.provided || (pp.provided && pp.provided.requestDate);
+                
+                // 「要」に設定されているもの全てが済になっていない
+                matchPartsDetail = !(mainDone && spareDone && providedDone);
+            }
+            
+            matchProcessFilters = matchProcessFilters && matchPartsDetail;
+        }
+
+        // 5. 銘板手配詳細フィルタ (AND)
+        if (processFilterValues.nameplateProcurement) {
+            let matchNPDetail = false;
+            const np = proc.nameplateProcurement || {};
+            const val = processFilterValues.nameplateProcurement;
+            
+            if (nec.nameplateProcurement) {
+                if (val === 'unordered') {
+                    matchNPDetail = !np.poSentDate;
+                }
+            }
+            
+            matchProcessFilters = matchProcessFilters && matchNPDetail;
+        }
+
+        // 6. 社内工事図詳細フィルタ (AND)
+        if (processFilterValues.internalDrawings) {
+            let matchIDDetail = false;
+            const idProc = proc.internalDrawings || {};
+            const val = processFilterValues.internalDrawings;
+            
+            if (nec.internalDrawings) {
+                if (val === 'unissued') {
+                    matchIDDetail = !idProc.issueDate;
+                }
+            }
+            
+            matchProcessFilters = matchProcessFilters && matchIDDetail;
+        }
+
+        // 7. ソフト詳細フィルタ (AND)
+        if (processFilterValues.software) {
+            let matchSWDetail = false;
+            const swProc = proc.software || {};
+            const val = processFilterValues.software;
+            
+            if (nec.software) {
+                if (val === 'uncreated') {
+                    matchSWDetail = !swProc.creationDate;
+                } else if (val === 'undebugged') {
+                    matchSWDetail = swProc.creationDate && !swProc.debuggingDate;
+                }
+            }
+            
+            matchProcessFilters = matchProcessFilters && matchSWDetail;
+        }
+
+        return matchId && matchCustomer && matchSubject && matchDestination && matchName && matchStaff && !isExcludedCompleted && matchProcessFilters;
+    });
+
+    filteredProjects.forEach(project => {
+        const tr = document.createElement('tr');
+
+        const resetTooltip = () => {
+            const customer = state.config.customerList?.find(c => c.name === project.customer) || { name: project.customer || '-', kana: '' };
+            const customerName = customer.kana ? `${customer.name} (${customer.kana})` : customer.name;
+            const qty = project.quantity || '-';
+            const memo = project.remarks || '-';
+            tooltipEl.innerHTML = `<strong>${project.id}</strong><br>` +
+                `担当者: ${project.staff || '-'}<br>` +
+                `客先: ${customerName}<br>` +
+                `件名: ${project.subject || '-'}<br>` +
+                `向先: ${project.destination || '-'}<br>` +
+                `品名: ${project.name || '-'}<br>` +
+                `数量: ${qty}<br>` +
+                `規格: ${project.spec || '-'}<br>` +
+                `検査: ${project.inspection || '-'}<br>` +
+                `板金予算: ${formatNumberWithCommas(project.budget)}<br>` +
+                `リンク: ${project.link || '-'}<br>` +
+                `メモ: ${memo}`;
+        };
+
+        tr.addEventListener('mouseenter', () => {
+            resetTooltip();
+            tooltipEl.classList.add('show');
+        });
+        tr.addEventListener('mousemove', (e) => {
+            const margin = 15;
+            let left = e.pageX + margin;
+            let top = e.pageY + margin;
+
+            // 画面端の判定（ビューポート基準）
+            const tooltipWidth = tooltipEl.offsetWidth;
+            const tooltipHeight = tooltipEl.offsetHeight;
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // マウスの現在位置（ビューポート内）
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            // 右端で切れる場合、マウスの左側に表示
+            if (mouseX + margin + tooltipWidth > viewportWidth) {
+                left = e.pageX - tooltipWidth - margin;
+            }
+
+            // 下端で切れる場合、マウスの上側に表示
+            if (mouseY + margin + tooltipHeight > viewportHeight) {
+                top = e.pageY - tooltipHeight - margin;
+            }
+
+            tooltipEl.style.left = left + 'px';
+            tooltipEl.style.top = top + 'px';
+        });
+        tr.addEventListener('mouseleave', () => {
+            tooltipEl.classList.remove('show');
+        });
+
+        // Define columns to render
+        const fields = [
+            { key: 'id', bold: true },
+            { key: 'staff' },
+            { key: 'link', special: 'link' },
+            { key: 'customer' },
+            { key: 'subject' },
+            { key: 'destination' },
+            { key: 'name' },
+            { key: 'deadline', special: 'deadline' }
+        ];
+
+        fields.forEach(field => {
+            const td = document.createElement('td');
+            td.className = 'info-cell' + (field.special === 'deadline' ? ' deadline-cell' : '');
+            td.style.cursor = 'pointer';
+            td.onclick = async (e) => {
+                // ボタンやリンク（コピーアイコンなど）クリック時は編集画面を開かない
+                if (e.target.closest('button') || e.target.closest('a')) return;
+                await SyncManager.refreshIfRemoteUpdated();
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openEditModal(latestProject);
+            };
+            if (field.special === 'link') {
+                if (project.link) {
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn-icon';
+                    copyBtn.style.display = 'inline-flex';
+                    copyBtn.innerHTML = '<i data-lucide="copy" style="width:16px; height:16px;"></i>';
+                    copyBtn.title = 'パスをコピー';
+
+                    copyBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(project.link).then(() => {
+                            showToast('パスをクリップボードにコピーしました');
+
+                            // 一定時間チェックマークに切り替える視覚的フィードバック
+                            copyBtn.classList.add('copied');
+                            copyBtn.innerHTML = '<i data-lucide="check" style="width:16px; height:16px;"></i>';
+                            copyBtn.title = 'コピー完了！';
+                            if (window.lucide) window.lucide.createIcons({ root: copyBtn });
+
+                            if (copyBtn._copyTimer) clearTimeout(copyBtn._copyTimer);
+                            copyBtn._copyTimer = setTimeout(() => {
+                                copyBtn.classList.remove('copied');
+                                copyBtn.innerHTML = '<i data-lucide="copy" style="width:16px; height:16px;"></i>';
+                                copyBtn.title = 'パスをコピー';
+                                if (window.lucide) window.lucide.createIcons({ root: copyBtn });
+                                copyBtn._copyTimer = null;
+                            }, 1800);
+                        }).catch(err => {
+                            console.error('Clipboard copy failed:', err);
+                        });
+                    };
+
+                    td.appendChild(copyBtn);
+                    td.style.textAlign = 'center';
+                } else {
+                    td.textContent = '-';
+                    td.style.textAlign = 'center';
+                    td.style.color = 'var(--text-muted)';
+                }
+            } else {
+                td.textContent = project[field.key] || '-';
+                if (field.bold) td.style.fontWeight = '600';
+
+                if (field.special === 'deadline') {
+                    const nec = project.necessity || {};
+                    const proc = project.processes || {};
+                    
+                    const isIdDone = !nec.internalDrawings || (proc.internalDrawings && proc.internalDrawings.issueDate);
+                    const isSwDone = !nec.software || (proc.software && proc.software.debuggingDate);
+
+                    // 案件自体が未完了、かつ納期がアラーム期間内、かつ重要工程が未完了
+                    if (!project.isCompleted && isWithinTwoMonths(project.deadline) && (!isIdDone || !isSwDone)) {
+                        td.style.color = 'var(--danger-color)';
+                        td.style.fontWeight = 'bold';
+                    }
+                }
+            }
+            tr.appendChild(td);
+        });
+
+        // Process: Spec Document (納入仕様書)
+        const tdSpec = document.createElement('td');
+        tdSpec.className = 'process-cell spec-cell';
+        tdSpec.style.cursor = 'pointer';
+        tdSpec.style.textAlign = 'center';
+
+        // Provide backward compatibility
+        if (!project.processes) project.processes = {};
+        if (!project.processes.specDoc) project.processes.specDoc = { issueDate: '', dueDate: '', returnDate: '', needsFix: '', approvalDate: '', memo: '' };
+        if (!project.processes.sheetMetal) project.processes.sheetMetal = { quoteDate: '', vendor: '', poSentDate: '', poDueDate: '', drawingDueDate: '', poRecvDate: '', drawingSentDate: '', drawingLimitDate: '', confirmedDate: '', memo: '' };
+        if (!project.processes.partsProcurement) project.processes.partsProcurement = { main: { requestDate: '', dueDate: '' }, spare: { requestDate: '', copyDate: '', dueDate: '' }, provided: { requestDate: '', dueDate: '' }, memo: '' };
+        if (!project.processes.nameplateProcurement) project.processes.nameplateProcurement = { poSentDate: '', dueDate: '', memo: '' };
+        if (!project.processes.internalDrawings) project.processes.internalDrawings = { issueDate: '', memo: '' };
+        if (!project.processes.software) project.processes.software = { creationDate: '', debuggingDate: '', memo: '' };
+
+        if (!project.necessity) {
+            project.necessity = {
+                specDoc: true,
+                sheetMetal: true,
+                partsProcurement: { main: true, spare: true, provided: true },
+                nameplateProcurement: true,
+                internalDrawings: true,
+                software: true
+            };
+        }
+
+        const nec = project.necessity;
+        const spec = project.processes.specDoc;
+        const isSpecStarted = !!(spec.issueDate || spec.returnDate || spec.approvalDate);
+        const isSpecApproved = !!spec.approvalDate;
+        const alertIconHTML = '<i data-lucide="alert-circle" style="width:16px; height:16px; color:var(--warning-color); vertical-align:middle; margin-right:4px;"></i>';
+        let summaryHTML = '-';
+
+        if (!nec.specDoc) {
+            summaryHTML = '<span style="color:var(--text-muted);">不要</span>';
+            tdSpec.onclick = null;
+        } else {
+            if (spec.approvalDate) {
+                const fixStr = spec.needsFix === '要' ? '<br><span style="color:var(--danger-color);font-weight:bold;">修正要</span>' : '';
+                summaryHTML = `<span style="color:var(--success-color);font-weight:bold;">承認済<br><small>${formatShortDate(spec.approvalDate)}</small></span>${fixStr}`;
+                tdSpec.style.backgroundColor = 'var(--process-done-bg)';
+            } else if (spec.returnDate) {
+                const fixStr = spec.needsFix === '要' ? '<br><span style="color:var(--danger-color);font-weight:bold;">修正要</span>' : '';
+                summaryHTML = `<span>返却済<br><small>${formatShortDate(spec.returnDate)}</small>${fixStr}</span>`;
+            } else if (spec.issueDate) {
+                let dueColor = '';
+                if (spec.dueDate && isOverdue(spec.dueDate)) {
+                    dueColor = 'color:var(--danger-color);font-weight:bold;';
+                }
+                const dueStr = spec.dueDate ? `<br><small style="${dueColor}">返却期日:${formatShortDate(spec.dueDate)}</small>` : '';
+                summaryHTML = `<span>出図済${dueStr}</span>`;
+            } else {
+                summaryHTML = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">要着手</span>`;
+            }
+            tdSpec.onclick = async (e) => {
+                e.stopPropagation();
+                await SyncManager.refreshIfRemoteUpdated();
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openSpecDocModal(latestProject);
+            };
+        }
+
+        tdSpec.innerHTML = summaryHTML;
+        tdSpec.addEventListener('mouseenter', () => {
+            tooltipEl.innerHTML = `<strong>納入仕様書</strong> (${nec.specDoc ? '要' : '不要'})<br>` +
+                `出図: ${spec.issueDate || '-'}<br>` +
+                `返却期日: ${spec.dueDate || '-'}<br>` +
+                `返却: ${spec.returnDate || '-'}<br>` +
+                `修正要否: ${spec.needsFix || '-'}<br>` +
+                `承認: ${spec.approvalDate || '-'}<br>` +
+                `メモ: ${spec.memo || '-'}`;
+        });
+        tdSpec.addEventListener('mouseleave', resetTooltip);
+        tr.appendChild(tdSpec);
+
+        // Process: Sheet Metal (板金手配)
+        const tdSheetMetal = document.createElement('td');
+        tdSheetMetal.className = 'process-cell sheet-metal-cell';
+        tdSheetMetal.style.cursor = 'pointer';
+        tdSheetMetal.style.textAlign = 'center';
+
+        const sm = project.processes.sheetMetal;
+        let smSummaryHTML = '-';
+
+        if (!nec.sheetMetal) {
+            smSummaryHTML = '<span style="color:var(--text-muted);">不要</span>';
+            tdSheetMetal.onclick = null;
+        } else {
+            if (sm.drawingSentDate && sm.drawingLimitDate) {
+                const confirmedStr = sm.confirmedDate ? `<br><small style="color:var(--primary-color);">納期確定:${formatShortDate(sm.confirmedDate)}</small>` : '';
+                smSummaryHTML = `<span style="color:var(--success-color);font-weight:bold;">完了 (詳細図送付)<br><small>納期:${formatShortDate(sm.drawingLimitDate)}</small></span>${confirmedStr}`;
+                tdSheetMetal.style.backgroundColor = 'var(--process-done-bg)';
+            } else if (sm.drawingSentDate) {
+                smSummaryHTML = `<span>詳細図送付済<br><small>納期(詳細図):-</small></span>`;
+            } else if (sm.poSentDate) {
+                const poDueStr = sm.poDueDate ? `納期(注文書):${formatShortDate(sm.poDueDate)}` : '';
+                
+                let dwgDueColor = '';
+                if (sm.drawingDueDate && !sm.drawingSentDate && isOverdue(sm.drawingDueDate)) {
+                    dwgDueColor = 'color:var(--danger-color);font-weight:bold;';
+                }
+                const dwgDueStr = sm.drawingDueDate ? `<span style="${dwgDueColor}">詳細図送付期日:${formatShortDate(sm.drawingDueDate)}</span>` : '';
+                
+                let approvalAlert = '';
+                if (isSpecApproved && !sm.drawingSentDate) {
+                    approvalAlert = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">詳細図送付可</span><br>`;
+                }
+
+                const dueStr = [poDueStr, dwgDueStr].filter(Boolean).join('<br>');
+                smSummaryHTML = `<span>注文書送付済<br>${approvalAlert}<small>${dueStr || '-'}</small></span>`;
+            } else if (sm.quoteDate) {
+                smSummaryHTML = `<span>見積依頼送付済<br><small>${formatShortDate(sm.quoteDate)}</small></span>`;
+            } else if (isSpecStarted) {
+                smSummaryHTML = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">要着手</span>`;
+            }
+            tdSheetMetal.onclick = async (e) => {
+                e.stopPropagation();
+                await SyncManager.refreshIfRemoteUpdated();
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openSheetMetalModal(latestProject);
+            };
+        }
+
+        tdSheetMetal.innerHTML = smSummaryHTML;
+        tdSheetMetal.addEventListener('mouseenter', () => {
+            tooltipEl.innerHTML = `<strong>板金手配</strong> (${nec.sheetMetal ? '要' : '不要'})<br>` +
+                `見積依頼送付: ${sm.quoteDate || '-'}<br>` +
+                `手配先: ${sm.vendor || '-'}<br>` +
+                `注文書送付: ${sm.poSentDate || '-'}<br>` +
+                `納期(注文書): ${sm.poDueDate || '-'}<br>` +
+                `詳細図期日: ${sm.drawingDueDate || '-'}<br>` +
+                `注文書受領: ${sm.poRecvDate || '-'}<br>` +
+                `詳細図送付: ${sm.drawingSentDate || '-'}<br>` +
+                `納期(詳細図): ${sm.drawingLimitDate || '-'}<br>` +
+                `納期確定: ${sm.confirmedDate || '-'}<br>` +
+                `メモ: ${sm.memo || '-'}`;
+        });
+        tdSheetMetal.addEventListener('mouseleave', resetTooltip);
+        tr.appendChild(tdSheetMetal);
+
+        // Process: Parts Procurement (部品手配)
+        const tdParts = document.createElement('td');
+        tdParts.className = 'process-cell parts-cell';
+        tdParts.style.cursor = 'pointer';
+        tdParts.style.textAlign = 'center';
+
+        const pp = project.processes.partsProcurement;
+        const ppNec = nec.partsProcurement || { main: true, spare: true, provided: true };
+        const partsSummary = [];
+        let hasUnstartedRequired = false;
+
+        // 全て不要の場合
+        if (!ppNec.main && !ppNec.spare && !ppNec.provided) {
+            tdParts.innerHTML = '<span style="color:var(--text-muted);">不要</span>';
+            tdParts.onclick = null;
+        } else {
+            if (ppNec.main) {
+                if (pp.main.requestDate) {
+                    const mainDueStr = pp.main.dueDate ? formatShortDate(pp.main.dueDate) : '-';
+                    partsSummary.push(`<span style="color:var(--success-color);">納期(主部品): ${mainDueStr}</span>`);
+                } else {
+                    hasUnstartedRequired = true;
+                }
+            } else {
+                partsSummary.push(`<span style="color:var(--text-muted);">不要(主部品)</span>`);
+            }
+
+            if (ppNec.spare) {
+                if (pp.spare.requestDate) {
+                    const spareDueStr = pp.spare.dueDate ? formatShortDate(pp.spare.dueDate) : '-';
+                    const spareCopyStr = pp.spare.copyDate ? '<span style="color:var(--success-color); font-size:0.85em; margin-left:4px;">[コピー済]</span>' : '';
+                    partsSummary.push(`<span style="color:var(--success-color);">納期(予備品): ${spareDueStr}${spareCopyStr}</span>`);
+                } else {
+                    hasUnstartedRequired = true;
+                }
+            } else {
+                partsSummary.push(`<span style="color:var(--text-muted);">不要(予備品)</span>`);
+            }
+
+            if (ppNec.provided) {
+                if (pp.provided.requestDate) {
+                    const provDueStr = pp.provided.dueDate ? formatShortDate(pp.provided.dueDate) : '-';
+                    partsSummary.push(`<span style="color:var(--success-color);">納期(支給品): ${provDueStr}</span>`);
+                } else {
+                    hasUnstartedRequired = true;
+                }
+            } else {
+                partsSummary.push(`<span style="color:var(--text-muted);">不要(支給品)</span>`);
+            }
+
+            let alertHTML = '';
+            if (hasUnstartedRequired && isSpecStarted) {
+                alertHTML = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">要着手</span><br>`;
+            }
+
+            if (partsSummary.length > 0 || alertHTML) {
+                tdParts.innerHTML = `<small>${alertHTML}${partsSummary.join('<br>')}</small>`;
+            } else {
+                tdParts.innerHTML = '-';
+            }
+            
+            // 全て完了(または不要)のチェック
+            const mainDone = !ppNec.main || pp.main.requestDate;
+            const spareDone = !ppNec.spare || pp.spare.requestDate;
+            const providedDone = !ppNec.provided || pp.provided.requestDate;
+            
+            if (mainDone && spareDone && providedDone && (ppNec.main || ppNec.spare || ppNec.provided)) {
+                tdParts.style.backgroundColor = 'var(--process-done-bg)';
+            }
+            tdParts.onclick = async (e) => {
+                e.stopPropagation();
+                await SyncManager.refreshIfRemoteUpdated();
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openPartsModal(latestProject);
+            };
+        }
+
+        tdParts.addEventListener('mouseenter', () => {
+            tooltipEl.innerHTML = `<strong>部品手配</strong><br>` +
+                `【主部品手配】(${ppNec.main ? '要' : '不要'})<br>` +
+                `手配依頼: ${pp.main.requestDate || '-'}<br>` +
+                `納期: ${pp.main.dueDate || '-'}<br>` +
+                `【予備品手配】(${ppNec.spare ? '要' : '不要'})<br>` +
+                `手配依頼: ${pp.spare.requestDate || '-'}<br>` +
+                `納期: ${pp.spare.dueDate || '-'}<br>` +
+                `コピー: ${pp.spare.copyDate || '-'}<br>` +
+                `【支給品手配】(${ppNec.provided ? '要' : '不要'})<br>` +
+                `手配依頼: ${pp.provided.requestDate || '-'}<br>` +
+                `納期: ${pp.provided.dueDate || '-'}<br>` +
+                `メモ: ${pp.memo || '-'}`;
+        });
+        tdParts.addEventListener('mouseleave', resetTooltip);
+        tr.appendChild(tdParts);
+
+        // Process: Nameplate Procurement (銘板手配)
+        const tdNameplate = document.createElement('td');
+        tdNameplate.className = 'process-cell nameplate-cell';
+        tdNameplate.style.cursor = 'pointer';
+        tdNameplate.style.textAlign = 'center';
+
+        const np = project.processes.nameplateProcurement;
+        const idProc = project.processes.internalDrawings;
+
+        const isSmDone = !nec.sheetMetal || sm.drawingSentDate;
+        const isPpDone = (!ppNec.main || pp.main.requestDate) && 
+                         (!ppNec.spare || pp.spare.requestDate) && 
+                         (!ppNec.provided || pp.provided.requestDate);
+        const isNpDone = !nec.nameplateProcurement || np.poSentDate;
+        const isReadyForID = isSmDone && isPpDone && isNpDone;
+
+        let npSummaryHTML = '-';
+
+        if (!nec.nameplateProcurement) {
+            npSummaryHTML = '<span style="color:var(--text-muted);">不要</span>';
+            tdNameplate.onclick = null;
+        } else {
+            if (np.poSentDate) {
+                npSummaryHTML = `<span style="color:var(--success-color);font-weight:bold;">注文書送付済<br><small>納期:${np.dueDate ? formatShortDate(np.dueDate) : '-'}</small></span>`;
+                tdNameplate.style.backgroundColor = 'var(--process-done-bg)';
+            } else if (isSpecApproved) {
+                npSummaryHTML = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">要着手</span>`;
+            }
+            tdNameplate.onclick = async (e) => {
+                e.stopPropagation();
+                await SyncManager.refreshIfRemoteUpdated();
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openNameplateModal(latestProject);
+            };
+        }
+
+        tdNameplate.innerHTML = npSummaryHTML;
+        tdNameplate.addEventListener('mouseenter', () => {
+            tooltipEl.innerHTML = `<strong>銘板手配</strong> (${nec.nameplateProcurement ? '要' : '不要'})<br>` +
+                `注文書送付: ${np.poSentDate || '-'}<br>` +
+                `納期: ${np.dueDate || '-'}<br>` +
+                `メモ: ${np.memo || '-'}`;
+        });
+        tdNameplate.addEventListener('mouseleave', resetTooltip);
+        tr.appendChild(tdNameplate);
+
+        // Process: Internal Drawings (社内工事図)
+        const tdInternalDrawings = document.createElement('td');
+        tdInternalDrawings.className = 'process-cell internal-drawings-cell';
+        tdInternalDrawings.style.cursor = 'pointer';
+        tdInternalDrawings.style.textAlign = 'center';
+
+        let idSummaryHTML = '-';
+
+        if (!nec.internalDrawings) {
+            idSummaryHTML = '<span style="color:var(--text-muted);">不要</span>';
+            tdInternalDrawings.onclick = null;
+        } else {
+            if (idProc.issueDate) {
+                idSummaryHTML = `<span style="color:var(--success-color);font-weight:bold;">出図済<br><small>${formatShortDate(idProc.issueDate)}</small></span>`;
+                tdInternalDrawings.style.backgroundColor = 'var(--process-done-bg)';
+            } else if (isReadyForID) {
+                idSummaryHTML = `${alertIconHTML}<span style="color:var(--warning-color);font-weight:600;">要着手</span>`;
+            }
+            tdInternalDrawings.onclick = async (e) => {
+                e.stopPropagation();
+                await SyncManager.refreshIfRemoteUpdated();
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openInternalDrawingsModal(latestProject);
+            };
+        }
+
+        tdInternalDrawings.innerHTML = idSummaryHTML;
+        tdInternalDrawings.addEventListener('mouseenter', () => {
+            tooltipEl.innerHTML = `<strong>社内工事図</strong> (${nec.internalDrawings ? '要' : '不要'})<br>` +
+                `出図: ${idProc.issueDate || '-'}<br>` +
+                `メモ: ${idProc.memo || '-'}`;
+        });
+        tdInternalDrawings.addEventListener('mouseleave', resetTooltip);
+        tr.appendChild(tdInternalDrawings);
+
+        // Process: Software (ソフト)
+        const tdSoftware = document.createElement('td');
+        tdSoftware.className = 'process-cell software-cell';
+        tdSoftware.style.cursor = 'pointer';
+        tdSoftware.style.textAlign = 'center';
+
+        const swProc = project.processes.software;
+        let swSummaryHTML = '-';
+
+        if (!nec.software) {
+            swSummaryHTML = '<span style="color:var(--text-muted);">不要</span>';
+            tdSoftware.onclick = null;
+        } else {
+            if (swProc.debuggingDate) {
+                swSummaryHTML = `<span style="color:var(--success-color);font-weight:bold;">デバッグ済<br><small>${formatShortDate(swProc.debuggingDate)}</small></span>`;
+                tdSoftware.style.backgroundColor = 'var(--process-done-bg)';
+            } else if (swProc.creationDate) {
+                swSummaryHTML = `作成済<br><small>${formatShortDate(swProc.creationDate)}</small>`;
+            }
+            tdSoftware.onclick = async (e) => {
+                e.stopPropagation();
+                await SyncManager.refreshIfRemoteUpdated();
+                const latestProject = state.projects.find(p => p.id === project.id);
+                if (!latestProject) {
+                    alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                    renderTable();
+                    return;
+                }
+                openSoftwareModal(latestProject);
+            };
+        }
+
+        tdSoftware.innerHTML = swSummaryHTML;
+        tdSoftware.addEventListener('mouseenter', () => {
+            tooltipEl.innerHTML = `<strong>ソフト</strong> (${nec.software ? '要' : '不要'})<br>` +
+                `作成: ${swProc.creationDate || '-'}<br>` +
+                `デバッグ: ${swProc.debuggingDate || '-'}<br>` +
+                `メモ: ${swProc.memo || '-'}`;
+        });
+        tdSoftware.addEventListener('mouseleave', resetTooltip);
+        tr.appendChild(tdSoftware);
+
+        // Process: Completed (完了)
+        const tdCompleted = document.createElement('td');
+        tdCompleted.className = 'process-cell completed-cell';
+        tdCompleted.style.textAlign = 'center';
+        tdCompleted.style.verticalAlign = 'middle';
+        
+        const completedBtn = document.createElement('button');
+        completedBtn.className = project.isCompleted ? 'btn btn-sm btn-completed is-done' : 'btn btn-sm btn-completed';
+        completedBtn.textContent = project.isCompleted ? '完了済' : '完了';
+        completedBtn.style.padding = '0.25rem 0.5rem';
+        completedBtn.style.fontSize = '0.78rem';
+        
+        completedBtn.onclick = async (e) => {
+            e.stopPropagation();
+            await SyncManager.refreshIfRemoteUpdated();
+            const latestProject = state.projects.find(p => p.id === project.id);
+            if (!latestProject) {
+                alert('対象のデータが見つかりません。他のユーザーによって製番が変更または削除された可能性があります。');
+                renderTable();
+                return;
+            }
+            latestProject.isCompleted = !latestProject.isCompleted;
+            renderTable();
+            // 自動保存を実行
+            await SyncManager.saveWithSync(true);
+        };
+
+        tdCompleted.appendChild(completedBtn);
+        tr.appendChild(tdCompleted);
+
+        // Apply completed style to row
+        if (project.isCompleted) {
+            tr.style.opacity = '0.55';
+            tr.style.backgroundColor = 'var(--bg-subtle)';
+        }
+
+        progressBody.appendChild(tr);
+    });
+
+    if (window.lucide) lucide.createIcons();
+}
+
+// 共通のモーダル表示/非表示ヘルパー
+function toggleModal(modal, show) {
+    if (modal) {
+        if (show) modal.classList.add('active');
+        else modal.classList.remove('active');
+    }
+}
+
+// Logic: Open Process Modal
+function openSpecDocModal(project) {
+    editingProcessProjectId = project.id;
+
+    // Provide backward compatibility
+    if (!project.processes.specDoc) {
+        project.processes.specDoc = { issueDate: '', dueDate: '', returnDate: '', needsFix: '', approvalDate: '', memo: '' };
+    }
+
+    // Copy data to temporary state (Update properties instead of re-assigning object)
+    Object.keys(project.processes.specDoc).forEach(key => {
+        currentSpecData[key] = project.processes.specDoc[key];
+    });
+    
+    specDueInput.value = currentSpecData.dueDate || '';
+    specMemoInput.value = currentSpecData.memo || '';
+
+    renderSpecDocModal();
+
+    processSpecModal.classList.add('active');
+}
+
+function renderSpecDocModal() {
+    // Helper to set button active state and input value
+    const setBtnState = (btn, inputEl, dateVal) => {
+        if (!btn || !inputEl) return;
+        btn.classList.add('btn-toggle');
+        if (dateVal) {
+            btn.classList.add('btn-primary', 'active');
+            btn.classList.remove('btn-outline');
+            inputEl.value = dateVal;
+        } else {
+            btn.classList.remove('btn-primary', 'active');
+            btn.classList.add('btn-outline');
+            inputEl.value = '';
+        }
+        updateDateInputState(inputEl);
+    };
+
+    setBtnState(specIssueBtn, specIssueDateInput, currentSpecData.issueDate);
+    setBtnState(specReturnBtn, specReturnDateInput, currentSpecData.returnDate);
+    setBtnState(specApprovalBtn, specApprovalDateInput, currentSpecData.approvalDate);
+
+    // Needs Fix State
+    const updateFixBtns = () => {
+        specFixYesBtn.classList.remove('btn-primary');
+        specFixYesBtn.classList.add('btn-outline');
+        specFixNoBtn.classList.remove('btn-primary');
+        specFixNoBtn.classList.add('btn-outline');
+
+        if (currentSpecData.needsFix === '要') {
+            specFixYesBtn.classList.add('btn-primary');
+            specFixYesBtn.classList.remove('btn-outline');
+        } else if (currentSpecData.needsFix === '否') {
+            specFixNoBtn.classList.add('btn-primary');
+            specFixNoBtn.classList.remove('btn-outline');
+        }
+    };
+    updateFixBtns();
+
+    specMemoInput.value = currentSpecData.memo || '';
+}
+
+// Logic: Open Sheet Metal Modal
+function openSheetMetalModal(project) {
+    editingProcessProjectId = project.id;
+
+    if (!project.processes.sheetMetal) {
+        project.processes.sheetMetal = {
+            quoteDate: '', vendor: '', poSentDate: '', poDueDate: '',
+            drawingDueDate: '', poRecvDate: '', drawingSentDate: '',
+            drawingLimitDate: '', confirmedDate: '', memo: ''
+        };
+    }
+
+    currentSheetMetalData = { ...project.processes.sheetMetal };
+    
+    // カスタムドロップダウン (Hidden + Visible Input)
+    document.getElementById('sm-vendor').value = currentSheetMetalData.vendor || '';
+    document.getElementById('sm-vendor-input').value = currentSheetMetalData.vendor || '';
+    
+    smPoDueDate.value = currentSheetMetalData.poDueDate || '';
+    smDrawingDueDate.value = currentSheetMetalData.drawingDueDate || '';
+    smDrawingLimitDate.value = currentSheetMetalData.drawingLimitDate || '';
+    smMemoInput.value = currentSheetMetalData.memo || '';
+
+    renderSheetMetalModal();
+    toggleModal(processSheetMetalModal, true);
+}
+
+function renderSheetMetalModal() {
+    const setBtnState = (btn, inputEl, dateVal) => {
+        if (!btn || !inputEl) return;
+        btn.classList.add('btn-toggle');
+        if (dateVal) {
+            btn.classList.add('btn-primary', 'active');
+            btn.classList.remove('btn-outline');
+            inputEl.value = dateVal;
+        } else {
+            btn.classList.remove('btn-primary', 'active');
+            btn.classList.add('btn-outline');
+            inputEl.value = '';
+        }
+        updateDateInputState(inputEl);
+    };
+
+    setBtnState(smQuoteBtn, smQuoteDate, currentSheetMetalData.quoteDate);
+    setBtnState(smPoSentBtn, smPoSentDate, currentSheetMetalData.poSentDate);
+    setBtnState(smPoRecvBtn, smPoRecvDate, currentSheetMetalData.poRecvDate);
+    setBtnState(smDrawingSentBtn, smDrawingSentDate, currentSheetMetalData.drawingSentDate);
+    setBtnState(smConfirmedBtn, smConfirmedDate, currentSheetMetalData.confirmedDate);
+    smMemoInput.value = currentSheetMetalData.memo || '';
+}
+
+// Logic: Open Parts Procurement Modal
+function openPartsModal(project) {
+    editingProcessProjectId = project.id;
+
+    if (!project.processes.partsProcurement) {
+        project.processes.partsProcurement = {
+            main: { requestDate: '', dueDate: '' },
+            spare: { requestDate: '', copyDate: '', dueDate: '' },
+            provided: { requestDate: '', dueDate: '' },
+            memo: ''
+        };
+    }
+
+    currentPartsData = JSON.parse(JSON.stringify(project.processes.partsProcurement));
+
+    // Necessity based visibility
+    const nec = project.necessity || { partsProcurement: { main: true, spare: true, provided: true } };
+    const ppNec = nec.partsProcurement || { main: true, spare: true, provided: true };
+    
+    if (ppMainSection) ppMainSection.style.display = ppNec.main ? 'block' : 'none';
+    if (ppSpareSection) ppSpareSection.style.display = ppNec.spare ? 'block' : 'none';
+    if (ppProvSection) ppProvSection.style.display = ppNec.provided ? 'block' : 'none';
+
+    ppMainDueDate.value = currentPartsData.main.dueDate || '';
+    ppSpareDueDate.value = currentPartsData.spare.dueDate || '';
+    ppProvDueDate.value = currentPartsData.provided.dueDate || '';
+    ppMemoInput.value = currentPartsData.memo || '';
+
+    renderPartsModal();
+    toggleModal(processPartsModal, true);
+}
+
+function renderPartsModal() {
+    const setBtnState = (btn, inputEl, dateVal) => {
+        if (!btn || !inputEl) return;
+        btn.classList.add('btn-toggle');
+        if (dateVal) {
+            btn.classList.add('btn-primary', 'active');
+            btn.classList.remove('btn-outline');
+            inputEl.value = dateVal;
+        } else {
+            btn.classList.remove('btn-primary', 'active');
+            btn.classList.add('btn-outline');
+            inputEl.value = '';
+        }
+        updateDateInputState(inputEl);
+    };
+
+    setBtnState(ppMainReqBtn, ppMainReqDate, currentPartsData.main.requestDate);
+    setBtnState(ppSpareReqBtn, ppSpareReqDate, currentPartsData.spare.requestDate);
+    setBtnState(ppSpareCopyBtn, ppSpareCopyDate, currentPartsData.spare.copyDate);
+    setBtnState(ppProvReqBtn, ppProvReqDate, currentPartsData.provided.requestDate);
+    ppMemoInput.value = currentPartsData.memo || '';
+}
+
+// Logic: Open Nameplate Procurement Modal
+function openNameplateModal(project) {
+    editingProcessProjectId = project.id;
+
+    if (!project.processes.nameplateProcurement) {
+        project.processes.nameplateProcurement = { poSentDate: '', dueDate: '', memo: '' };
+    }
+
+    currentNameplateData = { ...project.processes.nameplateProcurement };
+    npDueDate.value = currentNameplateData.dueDate || '';
+    npMemoInput.value = currentNameplateData.memo || '';
+
+    renderNameplateModal();
+    toggleModal(processNameplateModal, true);
+}
+
+function renderNameplateModal() {
+    const setBtnState = (btn, inputEl, dateVal) => {
+        if (!btn || !inputEl) return;
+        btn.classList.add('btn-toggle');
+        if (dateVal) {
+            btn.classList.add('btn-primary', 'active');
+            btn.classList.remove('btn-outline');
+            inputEl.value = dateVal;
+        } else {
+            btn.classList.remove('btn-primary', 'active');
+            btn.classList.add('btn-outline');
+            inputEl.value = '';
+        }
+        updateDateInputState(inputEl);
+    };
+
+    setBtnState(npPoSentBtn, npPoSentDate, currentNameplateData.poSentDate);
+    npMemoInput.value = currentNameplateData.memo || '';
+}
+
+// Logic: Open Internal Drawings Modal
+function openInternalDrawingsModal(project) {
+    editingProcessProjectId = project.id;
+
+    if (!project.processes.internalDrawings) {
+        project.processes.internalDrawings = { issueDate: '', memo: '' };
+    }
+
+    currentInternalDrawingsData = { ...project.processes.internalDrawings };
+    idMemoInput.value = currentInternalDrawingsData.memo || '';
+
+    renderInternalDrawingsModal();
+    toggleModal(processInternalDrawingsModal, true);
+}
+
+function renderInternalDrawingsModal() {
+    const setBtnState = (btn, inputEl, dateVal) => {
+        if (!btn || !inputEl) return;
+        btn.classList.add('btn-toggle');
+        if (dateVal) {
+            btn.classList.add('btn-primary', 'active');
+            btn.classList.remove('btn-outline');
+            inputEl.value = dateVal;
+        } else {
+            btn.classList.remove('btn-primary', 'active');
+            btn.classList.add('btn-outline');
+            inputEl.value = '';
+        }
+        updateDateInputState(inputEl);
+    };
+
+    setBtnState(idIssueBtn, idIssueDate, currentInternalDrawingsData.issueDate);
+    idMemoInput.value = currentInternalDrawingsData.memo || '';
+}
+
+// Logic: Open Software Modal
+function openSoftwareModal(project) {
+    editingProcessProjectId = project.id;
+
+    if (!project.processes.software) {
+        project.processes.software = { creationDate: '', debuggingDate: '', memo: '' };
+    }
+
+    currentSoftwareData = { ...project.processes.software };
+    swMemoInput.value = currentSoftwareData.memo || '';
+
+    renderSoftwareModal();
+    toggleModal(processSoftwareModal, true);
+}
+
+function renderSoftwareModal() {
+    const setBtnState = (btn, inputEl, dateVal) => {
+        if (!btn || !inputEl) return;
+        btn.classList.add('btn-toggle');
+        if (dateVal) {
+            btn.classList.add('btn-primary', 'active');
+            btn.classList.remove('btn-outline');
+            inputEl.value = dateVal;
+        } else {
+            btn.classList.remove('btn-primary', 'active');
+            btn.classList.add('btn-outline');
+            inputEl.value = '';
+        }
+        updateDateInputState(inputEl);
+    };
+
+    setBtnState(swCreationBtn, swCreationDate, currentSoftwareData.creationDate);
+    setBtnState(swDebuggingBtn, swDebuggingDate, currentSoftwareData.debuggingDate);
+    swMemoInput.value = currentSoftwareData.memo || '';
+}
+
+// Logic: Open Edit Modal
+function openEditModal(project) {
+    editingProjectId = project.id;
+    document.getElementById('modal-title').textContent = '製番情報の編集';
+    deleteProjectBtn.style.display = 'block';
+    copyFromSection.style.display = 'none'; // コピー機能を非表示
+
+    document.getElementById('project-id').value = project.id;
+    updateProjectIdValidationUI(); // エラー表示を初期化
+    document.getElementById('project-deadline').value = project.deadline;
+    
+    // カスタムドロップダウン (Hidden + Visible Input)
+    document.getElementById('project-customer').value = project.customer || '';
+    document.getElementById('project-customer-input').value = project.customer || '';
+    
+    document.getElementById('project-subject').value = project.subject || '';
+    document.getElementById('project-destination').value = project.destination || '';
+    document.getElementById('project-name').value = project.name || '';
+    document.getElementById('project-quantity').value = project.quantity || 1;
+    
+    // カスタムドロップダウン
+    document.getElementById('project-spec').value = project.spec || '';
+    document.getElementById('project-spec-input').value = project.spec || '';
+    
+    document.getElementById('project-staff').value = project.staff || '';
+    document.getElementById('project-staff-input').value = project.staff || '';
+    
+    document.getElementById('project-inspection').value = project.inspection || '';
+    document.getElementById('project-budget').value = formatNumberWithCommas(project.budget);
+    document.getElementById('project-link').value = project.link || '';
+    document.getElementById('project-remarks').value = project.remarks || '';
+    
+    // Load necessity data (with fallback for old data)
+    currentNecessityData = project.necessity ? JSON.parse(JSON.stringify(project.necessity)) : {
+        specDoc: true,
+        sheetMetal: true,
+        partsProcurement: { main: true, spare: true, provided: true },
+        nameplateProcurement: true,
+        internalDrawings: true,
+        software: true
+    };
+    renderNecessityButtons();
+
+    modalOverlay.classList.add('active');
+}
+
+function applyCopyFrom(project) {
+    // 基本情報をセット (製番以外)
+    document.getElementById('project-deadline').value = project.deadline || '';
+    
+    document.getElementById('project-customer').value = project.customer || '';
+    document.getElementById('project-customer-input').value = project.customer || '';
+    
+    document.getElementById('project-subject').value = project.subject || '';
+    document.getElementById('project-destination').value = project.destination || '';
+    document.getElementById('project-name').value = project.name || '';
+    document.getElementById('project-quantity').value = project.quantity || 1;
+    
+    document.getElementById('project-spec').value = project.spec || '';
+    document.getElementById('project-spec-input').value = project.spec || '';
+    
+    document.getElementById('project-staff').value = project.staff || '';
+    document.getElementById('project-staff-input').value = project.staff || '';
+    
+    document.getElementById('project-inspection').value = project.inspection || '';
+    document.getElementById('project-budget').value = formatNumberWithCommas(project.budget);
+    document.getElementById('project-link').value = project.link || '';
+    document.getElementById('project-remarks').value = project.remarks || '';
+
+    // 要否設定をコピー
+    currentNecessityData = JSON.parse(JSON.stringify(project.necessity || {
+        specDoc: true,
+        sheetMetal: true,
+        partsProcurement: { main: true, spare: true, provided: true },
+        nameplateProcurement: true,
+        internalDrawings: true,
+        software: true
+    }));
+    renderNecessityButtons();
+    showToast(`${project.id} の情報をコピーしました`);
+}
+
+
+
+// Helpers
+
+function renderNecessityButtons() {
+    const updateButtons = (yesBtn, noBtn, isRequired) => {
+        if (!yesBtn || !noBtn) return;
+        if (isRequired) {
+            yesBtn.classList.add('btn-primary');
+            yesBtn.classList.remove('btn-outline');
+            noBtn.classList.remove('btn-primary');
+            noBtn.classList.add('btn-outline');
+        } else {
+            yesBtn.classList.remove('btn-primary');
+            yesBtn.classList.add('btn-outline');
+            noBtn.classList.add('btn-primary');
+            noBtn.classList.remove('btn-outline');
+        }
+    };
+
+    updateButtons(necSpecYes, necSpecNo, currentNecessityData.specDoc);
+    updateButtons(necSmYes, necSmNo, currentNecessityData.sheetMetal);
+    updateButtons(necPpMainYes, necPpMainNo, currentNecessityData.partsProcurement.main);
+    updateButtons(necPpSpareYes, necPpSpareNo, currentNecessityData.partsProcurement.spare);
+    updateButtons(necPpProvYes, necPpProvNo, currentNecessityData.partsProcurement.provided);
+    updateButtons(necNpYes, necNpNo, currentNecessityData.nameplateProcurement);
+    updateButtons(necIdYes, necIdNo, currentNecessityData.internalDrawings);
+    updateButtons(necSwYes, necSwNo, currentNecessityData.software);
+}
+
+// 日付入力欄の空欄時表示（yyyy/mm/dd）状態管理
+function updateDateInputState(input) {
+    if (input && input.type === 'date') {
+        if (input.value) {
+            input.classList.add('has-val');
+        } else {
+            input.classList.remove('has-val');
+        }
+    }
+}
+
+function initDateInputsPlaceholder() {
+    // input[type="date"].value への代入時にも自動で has-val を同期
+    try {
+        const originalDateDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+        if (originalDateDescriptor && originalDateDescriptor.set) {
+            Object.defineProperty(HTMLInputElement.prototype, 'value', {
+                get: function() {
+                    return originalDateDescriptor.get.call(this);
+                },
+                set: function(val) {
+                    originalDateDescriptor.set.call(this, val);
+                    if (this.type === 'date') {
+                        updateDateInputState(this);
+                    }
+                }
+            });
+        }
+    } catch (e) {
+        console.warn('Date input descriptor hook failed:', e);
+    }
+
+    // 全ての日付入力を即座に初期同期
+    document.querySelectorAll('input[type="date"]').forEach(updateDateInputState);
+
+    // 入力・変更・フォーカスアウトイベントでリアルタイム更新
+    document.addEventListener('input', (e) => {
+        if (e.target && e.target.type === 'date') updateDateInputState(e.target);
+    }, true);
+    document.addEventListener('change', (e) => {
+        if (e.target && e.target.type === 'date') updateDateInputState(e.target);
+    }, true);
+    document.addEventListener('blur', (e) => {
+        if (e.target && e.target.type === 'date') updateDateInputState(e.target);
+    }, true);
+
+    // モーダルオープン時にも確実にプレースホルダー状態を同期
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const target = mutation.target;
+                if (target.classList.contains('active')) {
+                    target.querySelectorAll('input[type="date"]').forEach(updateDateInputState);
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach((modal) => {
+        observer.observe(modal, { attributes: true });
+    });
+}
+
+// Global Tooltip element
+const tooltipEl = document.createElement('div');
+tooltipEl.className = 'custom-tooltip';
+document.body.appendChild(tooltipEl);
+
+init();
