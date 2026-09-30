@@ -707,98 +707,98 @@
             <tr>
               <td>1</td>
               <td><strong>製番</strong></td>
-              <td><code>110px</code></td>
+              <td><code>100px</code></td>
               <td>左揃え</td>
-              <td>製造番号（主キー）。<strong>一意性制約</strong>により重複登録・重複変更をリアルタイムに防止。等幅フォント。</td>
+              <td>製造番号（主キー、最長11文字等幅対応）。<strong>一意性制約</strong>により重複登録・重複変更をリアルタイムに防止。等幅フォント。</td>
             </tr>
             <tr>
               <td>2</td>
               <td><strong>担当者</strong></td>
-              <td><code>75px</code></td>
+              <td><code>80px</code></td>
               <td>中央揃え</td>
-              <td>電気設計主担当者名。マスターデータから選択。</td>
+              <td>電気設計主担当者名（全角4文字まで余裕を持って1行表示）。マスターデータから選択。</td>
             </tr>
             <tr>
               <td>3</td>
               <td><strong>リンク</strong></td>
-              <td><code>65px</code></td>
+              <td><code>50px</code></td>
               <td>中央揃え</td>
               <td>図面フォルダや共有パスへのリンク。クリックでクリップボードへコピー（コピー完了時に一定時間チェックマークを表示）。</td>
             </tr>
             <tr>
               <td>4</td>
               <td><strong>客先</strong></td>
-              <td><code>110px</code></td>
+              <td><code>150px</code></td>
               <td>左揃え</td>
-              <td>クライアント企業名。文字あふれ時は「...」で省略表示。</td>
+              <td>クライアント企業名。ゆったり幅確保。長文時は「...」省略表示＋ホバーで全文ポップアップ。</td>
             </tr>
             <tr>
               <td>5</td>
               <td><strong>件名</strong></td>
-              <td><code>165px</code></td>
+              <td><code>205px</code></td>
               <td>左揃え</td>
-              <td>工事名称・案件名。十分な表示幅を確保。</td>
+              <td>工事名称・案件名。最大拡張幅を確保。長文時は「...」省略表示＋ホバーで全文ポップアップ。</td>
             </tr>
             <tr>
               <td>6</td>
               <td><strong>向先</strong></td>
-              <td><code>110px</code></td>
+              <td><code>150px</code></td>
               <td>左揃え</td>
-              <td>納入先工場・現場名。</td>
+              <td>納入先工場・現場名。ゆったり幅確保。長文時は「...」省略表示＋ホバーで全文ポップアップ。</td>
             </tr>
             <tr>
               <td>7</td>
               <td><strong>品名</strong></td>
-              <td><code>140px</code></td>
+              <td><code>215px</code></td>
               <td>左揃え</td>
-              <td>制御盤名・製品名。</td>
+              <td>制御盤名・製品名。ゆったり幅確保。長文時は「...」省略表示＋ホバーで全文ポップアップ。</td>
             </tr>
             <tr>
               <td>8</td>
               <td><strong>納期</strong></td>
-              <td><code>110px</code></td>
+              <td><code>100px</code></td>
               <td>中央揃え</td>
-              <td>最終納期（YYYY-MM-DD）。ソート対応。右端に3px境界ディバイダー。</td>
+              <td>最終納期（YYYY-MM-DD、改行禁止）。ソート対応。右端に3px境界ディバイダー。</td>
             </tr>
             <tr>
               <td>9</td>
               <td><strong>納入仕様書</strong></td>
-              <td><code>145px</code></td>
+              <td><code>125px</code></td>
               <td>中央揃え</td>
-              <td>出図日、返却期日、承認日。返却期日超過時は<strong>赤字強調</strong>。</td>
+              <td>出図日、返却期日、承認日。返却期日超過時は<strong>赤字強調</strong>。改行防止。</td>
             </tr>
             <tr>
               <td>10</td>
               <td><strong>板金手配</strong></td>
-              <td><code>155px</code></td>
+              <td><code>135px</code></td>
               <td>中央揃え</td>
               <td>外注先、注文納期、受領、詳細図納期、納期確定。詳細図リミット超過時は<strong>赤字強調</strong>。板金予算管理（自動カンマ区切り）。</td>
             </tr>
             <tr>
               <td>11</td>
               <td><strong>部品手配</strong></td>
-              <td><code>160px</code></td>
+              <td><code>195px</code></td>
               <td>中央揃え</td>
-              <td><strong>主部品・予備品・支給品</strong> の3系統独立管理。進捗サマリー（<code>納期(主部品): 日付</code>、<code>不要(予備品)</code>、<code>[コピー済]</code> 等）。</td>
+              <td><strong>主部品・予備品・支給品</strong> の3系統独立管理。進捗サマリー（<code>[コピー済]</code> 付記時も改行防止・余裕幅）。</td>
             </tr>
             <tr>
               <td>12</td>
               <td><strong>銘板手配</strong></td>
-              <td><code>120px</code></td>
+              <td><code>105px</code></td>
               <td>中央揃え</td>
               <td>手配業者、注文日、納期。仕様書承認後に「！要着手」点灯。</td>
             </tr>
             <tr>
               <td>13</td>
               <td><strong>社内工事図</strong></td>
-              <td><code>110px</code></td>
+              <td><code>85px</code></td>
               <td>中央揃え</td>
               <td>出図日。板金・部品・銘板の完了後に「！要着手」点灯。</td>
             </tr>
             <tr>
               <td>14</td>
-              <td><strong>ソフト開発</strong></td>
-              <td><code>110px</code></td>
+              <td><strong>ソフト</strong></td>
+              <td><code>90px</code></td>
               <td>中央揃え</td>
               <td>作成日、デバッグ完了日。銘板完了後に「！要着手」点灯。</td>
             </tr>
@@ -807,7 +807,7 @@
               <td><strong>完了</strong></td>
               <td><code>75px</code></td>
               <td>中央揃え</td>
-              <td>案件全体の完了トグルスイッチ。完了時は常磐緑ボタンが点灯。</td>
+              <td>案件全体の完了トグルスイッチ。縦割れ防止設計。完了時は常磐緑ボタンが点灯。</td>
             </tr>
           </tbody>
         </table>
@@ -832,18 +832,19 @@
         <div class="card">
           <h3 style="margin-top:0;">一覧表示とのレイアウト統一 ＆ 列幅均等化</h3>
           <ul style="padding-left: 20px; font-size: 13.5px; color: var(--text-muted); line-height: 1.8;">
-            <li>基本情報は <strong>製番・客先・件名・品名・納期</strong> の独立5列で構成</li>
-            <li>基本情報データ部は製番別進捗一覧と揃えて <strong>左揃え</strong> で統一</li>
-            <li>右側工程データ9列すべてを <code>&lt;colgroup&gt;</code> で <strong>120px の均等幅</strong> に固定</li>
-            <li><code>white-space: nowrap</code> により日付等の改行（折り返し）を防止</li>
+            <li>基本情報は <strong>製番 (100px)・客先 (220px)・件名 (295px)・品名 (305px)・納期 (100px)</strong> の独立5列で構成</li>
+            <li>基本情報データ部は製番別進捗一覧と揃えて <strong>左揃え</strong> で統一し、客先・件名・品名は一覧と同バランスで余剰幅を最大配分＋ <strong>1行省略＆ホバー時全文ツールチップ表示</strong> を完備</li>
+            <li>パディングを製番別進捗一覧と完全に共通の <code>0.45rem 0.4rem</code>（上下約7.2px・左右約6.4px）にスリム化</li>
+            <li>右側工程データ9列すべてを <code>&lt;colgroup&gt;</code> で <strong>納期と同じ100pxの均等幅</strong> に固定（合計幅 1,820px・FHD全幅最適化）</li>
+            <li><code>white-space: nowrap</code> により日付等の改行（折り返し・縦割れ）を完全防止</li>
           </ul>
         </div>
         <div class="card">
-          <h3 style="margin-top:0;">複合安定ソート ＆ 変更点強調</h3>
+          <h3 style="margin-top:0;">複合安定ソート ＆ CUD最適化変更点強調</h3>
           <ul style="padding-left: 20px; font-size: 13.5px; color: var(--text-muted); line-height: 1.8;">
             <li><strong>第1キー「納期昇順」＋ 第2キー「製番昇順（自然順）」</strong> の複合ソート</li>
             <li>同日納期の案件が多数存在する場合でも、製番の若い順に自動整列</li>
-            <li>前回バックアップから変更のあったセルは <strong>常磐緑チント背景 ＋ 太字</strong> でハイライト表示</li>
+            <li>前回バックアップから変更のあったセルは <strong>常磐緑チント背景 ＋ 太字（Darkモード時は落ち着いた深草色背景 ＋ 高明度CUDエメラルド文字 #4ADE80）</strong> でハイライト表示</li>
             <li>新規追加された案件も自動検出して差分行として抽出</li>
           </ul>
         </div>
@@ -854,7 +855,7 @@
           <thead>
             <tr>
               <th>対象工程</th>
-              <th>比較対象項目 (全9列・各120px均等幅)</th>
+              <th>比較対象項目 (全9列・各100px均等幅)</th>
             </tr>
           </thead>
           <tbody>

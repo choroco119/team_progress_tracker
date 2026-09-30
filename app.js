@@ -1318,6 +1318,7 @@ function setupEventListeners() {
     filterExcludeCompleted.onclick = () => {
         showCompletedFilter = !showCompletedFilter;
         filterExcludeCompleted.classList.toggle('active', showCompletedFilter);
+        filterExcludeCompleted.textContent = showCompletedFilter ? '完了を表示中' : '完了を表示';
         renderTable();
     };
 
@@ -2000,7 +2001,11 @@ function renderTable() {
                     td.style.color = 'var(--text-muted)';
                 }
             } else {
-                td.textContent = project[field.key] || '-';
+                const val = project[field.key] || '-';
+                td.textContent = val;
+                if (['customer', 'subject', 'destination', 'name'].includes(field.key) && val !== '-') {
+                    td.title = val;
+                }
                 if (field.bold) td.style.fontWeight = '600';
 
                 if (field.special === 'deadline') {

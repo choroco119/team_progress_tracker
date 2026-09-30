@@ -173,12 +173,12 @@ const DiffEngine = {
         diffRows.forEach(d => {
             const tr = document.createElement('tr');
             
-            // 基本情報カラム（製番別進捗一覧と完全に同一の順序・セル構成）
+            // 基本情報カラム（製番別進捗一覧と完全に同一の順序・セル構成・ホバー時全文ツールチップ付与）
             tr.innerHTML = `
                 <td class="diff-cell-id"><strong>${d.id}</strong></td>
-                <td class="diff-cell-customer">${d.customer}</td>
-                <td class="diff-cell-subject">${d.subject}</td>
-                <td class="diff-cell-name">${d.name}</td>
+                <td class="diff-cell-customer" ${d.customer !== '-' ? `title="${d.customer}"` : ''}>${d.customer}</td>
+                <td class="diff-cell-subject" ${d.subject !== '-' ? `title="${d.subject}"` : ''}>${d.subject}</td>
+                <td class="diff-cell-name" ${d.name !== '-' ? `title="${d.name}"` : ''}>${d.name}</td>
                 <td class="diff-cell-deadline">${d.deadline === '9999-99-99' ? '-' : d.deadline}</td>
             `;
 
