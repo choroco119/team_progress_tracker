@@ -40,15 +40,20 @@ function formatNumberWithCommas(val) {
 }
 
 /**
- * 日付文字列を YYYY/MM/DD 形式にフォーマットする
+ * 日付文字列を YYYY-MM-DD 形式にフォーマットする（2桁0埋めハイフン統一）
  * @param {string} dateStr 
  * @returns {string}
  */
 function formatShortDate(dateStr) {
     if (!dateStr) return '-';
+    // すでに YYYY-MM-DD 形式ならそのまま返す
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
-    return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
 }
 
 /**

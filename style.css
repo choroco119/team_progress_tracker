@@ -647,7 +647,9 @@ table {
     width: 100%;
     table-layout: fixed;
     border-collapse: collapse;
-    font-size: 0.825rem;
+    font-size: 0.78rem;
+    font-family: var(--font-body);
+    font-variant-numeric: tabular-nums;
 }
 
 thead {
@@ -662,11 +664,11 @@ th {
     top: 0;
     z-index: 10;
     background-color: var(--bg-card) !important;
-    font-family: var(--font-mono);
+    font-family: var(--font-body);
     font-weight: 700;
-    font-size: 0.74rem;
+    font-size: 0.71rem;
     color: var(--text-main);
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
     padding: 0.45rem 0.4rem;
     border-bottom: 2px solid var(--border-strong);
     border-left: 1px solid var(--border-color);
@@ -907,7 +909,7 @@ th.sort-active .sort-indicator .sort-icon {
 
 th.sort-active .sort-indicator .sort-label {
     display: inline-block;
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-family: var(--font-sans);
     letter-spacing: -0.02em;
 }
@@ -947,7 +949,7 @@ th.sort-active .sort-indicator .sort-label {
 
 /* 5. 件名 (工事名・案件名最大拡張・1行省略表示) */
 #progress-table th:nth-child(5), #progress-table td:nth-child(5) {
-    width: 205px;
+    width: 190px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -963,7 +965,7 @@ th.sort-active .sort-indicator .sort-label {
 
 /* 7. 品名 (盤種名ゆったり拡張・1行省略表示) */
 #progress-table th:nth-child(7), #progress-table td:nth-child(7) {
-    width: 215px;
+    width: 200px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -984,9 +986,9 @@ th.sort-active .sort-indicator .sort-label {
     white-space: nowrap;
 }
 
-/* 10. 板金手配 */
+/* 10. 板金手配 (「詳細図送付期日:2026-10-15」等が折れ曲がらず収まる十分な余裕幅) */
 #progress-table th:nth-child(10), #progress-table td:nth-child(10) {
-    width: 135px;
+    width: 165px;
     text-align: center;
     white-space: nowrap;
 }
@@ -1033,7 +1035,7 @@ td {
     padding: 0.45rem 0.4rem;
     border-bottom: 1px solid var(--border-color);
     border-left: 1px solid var(--border-color);
-    font-size: 0.825rem;
+    font-size: 0.78rem;
     color: var(--text-main);
     line-height: 1.35;
     vertical-align: middle;
@@ -1100,7 +1102,7 @@ tr:hover .info-cell {
 
 .date-text {
     display: block;
-    font-size: 0.7rem;
+    font-size: 0.66rem;
     font-family: var(--font-mono);
     color: var(--text-muted);
     margin-top: 0.15rem;
@@ -1117,7 +1119,7 @@ tr:hover .info-cell {
     border: 1px solid var(--color-experiment);
     border-radius: 4px;
     padding: 2px 6px;
-    font-size: 0.7rem;
+    font-size: 0.66rem;
     font-weight: 700;
 }
 
@@ -1190,7 +1192,7 @@ tr:hover .info-cell {
     width: 100%;
     table-layout: fixed;
     border-collapse: collapse;
-    font-size: 0.825rem;
+    font-size: 0.78rem;
 }
 
 #diff-table thead {
@@ -1205,7 +1207,7 @@ tr:hover .info-cell {
     padding: 0.45rem 0.4rem;
     font-family: var(--font-mono);
     font-weight: 700;
-    font-size: 0.74rem;
+    font-size: 0.71rem;
     letter-spacing: 0.04em;
     border-left: 1px solid var(--border-color);
     text-align: center !important;
@@ -1296,7 +1298,7 @@ th.diff-th-parts {
 th.diff-th-sub {
     top: 29px;
     z-index: 20;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     padding: 0.32rem 0.4rem;
     border-bottom: 2px solid var(--border-strong);
     box-shadow: inset 0 -2px 0 var(--border-strong);
@@ -1634,9 +1636,9 @@ input[type="date"]:not(.has-val):not(:focus)::-webkit-datetime-edit {
     color: transparent;
 }
 
-/* 空欄かつ非フォーカス時に yyyy/mm/dd を等幅フォントでオーバーレイ表示 */
+/* 空欄かつ非フォーカス時に yyyy-mm-dd を等幅フォントでオーバーレイ表示 */
 input[type="date"]:not(.has-val):not(:focus)::before {
-    content: "yyyy/mm/dd";
+    content: "yyyy-mm-dd";
     position: absolute;
     left: 0.55rem;
     top: 50%;
@@ -1969,4 +1971,296 @@ input[type="date"]:not(.has-val):not(:focus)::before {
         border-top: 1px solid var(--border-color);
         padding-top: 1.25rem;
     }
+}
+
+/* ==========================================================================
+   Specification Tab Styles (Scoped)
+   ========================================================================== */
+.spec-tab-card {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.spec-scroll-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 24px 60px;
+    background-color: var(--bg-base);
+}
+
+.spec-container {
+    max-width: 1060px;
+    margin: 0 auto;
+}
+
+.spec-doc-header {
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1.5px solid var(--border-color);
+}
+
+.spec-tool-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-experiment);
+    background: rgba(184, 92, 67, 0.08);
+    border: 1px solid rgba(184, 92, 67, 0.25);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.05em;
+    margin-bottom: 14px;
+}
+
+[data-theme="dark"] .spec-tool-tag {
+    background: rgba(209, 121, 98, 0.12);
+    border-color: rgba(209, 121, 98, 0.3);
+}
+
+.spec-main-title {
+    font-family: var(--font-heading);
+    font-size: 1.85rem;
+    font-weight: 900;
+    color: var(--text-main);
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+    margin-bottom: 16px;
+}
+
+.spec-meta-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    font-size: 12.5px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+}
+
+.spec-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.spec-meta-symbol {
+    color: var(--color-define);
+    font-size: 10px;
+}
+
+.spec-section {
+    margin-bottom: 40px;
+}
+
+.spec-h2 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 4px solid var(--color-define);
+    padding-left: 12px;
+}
+
+.spec-section-indicator {
+    color: var(--color-experiment);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+.spec-h3 {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-experiment);
+    margin: 20px 0 10px;
+}
+
+.spec-p {
+    margin-bottom: 14px;
+    color: var(--text-main);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.spec-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 22px 24px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-sm);
+    border-top: 3.5px solid var(--color-define);
+}
+
+.spec-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.spec-ul {
+    padding-left: 20px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.8;
+}
+
+.spec-table-container {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    margin: 16px 0 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+
+.spec-table th {
+    background-color: var(--bg-subtle);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 11px 14px;
+    text-align: left;
+    border-bottom: 1.5px solid var(--border-color);
+    letter-spacing: 0.03em;
+}
+
+.spec-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+}
+
+.spec-table tr:last-child td {
+    border-bottom: none;
+}
+
+.spec-table tr:hover td {
+    background-color: rgba(59, 87, 102, 0.03);
+}
+
+[data-theme="dark"] .spec-table tr:hover td {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.spec-callout {
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    margin: 18px 0;
+    display: flex;
+    gap: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--color-define);
+}
+
+.spec-callout.accent {
+    border-left-color: var(--color-experiment);
+}
+
+.spec-callout.success {
+    border-left-color: var(--color-engrave);
+}
+
+.spec-callout-title {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.spec-callout-body {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.spec-step-list {
+    list-style: none;
+    counter-reset: step-seq;
+    margin: 14px 0;
+}
+
+.spec-step-list li {
+    counter-increment: step-seq;
+    position: relative;
+    padding-left: 44px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.spec-step-list li::before {
+    content: counter(step-seq, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 28px;
+    height: 28px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--color-define);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+}
+
+.spec-step-title {
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 3px;
+}
+
+.spec-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+.spec-badge-primary { background: rgba(59, 87, 102, 0.12); color: var(--color-define); border: 1px solid var(--color-define); }
+.spec-badge-accent { background: rgba(184, 92, 67, 0.12); color: var(--color-experiment); border: 1px solid var(--color-experiment); }
+.spec-badge-success { background: rgba(78, 111, 90, 0.12); color: var(--color-engrave); border: 1px solid var(--color-engrave); }
+.spec-badge-purple { background: rgba(107, 91, 110, 0.12); color: var(--color-refine); border: 1px solid var(--color-refine); }
+
+.spec-footer {
+    width: 100%;
+    max-width: 1060px;
+    margin-top: 50px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.spec-footer-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.6;
 }

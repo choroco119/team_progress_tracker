@@ -50,6 +50,7 @@
     <nav class="tab-nav">
         <button class="tab-btn active" data-tab="progress-tab">製番別進捗一覧</button>
         <button class="tab-btn" data-tab="diff-tab" id="diff-tab-btn">進捗差分比較</button>
+        <button class="tab-btn" data-tab="spec-tab" id="spec-tab-btn">取扱仕様書</button>
     </nav>
 
     <main>
@@ -244,6 +245,426 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+        <div id="spec-tab" class="tab-content">
+            <div class="content-card spec-tab-card animate-fade-in">
+                <div class="spec-scroll-wrapper">
+                    <div class="spec-container">
+                        <!-- ドキュメントヘッダー -->
+                        <div class="spec-doc-header">
+                            <div class="spec-tool-tag">
+                                <span>■</span>
+                                <span>OFFICIAL SPECIFICATION</span>
+                            </div>
+                            <h1 class="spec-main-title">Team Progress Tracker 製造工程進捗管理システム 設計仕様書</h1>
+                            <div class="spec-meta-grid">
+                                <div class="spec-meta-item">
+                                    <span class="spec-meta-symbol">●</span>
+                                    <span><strong>実行環境:</strong> ローカルブラウザ環境 (Google Chrome / Microsoft Edge 等)</span>
+                                </div>
+                                <div class="spec-meta-item">
+                                    <span class="spec-meta-symbol">●</span>
+                                    <span><strong>動作形態:</strong> 完全ローカル・オフライン動作（Webサーバー不要 / LAN共有フォルダ同期）</span>
+                                </div>
+                                <div class="spec-meta-item">
+                                    <span class="spec-meta-symbol">●</span>
+                                    <span><strong>データストレージ:</strong> 単一JSON永続化 (<code>team_data.json</code>) ＋ デイリー自動バックアップ</span>
+                                </div>
+                                <div class="spec-meta-item">
+                                    <span class="spec-meta-symbol">●</span>
+                                    <span><strong>デザイン設計:</strong> 高密度実務レイアウト (鳥の子色 / 深墨茶 和紙調パレット)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 1. 概要と開発目的 -->
+                        <section class="spec-section">
+                            <h2 class="spec-h2"><span class="spec-section-indicator">01.</span> 概要と開発目的 (What & Why)</h2>
+                            <p class="spec-p">
+                                <strong>Team Progress Tracker</strong> は、電気制御盤・機械制御盤・受配電盤などの製造現場において、製番（製造番号）単位での複数工程（納入仕様書・板金手配・部品手配・銘板手配・社内工事図・ソフト開発）の進捗を高密度かつ一覧性に優れた形で管理するための、<strong>完全ローカル動作型の進捗管理ツール</strong>です。ブラウザを表示インターフェースとして使用しますが、Webサーバーやインターネット通信を一切必要とせず、完全にローカルの閉じた環境（スタンドアロンまたは社内LANのファイル共有）で安全に動作します。
+                            </p>
+
+                            <div class="spec-card-grid">
+                                <div class="spec-card">
+                                    <h3 class="spec-h3" style="margin-top:0;">現場の課題 (Before)</h3>
+                                    <ul class="spec-ul">
+                                        <li>Excelでの管理によるファイル共有競合、保存ロック、上書きによる更新漏れ</li>
+                                        <li>前工程の進捗状況が把握しづらいことによる手待ち時間</li>
+                                        <li>返却期日や詳細図送付リミットの見落としによる納期遅延リスク</li>
+                                        <li>定例会や朝会での「前回からの変更点抽出」にかかる確認工数</li>
+                                    </ul>
+                                </div>
+                                <div class="spec-card" style="border-top-color: var(--color-engrave);">
+                                    <h3 class="spec-h3" style="margin-top:0; color: var(--color-engrave);">達成仕様と効果 (After)</h3>
+                                    <ul class="spec-ul">
+                                        <li>Webサーバー・外部DB不要。社内LANのファイル共有領域を指定することで複数端末からの同時運用が可能</li>
+                                        <li>前工程の完了状態に連動した <code>！要着手</code> 表示による次工程着手判断の補助</li>
+                                        <li>返却期日超過・図面リミット超過の即時赤字ハイライト警告</li>
+                                        <li>過去バックアップデータとの差分比較により、変更箇所のみを迅速に抽出</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="spec-callout success">
+                                <div>
+                                    <div class="spec-callout-title">完全ローカル・閉域環境動作アーキテクチャ</div>
+                                    <div class="spec-callout-body">
+                                        外部のWebサーバー、クラウドサービス、外部データベースとの通信は一切行いません。ブラウザ標準のローカルファイルアクセス機能（File System Access API）を利用し、端末ローカルまたは社内LAN上の共有フォルダ内にある <code>team_data.json</code> を直接読み書きします。インターネットから完全に隔離された閉域環境・オフライン環境でも同一の操作性で安全に稼働し、社外への情報流出リスクを構造的に排除しています。
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 2. システムアーキテクチャとデータ同期 -->
+                        <section class="spec-section">
+                            <h2 class="spec-h2"><span class="spec-section-indicator">02.</span> システムアーキテクチャとデータ同期仕様</h2>
+                            <p class="spec-p">
+                                複数の担当者が同時に利用する運用に対応するため、排他制御（ロック制御）および自動バックアップ機能を備えています。
+                            </p>
+
+                            <div class="spec-table-container">
+                                <table class="spec-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 220px;">機能・機構</th>
+                                            <th>技術仕様・動作挙動</th>
+                                            <th style="width: 180px;">メリット・効果</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>File System Access API</strong></td>
+                                            <td>ユーザーが指定した共有フォルダのハンドル（<code>dirHandle</code>）を取得し、直接ファイル操作を実行。</td>
+                                            <td>専用サーバー不要。社内LANのファイル共有環境で運用可能</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>排他制御 (Lock Mechanism)</strong></td>
+                                            <td>データ保存時に <code>lock.json</code> を作成し、他端末からの同時上書きを一時的に待機。ロックファイルのタイムアウト自動解除機構を実装。</td>
+                                            <td>同時更新時の競合やデータの上書き不整合を防止</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>デイリー自動バックアップ</strong></td>
+                                            <td>日々の初回接続時、<code>backups/daily_YYYYMMDD.json</code> を自動生成。直近30世代のバックアップファイルを自動保持・ローテーション。</td>
+                                            <td>過去データの復元担保および進捗差分比較の入力ソースとして活用</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>クイック同期</strong></td>
+                                            <td>ヘッダーの「最新データに更新」または「クイック同期」操作により、ファイル上の最新データを再読込して画面を即時更新。</td>
+                                            <td>他端末で行われた進捗更新を即座に反映</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- 3. 画面レイアウトとデザインシステム -->
+                        <section class="spec-section">
+                            <h2 class="spec-h2"><span class="spec-section-indicator">03.</span> 画面レイアウトとデザインシステム</h2>
+                            <p class="spec-p">
+                                長時間の現場業務における眼精疲労を軽減し、高密度な進捗情報の視認性を確保するため、鳥の子色・深墨茶を基調とした落ち着いた配色設計を採用しています。
+                            </p>
+
+                            <div class="spec-card">
+                                <h3 class="spec-h3" style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">① フルHD (1920×1080) 解像度 最適化レイアウト</h3>
+                                <p class="spec-p" style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+                                    一般的なオフィスのフルHDディスプレイにおいて、横スクロールなしで基本情報8列＋工程7列の全15列を一画面で俯瞰・確認できます。テーブルヘッダーは上部に固定（Sticky）され、多数の製番行をスクロールしても列見出しが常時表示されます。
+                                </p>
+                            </div>
+
+                            <div class="spec-card">
+                                <h3 class="spec-h3" style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">② 工程ヘッダーの配色区分とアクセントバー</h3>
+                                <p class="spec-p" style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 14px;">
+                                    一覧表の各工程ヘッダー上端には、視認性を高める 3.5px のアクセントバーと淡い背景色を配置しています。各工程は以下のカラーコードで区分されています：
+                                </p>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; font-family: var(--font-mono);">
+                                    <span class="spec-badge spec-badge-primary">1. 納入仕様書: 鉄紺 (#3B5766)</span>
+                                    <span class="spec-badge spec-badge-accent">2. 板金手配: 弁柄 (#B85C43)</span>
+                                    <span class="spec-badge" style="background: rgba(92, 75, 64, 0.12); color: #5C4B40; border: 1px solid #5C4B40;">3. 部品手配: 黒茶 (#5C4B40)</span>
+                                    <span class="spec-badge spec-badge-success">4. 銘板手配: 常磐緑 (#4E6F5A)</span>
+                                    <span class="spec-badge spec-badge-purple">5. 社内工事図: 古代紫 (#6B5B6E)</span>
+                                    <span class="spec-badge spec-badge-primary">6. ソフト開発: 鉄紺 (#3B5766)</span>
+                                    <span class="spec-badge spec-badge-accent">7. 完了: 弁柄 (#B85C43)</span>
+                                </div>
+                            </div>
+
+                            <div class="spec-card">
+                                <h3 class="spec-h3" style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">③ 基本情報エリア境界ディバイダー (3px 鉄紺ボーダー)</h3>
+                                <p class="spec-p" style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+                                    第8列の「納期」セルの右端に、太さ <strong>3px の鉄紺縦境界線</strong>（Dark時は明鉄紺 <code>#678696</code>）を配置。案件の基本情報エリアと、日々更新される工程進捗エリアを明確に視覚区分しています。
+                                </p>
+                            </div>
+                        </section>
+
+                        <!-- 4. 製番別進捗一覧 機能仕様 -->
+                        <section class="spec-section">
+                            <h2 class="spec-h2"><span class="spec-section-indicator">04.</span> 製番別進捗一覧 機能仕様</h2>
+                            <p class="spec-p">
+                                日々の業務の中心となるメイン画面（製番別進捗一覧）の詳細な列仕様と機能構成です。
+                            </p>
+
+                            <div class="spec-table-container">
+                                <table class="spec-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">No</th>
+                                            <th style="width: 140px;">列名</th>
+                                            <th style="width: 90px;">幅 (FHD)</th>
+                                            <th style="width: 90px;">配置</th>
+                                            <th>管理内容・仕様詳細</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td><strong>製番</strong></td>
+                                            <td><code>100px</code></td>
+                                            <td>左揃え</td>
+                                            <td>製造番号（主キー、最長11文字等幅対応）。<strong>一意性制約</strong>により重複登録・重複変更をリアルタイムに防止。等幅フォント。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td><strong>担当者</strong></td>
+                                            <td><code>80px</code></td>
+                                            <td>中央揃え</td>
+                                            <td>電気設計主担当者名（全角4文字まで余裕を持って1行表示）。マスターデータから選択。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td><strong>リンク</strong></td>
+                                            <td><code>50px</code></td>
+                                            <td>中央揃え</td>
+                                            <td>図面フォルダや共有パスへのリンク。クリックでクリップボードへコピー（コピー完了時に一定時間チェックマークを表示）。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td><strong>客先</strong></td>
+                                            <td><code>150px</code></td>
+                                            <td>左揃え</td>
+                                            <td>クライアント企業名。ゆったり幅確保。長文時は「...」省略表示＋ホバーで全文ポップアップ。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>5</td>
+                                            <td><strong>件名</strong></td>
+                                            <td><code>190px</code></td>
+                                            <td>左揃え</td>
+                                            <td>工事名称・案件名。最大拡張幅を確保。長文時は「...」省略表示＋ホバーで全文ポップアップ。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>6</td>
+                                            <td><strong>向先</strong></td>
+                                            <td><code>150px</code></td>
+                                            <td>左揃え</td>
+                                            <td>納入先工場・現場名。ゆったり幅確保。長文時は「...」省略表示＋ホバーで全文ポップアップ。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>7</td>
+                                            <td><strong>品名</strong></td>
+                                            <td><code>200px</code></td>
+                                            <td>左揃え</td>
+                                            <td>制御盤名・製品名。ゆったり幅確保。長文時は「...」省略表示＋ホバーで全文ポップアップ。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>8</td>
+                                            <td><strong>納期</strong></td>
+                                            <td><code>100px</code></td>
+                                            <td>中央揃え</td>
+                                            <td>最終納期（YYYY-MM-DD、改行禁止）。ソート対応。右端に3px境界ディバイダー。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>9</td>
+                                            <td><strong>納入仕様書</strong></td>
+                                            <td><code>125px</code></td>
+                                            <td>中央揃え</td>
+                                            <td>出図日、返却期日、承認日。返却期日超過時は<strong>赤字強調</strong>。改行防止。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>10</td>
+                                            <td><strong>板金手配</strong></td>
+                                            <td><code>165px</code></td>
+                                            <td>中央揃え</td>
+                                            <td>外注先、注文納期、受領、詳細図納期、納期確定。詳細図リミット超過時は<strong>赤字強調</strong>。板金予算管理（自動カンマ区切り）。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>11</td>
+                                            <td><strong>部品手配</strong></td>
+                                            <td><code>195px</code></td>
+                                            <td>中央揃え</td>
+                                            <td><strong>主部品・予備品・支給品</strong> の3系統独立管理。進捗サマリー（<code>[コピー済]</code> 付記時も改行防止・余裕幅）。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>12</td>
+                                            <td><strong>銘板手配</strong></td>
+                                            <td><code>105px</code></td>
+                                            <td>中央揃え</td>
+                                            <td>手配業者、注文日、納期。仕様書承認後に「！要着手」点灯。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>13</td>
+                                            <td><strong>社内工事図</strong></td>
+                                            <td><code>85px</code></td>
+                                            <td>中央揃え</td>
+                                            <td>出図日。板金・部品・銘板の完了後に「！要着手」点灯。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>14</td>
+                                            <td><strong>ソフト</strong></td>
+                                            <td><code>90px</code></td>
+                                            <td>中央揃え</td>
+                                            <td>作成日、デバッグ完了日。銘板完了後に「！要着手」点灯。</td>
+                                        </tr>
+                                        <tr>
+                                            <td>15</td>
+                                            <td><strong>完了</strong></td>
+                                            <td><code>75px</code></td>
+                                            <td>中央揃え</td>
+                                            <td>案件全体の完了トグルスイッチ。縦割れ防止設計。完了時は常磐緑ボタンが点灯。</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="spec-card">
+                                <h3 class="spec-h3" style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">視認性強化ソート (製番・納期)</h3>
+                                <p class="spec-p" style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+                                    ヘッダーの「製番」「納期」をクリックすると昇順・降順を切り替え。現在どの列が有効かを <strong>ピル型バッジ（<code>[↑ 昇順]</code> / <code>[↓ 降順]</code>）、背景チントハイライト、下端3pxアクセントライン</strong> で表示し、現在の並び順を即座に判別可能です。
+                                </p>
+                            </div>
+                        </section>
+
+                        <!-- 5. 進捗差分比較 (Diff Engine) 機能仕様 -->
+                        <section class="spec-section">
+                            <h2 class="spec-h2"><span class="spec-section-indicator">05.</span> 進捗差分比較 (Diff Engine) 仕様</h2>
+                            <p class="spec-p">
+                                前回ミーティング時や過去バックアップ時点からの工程変更点を抽出し、報告・進捗確認業務の効率化を図る比較機能です。
+                            </p>
+
+                            <div class="spec-card-grid">
+                                <div class="spec-card">
+                                    <h3 class="spec-h3" style="margin-top:0;">一覧表示とのレイアウト統一 ＆ 列幅均等化</h3>
+                                    <ul class="spec-ul">
+                                        <li>基本情報は <strong>製番 (100px)・客先 (220px)・件名 (295px)・品名 (305px)・納期 (100px)</strong> の独立5列で構成</li>
+                                        <li>基本情報データ部は製番別進捗一覧と揃えて <strong>左揃え</strong> で統一し、客先・件名・品名は一覧と同バランスで余剰幅を最大配分＋ <strong>1行省略＆ホバー時全文ツールチップ表示</strong> を完備</li>
+                                        <li>パディングを製番別進捗一覧と完全に共通の <code>0.45rem 0.4rem</code>（上下約7.2px・左右約6.4px）にスリム化</li>
+                                        <li>右側工程データ9列すべてを <code>&lt;colgroup&gt;</code> で <strong>納期と同じ100pxの均等幅</strong> に固定（合計幅 1,820px・FHD全幅最適化）</li>
+                                        <li><code>white-space: nowrap</code> により日付等の改行（折り返し・縦割れ）を完全防止</li>
+                                    </ul>
+                                </div>
+                                <div class="spec-card">
+                                    <h3 class="spec-h3" style="margin-top:0;">複合安定ソート ＆ CUD最適化変更点強調</h3>
+                                    <ul class="spec-ul">
+                                        <li><strong>第1キー「納期昇順」＋ 第2キー「製番昇順（自然順）」</strong> の複合ソート</li>
+                                        <li>同日納期の案件が多数存在する場合でも、製番の若い順に自動整列</li>
+                                        <li>前回バックアップから変更のあったセルは <strong>常磐緑チント背景 ＋ 太字（Darkモード時は落ち着いた深草色背景 ＋ 高明度CUDエメラルド文字 #4ADE80）</strong> でハイライト表示</li>
+                                        <li>新規追加された案件も自動検出して差分行として抽出</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="spec-table-container">
+                                <table class="spec-table">
+                                    <thead>
+                                        <tr>
+                                            <th>対象工程</th>
+                                            <th>比較対象項目 (全9列・各100px均等幅)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>納入仕様書 (鉄紺)</strong></td>
+                                            <td><code>出図</code>、<code>返却期日</code>、<code>承認</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>板金手配 (弁柄)</strong></td>
+                                            <td><code>手配先</code>、<code>注文納期</code>、<code>受領</code>、<code>詳細図納期</code>、<code>納期確定</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>主部品 (黒茶)</strong></td>
+                                            <td><code>納期</code></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- 6. 案件登録・編集とマスターデータ管理 -->
+                        <section class="spec-section">
+                            <h2 class="spec-h2"><span class="spec-section-indicator">06.</span> 案件登録・編集 ＆ マスターデータ管理</h2>
+                            <p class="spec-p">
+                                入力誤りや二重登録を防止し、効率的なデータ登録を支援する入力制御機能を備えています。
+                            </p>
+
+                            <div class="spec-card">
+                                <h3 class="spec-h3" style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">① 既存案件からの情報一括コピー</h3>
+                                <p class="spec-p" style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+                                    新規製番登録モーダル上部の検索窓から過去の類似案件を検索・選択すると、客先・件名・品名・担当者・規格だけでなく、<strong>各工程の「要・不要」設定や板金予算まで一括転記</strong>されます。リピート案件や類似案件の登録作業を大幅に省力化します。
+                                </p>
+                            </div>
+
+                            <div class="spec-card">
+                                <h3 class="spec-h3" style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">② 製番の一意性制約 ＆ リアルタイム警告UI</h3>
+                                <p class="spec-p" style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+                                    製番入力欄に文字を入力した時点で既存の全製番とリアルタイム照合を行い、重複を検知した場合は入力枠を強調表示し、「※この製番は既に登録されています」と警告を表示します。保存処理時にも最新データと照合し、同一製番の重複登録を確実に抑止します。
+                                </p>
+                            </div>
+
+                            <div class="spec-card">
+                                <h3 class="spec-h3" style="font-size: 1.05rem; margin-top:0; margin-bottom:12px;">③ マスターデータの一意性制約 ＆ Enterキー対応</h3>
+                                <p class="spec-p" style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 0;">
+                                    「設定」モーダル内の各マスターデータ（客先、担当者、規格、板金外注先）において、重複登録および編集時の重複を防止します。入力中のリアルタイム重複判定に加え、Enterキーによる項目追加（日本語入力IME変換確定時の誤動作防止を含む）に対応しています。
+                                </p>
+                            </div>
+                        </section>
+
+                        <!-- 7. 操作マニュアル ＆ 運用ステップ -->
+                        <section class="spec-section">
+                            <h2 class="spec-h2"><span class="spec-section-indicator">07.</span> 操作マニュアル ＆ 運用ステップ (Step-by-Step)</h2>
+                            <p class="spec-p">
+                                現場導入時の標準的な運用手順です。
+                            </p>
+
+                            <ol class="spec-step-list">
+                                <li>
+                                    <div class="spec-step-title">共有フォルダの接続</div>
+                                    初回起動時、ヘッダーの「同期設定」をクリックし、社内LAN上の共有フォルダ（例: <code>\\fileserver\製造部\進捗管理\</code> または <code>Z:\製造部\進捗管理\</code>）を選択します。接続状態が「同期中」となれば設定完了です。
+                                </li>
+                                <li>
+                                    <div class="spec-step-title">新規製番の登録</div>
+                                    ヘッダー右上の「＋新規製番登録」をクリックします。類似案件やリピート案件の場合は「既存案件からコピー」で過去案件を検索して転記し、納期等を設定して「保存」をクリックします。
+                                </li>
+                                <li>
+                                    <div class="spec-step-title">日々の工程進捗更新</div>
+                                    一覧表の各工程セル（納入仕様書、板金、部品…）をクリックすると、専用の詳細モーダルが開きます。
+                                    <ul class="spec-ul" style="margin-top: 6px;">
+                                        <li>「済」ボタンをクリックすると当日の日付が自動入力され、完了状態（常磐緑）となります。</li>
+                                        <li>日付欄をクリックしてキーボードから直接 <code>yyyy/mm/dd</code> を打ち込むか、右端のカレンダーアイコンから選択。</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <div class="spec-step-title">朝会・週次定例での差分比較実行</div>
+                                    上部タブを「進捗差分比較」に切り替え、比較対象とする過去のバックアップファイルを選択して「比較実行」をクリックします。変更のあった工程セルが常磐緑でハイライト表示されます。
+                                </li>
+                            </ol>
+
+                            <div class="spec-callout accent">
+                                <div>
+                                    <div class="spec-callout-title">トラブルシューティング</div>
+                                    <div class="spec-callout-body">
+                                        <strong>Q. フォルダへのアクセス許可が求められる場合:</strong><br>
+                                        ブラウザのセキュリティ保護仕様により、ブラウザを完全に閉じて再起動した後はフォルダへのアクセス再許可が必要です。ヘッダーの「同期設定」または「最新データに更新」をクリックし、確認ダイアログで「アクセスを許可」を選択してください。
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- フッター -->
+                        <footer class="spec-footer">
+                            <div class="spec-footer-sub">
+                                Team Progress Tracker &middot; Official System Specification
+                            </div>
+                        </footer>
+                    </div>
                 </div>
             </div>
         </div>

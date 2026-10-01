@@ -2845,7 +2845,6 @@ function renderNecessityButtons() {
     updateButtons(necSwYes, necSwNo, currentNecessityData.software);
 }
 
-// 日付入力欄の空欄時表示（yyyy/mm/dd）状態管理
 function updateDateInputState(input) {
     if (input && input.type === 'date') {
         if (input.value) {
